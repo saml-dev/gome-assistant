@@ -1,43 +1,50 @@
-package main
+package gomeassistant
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
-type App struct {
-	Name      string
-	Schedules []Schedule
-	Listeners []Listener
+type app struct {
+	url       string
+	ctx       context.Context
+	schedules []Schedule
+	listeners []Listener
 }
 
-type Schedule struct {
-	/*
-		RunEvery is a time.Duration representing how often you want to run your function.
+func App(url string) (app, error) {
+	// TODO: connect to websocket, return error if fails
+	return app{url: url}, nil
+}
 
-		Some examples:
-			time.Second * 5 // runs every 5 seconds at 00:00:00, 00:00:05, etc.
-			time.Hour * 12 // runs at BaseTime, +12 hours, +24 hours, etc.
-			gomeassistant.Daily // runs at BaseTime, +24 hours, +48 hours, etc. Daily is a const helper for time.Hour * 24
-			// Helpers include Daily, Hourly, Minutely
-	*/
-	RunEvery time.Duration
-	/* Callback is the function you want to run. Takes zero arguments. */
-	Callback func()
-	/*
-		BaseTime is 4 character string representing hours and minutes
-		in a 24-hr format.
-		It is the base that your RunEvery will be added to.
-		Defaults to "0000" (which is probably fine for most cases).
+func (a app) RegisterSchedule(s Schedule) {
+	if s.err != nil {
+		panic(s.err) // something wasn't configured properly when the schedule was built
+	}
 
-		Example: Run in the 3rd minute of every hour.
-			Schedule{
-				RunEvery: gomeassistant.Hourly // helper const for time.Hour
-				BaseTime: "0003"
-			}
-	*/
-	BaseTime string
+	if s.frequency == 0 {
+		panic("A schedule must call either Daily() or Every() when built.")
+	}
+
+	now := time.Now()
+	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // start at midnight today
+
+	// apply offset if set
+	if s.offset.Hour != 0 || s.offset.Minute != 0 {
+		startTime.Add(time.Hour * time.Duration(s.offset.Hour))
+		startTime.Add(time.Minute * time.Duration(s.offset.Minute))
+	}
+
+	// advance first scheduled time by frequency until it is in the future
+	for startTime.Before(now) {
+		startTime = startTime.Add(s.frequency)
+	}
+
+	// TODO: save realStartTime or _startTime to s, add to list of Schedules
 }
 
 const (
-	RunEveryMissing time.Duration = 0
+	FrequencyMissing time.Duration = 0
 
 	Daily    time.Duration = time.Hour * 24
 	Hourly   time.Duration = time.Hour
