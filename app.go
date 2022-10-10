@@ -81,7 +81,8 @@ func (a *app) RegisterSchedule(s schedule) {
 }
 
 func (a *app) Start() {
-	// TODO: figure out looping listening to messages
+	// TODO: figure out looping listening to messages for
+	// listeners
 }
 
 const (
