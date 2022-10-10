@@ -2,7 +2,6 @@ package gomeassistant
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/saml-dev/gome-assistant/internal/setup"
@@ -16,6 +15,11 @@ type app struct {
 	schedules       []schedule
 	entityListeners []entityListener
 }
+
+var (
+	Sunrise hourMinute = hourMinute{1000, 0}
+	Sunset  hourMinute = hourMinute{1001, 0}
+)
 
 /*
 App establishes the websocket connection and returns an object
@@ -43,7 +47,6 @@ func (a *app) Cleanup() {
 }
 
 func (a *app) RegisterSchedule(s schedule) {
-	fmt.Println(a.schedules)
 	if s.err != nil {
 		panic(s.err) // something wasn't configured properly when the schedule was built
 	}
@@ -56,9 +59,16 @@ func (a *app) RegisterSchedule(s schedule) {
 	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // start at midnight today
 
 	// apply offset if set
-	if s.offset.Hour != 0 || s.offset.Minute != 0 {
-		startTime.Add(time.Hour * time.Duration(s.offset.Hour))
-		startTime.Add(time.Minute * time.Duration(s.offset.Minute))
+	if s.offset.int() != 0 {
+		if s.offset.int() == Sunrise.int() {
+			// TODO: same as sunset w/ sunrise
+		} else if s.offset.int() == Sunset.int() {
+			// TODO: add an http client (w/ token) to *app, use it to get state of sun.sun
+			// to get next sunset time
+		} else {
+			startTime.Add(time.Hour * time.Duration(s.offset.Hour))
+			startTime.Add(time.Minute * time.Duration(s.offset.Minute))
+		}
 	}
 
 	// advance first scheduled time by frequency until it is in the future
@@ -68,6 +78,10 @@ func (a *app) RegisterSchedule(s schedule) {
 
 	s.realStartTime = startTime
 	a.schedules = append(a.schedules, s)
+}
+
+func (a *app) Start() {
+	// TODO: figure out looping listening to messages
 }
 
 const (

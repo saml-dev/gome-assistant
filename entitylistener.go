@@ -13,6 +13,24 @@ type entityListenerCallback func(Service, Data)
 
 type Data struct{}
 
+func (b elBuilder3) OnlyBetween(start hourMinute, end hourMinute) elBuilder3 {
+	b.entityListener.betweenStart = start
+	b.entityListener.betweenEnd = end
+	return b
+}
+
+func (b elBuilder3) FromState(s string) elBuilder3 {
+	b.entityListener.fromState = s
+	return b
+}
+
+func (b elBuilder3) ToState(s string) elBuilder3 {
+	b.entityListener.toState = s
+	return b
+}
+
+/* Builders */
+
 func EntityListenerBuilder() elBuilder1 {
 	return elBuilder1{entityListener{}}
 }
@@ -37,20 +55,4 @@ func (b elBuilder2) Call(callback entityListenerCallback) elBuilder3 {
 
 type elBuilder3 struct {
 	entityListener
-}
-
-func (b elBuilder3) OnlyBetween(start hourMinute, end hourMinute) elBuilder3 {
-	b.entityListener.betweenStart = start
-	b.entityListener.betweenEnd = end
-	return b
-}
-
-func (b elBuilder3) FromState(s string) elBuilder3 {
-	b.entityListener.fromState = s
-	return b
-}
-
-func (b elBuilder3) ToState(s string) elBuilder3 {
-	b.entityListener.toState = s
-	return b
 }

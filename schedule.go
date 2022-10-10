@@ -12,6 +12,10 @@ type hourMinute struct {
 	Minute int
 }
 
+func (hm hourMinute) int() int {
+	return hm.Hour + hm.Minute
+}
+
 func HourMinute(Hour, Minute int) hourMinute {
 	return hourMinute{Hour, Minute}
 }
@@ -76,7 +80,12 @@ type scheduleBuilderEnd struct {
 }
 
 func ScheduleBuilder() scheduleBuilder {
-	return scheduleBuilder{schedule{}}
+	return scheduleBuilder{
+		schedule{
+			frequency: 0,
+			offset:    hourMinute{0, 0},
+		},
+	}
 }
 
 func (s schedule) String() string {
@@ -88,7 +97,6 @@ func (s schedule) String() string {
 }
 
 func frequencyToString(d time.Duration) string {
-	fmt.Println(d.Hours(), d.Minutes(), d.Seconds())
 	if d.Hours() == 24 {
 		return "daily at"
 	}
