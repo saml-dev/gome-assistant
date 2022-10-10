@@ -16,9 +16,13 @@ func HourMinute(Hour, Minute int) hourMinute {
 	return hourMinute{Hour, Minute}
 }
 
+func (hm hourMinute) String() string {
+	return fmt.Sprintf("%02d:%02d", hm.Hour, hm.Minute)
+}
+
 type scheduleCallback func(Service)
 
-type Schedule struct {
+type schedule struct {
 	/*
 		frequency is a time.Duration representing how often you want to run your function.
 
@@ -47,35 +51,48 @@ type Schedule struct {
 		This will be set rather than returning an error to avoid checking err for nil on every schedule :)
 		RegisterSchedule will panic if the error is set.
 	*/
-	err error
+	err           error
+	realStartTime time.Time
 }
 
 type scheduleBuilder struct {
-	schedule Schedule
+	schedule schedule
 }
 
 type scheduleBuilderCall struct {
-	schedule Schedule
+	schedule schedule
 }
 
 type scheduleBuilderDaily struct {
-	schedule Schedule
+	schedule schedule
 }
 
 type scheduleBuilderCustom struct {
-	schedule Schedule
+	schedule schedule
 }
 
 type scheduleBuilderEnd struct {
-	schedule Schedule
+	schedule schedule
 }
 
 func ScheduleBuilder() scheduleBuilder {
-	return scheduleBuilder{Schedule{}}
+	return scheduleBuilder{schedule{}}
 }
 
-func (s Schedule) String() string {
-	return fmt.Sprintf("Run %q every %v with offset %s", getFunctionName(s.callback), s.frequency, s.offset)
+func (s schedule) String() string {
+	return fmt.Sprintf("Run %q %s %s",
+		getFunctionName(s.callback),
+		frequencyToString(s.frequency),
+		s.offset,
+	)
+}
+
+func frequencyToString(d time.Duration) string {
+	fmt.Println(d.Hours(), d.Minutes(), d.Seconds())
+	if d.Hours() == 24 {
+		return "daily at"
+	}
+	return "every " + d.String() + " with offset"
 }
 
 func (sb scheduleBuilder) Call(callback scheduleCallback) scheduleBuilderCall {
@@ -103,11 +120,11 @@ func (sb scheduleBuilderCustom) Offset(o hourMinute) scheduleBuilderEnd {
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderCustom) Build() Schedule {
+func (sb scheduleBuilderCustom) Build() schedule {
 	return sb.schedule
 }
 
-func (sb scheduleBuilderEnd) Build() Schedule {
+func (sb scheduleBuilderEnd) Build() schedule {
 	return sb.schedule
 }
 

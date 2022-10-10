@@ -9,11 +9,14 @@ import (
 
 func main() {
 	app, err := ga.App("192.168.86.67:8123")
+	defer app.Cleanup()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
+
 	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(ga.HourMinute(22, 00)).Build()
-	s2 := ga.ScheduleBuilder().Call(lightsOut).Every(time.Hour * 4).Offset(ga.HourMinute(1, 0)).Build()
+	s2 := ga.ScheduleBuilder().Call(lightsOut).Every(time.Hour*4 + time.Minute*30).Offset(ga.HourMinute(1, 0)).Build()
 	app.RegisterSchedule(s2)
 	// err = app.Start()
 
@@ -23,9 +26,7 @@ func main() {
 		OnlyBetween(ga.HourMinute(22, 00), ga.HourMinute(07, 00))
 	fmt.Println(simpleListener)
 
-	// p := ga.NewPersonBuilder().Lives().At("lskdjflskf").WithPostalCode("kdjf").Works().As("SWE")
-
-	fmt.Println(s, s2)
+	fmt.Println(s, "\n", s2)
 }
 
 func lightsOut(service ga.Service) {
