@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -39,40 +40,38 @@ func ReadMessage(conn *websocket.Conn, ctx context.Context) (string, error) {
 	return string(msg), nil
 }
 
-func SetupConnection(connString string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*5)
+func SetupConnection(connString string) (*websocket.Conn, context.Context, context.CancelFunc) {
+	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
 
 	// Init websocket connection
 	conn, _, err := websocket.Dial(ctx, fmt.Sprintf("ws://%s/api/websocket", connString), nil)
 	if err != nil {
-		fmt.Printf("ERROR: Failed to connect to websocket at ws://%s/api/websocket. Check IP address and port\n", connString)
 		ctxCancel()
-		return nil, nil, nil, err
+		log.Fatalf("ERROR: Failed to connect to websocket at ws://%s/api/websocket. Check IP address and port\n", connString)
 	}
 
 	// Read auth_required message
 	_, err = ReadMessage(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		return nil, nil, nil, err
+		log.Fatalln("Unknown error creating websocket client")
 	}
 
 	// Send auth message
 	err = SendAuthMessage(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		return nil, nil, nil, err
+		log.Fatalln("Unknown error creating websocket client")
 	}
 
 	// Verify auth message
 	err = VerifyAuthResponse(conn, ctx)
 	if err != nil {
-		fmt.Println("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
 		ctxCancel()
-		return nil, nil, nil, err
+		log.Fatalln("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
 	}
 
-	return conn, ctx, ctxCancel, err
+	return conn, ctx, ctxCancel
 }
 
 func SendAuthMessage(conn *websocket.Conn, ctx context.Context) error {

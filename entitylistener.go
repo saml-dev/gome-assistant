@@ -5,15 +5,15 @@ type entityListener struct {
 	callback     entityListenerCallback
 	fromState    string
 	toState      string
-	betweenStart hourMinute
-	betweenEnd   hourMinute
+	betweenStart timeOfDay
+	betweenEnd   timeOfDay
 }
 
 type entityListenerCallback func(Service, Data)
 
 type Data struct{}
 
-func (b elBuilder3) OnlyBetween(start hourMinute, end hourMinute) elBuilder3 {
+func (b elBuilder3) OnlyBetween(start timeOfDay, end timeOfDay) elBuilder3 {
 	b.entityListener.betweenStart = start
 	b.entityListener.betweenEnd = end
 	return b

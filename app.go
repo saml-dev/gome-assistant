@@ -2,42 +2,51 @@ package gomeassistant
 
 import (
 	"context"
+	"log"
+	"os"
 	"time"
 
+	"github.com/saml-dev/gome-assistant/internal/http"
 	"github.com/saml-dev/gome-assistant/internal/setup"
 	"nhooyr.io/websocket"
 )
 
 type app struct {
-	ctx             context.Context
-	ctxCancel       context.CancelFunc
-	conn            *websocket.Conn
+	ctx        context.Context
+	ctxCancel  context.CancelFunc
+	conn       *websocket.Conn
+	httpClient *http.HttpClient
+
+	service *Service
+	state   *State
+
 	schedules       []schedule
 	entityListeners []entityListener
 }
-
-var (
-	Sunrise hourMinute = hourMinute{1000, 0}
-	Sunset  hourMinute = hourMinute{1001, 0}
-)
 
 /*
 App establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
-func App(connString string) (app, error) {
-	conn, ctx, ctxCancel, err := setup.SetupConnection(connString)
-	if err != nil {
-		return app{}, err
-	}
+func App(connString string) app {
+	token := os.Getenv("AUTH_TOKEN")
+	conn, ctx, ctxCancel := setup.SetupConnection(connString)
+
+	httpClient := http.NewHttpClient(connString, token)
+
+	service := NewService(conn, ctx, httpClient)
+	state := NewState(httpClient)
 
 	return app{
 		conn:            conn,
 		ctx:             ctx,
 		ctxCancel:       ctxCancel,
+		httpClient:      httpClient,
+		service:         service,
+		state:           state,
 		schedules:       []schedule{},
 		entityListeners: []entityListener{},
-	}, nil
+	}
 }
 
 func (a *app) Cleanup() {
@@ -48,27 +57,20 @@ func (a *app) Cleanup() {
 
 func (a *app) RegisterSchedule(s schedule) {
 	if s.err != nil {
-		panic(s.err) // something wasn't configured properly when the schedule was built
+		log.Fatalln(s.err) // something wasn't configured properly when the schedule was built
 	}
 
 	if s.frequency == 0 {
-		panic("A schedule must call either Daily() or Every() when built.")
+		log.Fatalln("A schedule must call either Daily() or Every() when built.")
 	}
 
 	now := time.Now()
 	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // start at midnight today
 
 	// apply offset if set
-	if s.offset.int() != 0 {
-		if s.offset.int() == Sunrise.int() {
-			// TODO: same as sunset w/ sunrise
-		} else if s.offset.int() == Sunset.int() {
-			// TODO: add an http client (w/ token) to *app, use it to get state of sun.sun
-			// to get next sunset time
-		} else {
-			startTime.Add(time.Hour * time.Duration(s.offset.Hour))
-			startTime.Add(time.Minute * time.Duration(s.offset.Minute))
-		}
+	if s.offset.minutes() != 0 {
+		startTime.Add(time.Hour * time.Duration(s.offset.hour))
+		startTime.Add(time.Minute * time.Duration(s.offset.minute))
 	}
 
 	// advance first scheduled time by frequency until it is in the future
@@ -81,6 +83,11 @@ func (a *app) RegisterSchedule(s schedule) {
 }
 
 func (a *app) Start() {
+	// NOTE:should the prio queue and websocket listener both write to a channel or something?
+	// then select from that and spawn new goroutine to call callback?
+
+	// TODO: loop through schedules and create heap priority queue
+
 	// TODO: figure out looping listening to messages for
 	// listeners
 }

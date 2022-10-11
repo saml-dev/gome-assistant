@@ -3,13 +3,15 @@ package services
 import (
 	"context"
 
+	"github.com/saml-dev/gome-assistant/internal/http"
 	"github.com/saml-dev/gome-assistant/internal/setup"
 	"nhooyr.io/websocket"
 )
 
 type Light struct {
-	conn *websocket.Conn
-	ctx  context.Context
+	conn       *websocket.Conn
+	ctx        context.Context
+	httpClient *http.HttpClient
 }
 
 type LightRequest struct {
@@ -22,7 +24,21 @@ type LightRequest struct {
 	} `json:"target"`
 }
 
-func LightOnRequest(entityId string) LightRequest {
+/* Public API */
+
+func (l Light) TurnOn(entityId string) {
+	req := newLightOnRequest(entityId)
+	setup.WriteMessage(req, l.conn, l.ctx)
+}
+
+func (l Light) TurnOff(entityId string) {
+	req := newLightOffRequest(entityId)
+	setup.WriteMessage(req, l.conn, l.ctx)
+}
+
+/* Internal */
+
+func newLightOnRequest(entityId string) LightRequest {
 	req := LightRequest{
 		Id:      5,
 		Type:    "call_service",
@@ -33,18 +49,8 @@ func LightOnRequest(entityId string) LightRequest {
 	return req
 }
 
-func LightOffRequest(entityId string) LightRequest {
-	req := LightOnRequest(entityId)
+func newLightOffRequest(entityId string) LightRequest {
+	req := newLightOnRequest(entityId)
 	req.Service = "turn_off"
 	return req
-}
-
-func (l Light) TurnOn(entityId string) {
-	req := LightOnRequest(entityId)
-	setup.WriteMessage(req, l.conn, l.ctx)
-}
-
-func (l Light) TurnOff(entityId string) {
-	req := LightOffRequest(entityId)
-	setup.WriteMessage(req, l.conn, l.ctx)
 }

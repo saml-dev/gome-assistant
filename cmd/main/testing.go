@@ -8,28 +8,24 @@ import (
 )
 
 func main() {
-	app, err := ga.App("192.168.86.67:8123")
+	app := ga.App("192.168.86.67:8123")
 	defer app.Cleanup()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
 
-	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(ga.HourMinute(22, 00)).Build()
-	s2 := ga.ScheduleBuilder().Call(lightsOut).Every(time.Hour*4 + time.Minute*30).Offset(ga.HourMinute(1, 0)).Build()
+	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(ga.Sunset.Subtract(ga.TimeOfDay(0, 30))).Build()
+	s2 := ga.ScheduleBuilder().Call(lightsOut).Every(time.Hour*4 + time.Minute*30).Offset(ga.TimeOfDay(1, 0)).Build()
 	app.RegisterSchedule(s2)
 	// err = app.Start()
 
 	simpleListener := ga.EntityListenerBuilder().
 		EntityId("light.lights").
 		Call(cool).
-		OnlyBetween(ga.HourMinute(22, 00), ga.HourMinute(07, 00))
+		OnlyBetween(ga.TimeOfDay(22, 00), ga.TimeOfDay(07, 00))
 	fmt.Println(simpleListener)
 
 	fmt.Println(s, "\n", s2)
 }
 
-func lightsOut(service ga.Service) {
+func lightsOut(service ga.Service, state ga.State) {
 	// ga.TurnOff("light.all_lights")
 }
 

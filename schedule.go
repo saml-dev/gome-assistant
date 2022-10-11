@@ -2,29 +2,76 @@ package gomeassistant
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"runtime"
 	"time"
 )
 
-type hourMinute struct {
-	Hour   int
-	Minute int
+type sunriseSunset struct {
+	base        timeOfDay
+	addition    timeOfDay
+	subtraction timeOfDay
 }
 
-func (hm hourMinute) int() int {
-	return hm.Hour + hm.Minute
+var Sunrise *sunriseSunset = &sunriseSunset{
+	base:        TimeOfDay(0, 10000),
+	addition:    TimeOfDay(0, 0),
+	subtraction: TimeOfDay(0, 0),
 }
 
-func HourMinute(Hour, Minute int) hourMinute {
-	return hourMinute{Hour, Minute}
+var Sunset *sunriseSunset = &sunriseSunset{
+	base:        TimeOfDay(0, 20000),
+	addition:    TimeOfDay(0, 0),
+	subtraction: TimeOfDay(0, 0),
 }
 
-func (hm hourMinute) String() string {
-	return fmt.Sprintf("%02d:%02d", hm.Hour, hm.Minute)
+func (ss *sunriseSunset) Add(hm timeOfDay) *sunriseSunset {
+	ss.addition = hm
+	return ss
 }
 
-type scheduleCallback func(Service)
+func (ss *sunriseSunset) Subtract(hm timeOfDay) *sunriseSunset {
+	ss.subtraction = hm
+	return ss
+}
+
+func (ss *sunriseSunset) minutes() int {
+	return ss.base.minute +
+		(ss.addition.hour*60 + ss.addition.minute) -
+		(ss.subtraction.hour*60 + ss.subtraction.minute)
+}
+
+// HourMinute is used to express a time of day
+// but it shouldn't be used directly. Use
+// HourMinute(), Sunset(), or Sunrise() to
+// create one. Add() and Subtract() can be
+// called on Sunset and Sunrise to offset
+// from that time.
+type timeOfDay struct {
+	hour   int
+	minute int
+}
+
+type timeOfDayInterface interface {
+	// Time represented as number of minutes
+	// after midnight. E.g. 02:00 would be 120.
+	minutes() int
+}
+
+func (hm timeOfDay) minutes() int {
+	return hm.hour*60 + hm.minute
+}
+
+func TimeOfDay(Hour, Minute int) timeOfDay {
+	return timeOfDay{Hour, Minute}
+}
+
+func (hm timeOfDay) String() string {
+	return fmt.Sprintf("%02d:%02d", hm.hour, hm.minute)
+}
+
+type scheduleCallback func(Service, State)
 
 type schedule struct {
 	/*
@@ -50,10 +97,10 @@ type schedule struct {
 				offset: "0003"
 			}
 	*/
-	offset hourMinute
+	offset timeOfDay
 	/*
 		This will be set rather than returning an error to avoid checking err for nil on every schedule :)
-		RegisterSchedule will panic if the error is set.
+		RegisterSchedule will exit if the error is set.
 	*/
 	err           error
 	realStartTime time.Time
@@ -83,7 +130,7 @@ func ScheduleBuilder() scheduleBuilder {
 	return scheduleBuilder{
 		schedule{
 			frequency: 0,
-			offset:    hourMinute{0, 0},
+			offset:    timeOfDay{0, 0},
 		},
 	}
 }
@@ -113,18 +160,18 @@ func (sb scheduleBuilderCall) Daily() scheduleBuilderDaily {
 	return scheduleBuilderDaily(sb)
 }
 
-func (sb scheduleBuilderDaily) At(t hourMinute) scheduleBuilderEnd {
-	sb.schedule.offset = t
+func (sb scheduleBuilderDaily) At(t timeOfDayInterface) scheduleBuilderEnd {
+	sb.schedule.offset = convertTimeOfDayToActualOffset(t)
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderCall) Every(d time.Duration) scheduleBuilderCustom {
-	sb.schedule.frequency = d
+func (sb scheduleBuilderCall) Every(duration time.Duration) scheduleBuilderCustom {
+	sb.schedule.frequency = duration
 	return scheduleBuilderCustom(sb)
 }
 
-func (sb scheduleBuilderCustom) Offset(o hourMinute) scheduleBuilderEnd {
-	sb.schedule.offset = o
+func (sb scheduleBuilderCustom) Offset(t timeOfDay) scheduleBuilderEnd {
+	sb.schedule.offset = t
 	return scheduleBuilderEnd(sb)
 }
 
@@ -138,4 +185,23 @@ func (sb scheduleBuilderEnd) Build() schedule {
 
 func getFunctionName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
+
+func convertTimeOfDayToActualOffset(t timeOfDayInterface) timeOfDay {
+	if t.minutes() > 15000 {
+		// TODO: same as below but w/ sunset
+		return TimeOfDay(0, 0)
+	} else if t.minutes() > 5000 {
+		// TODO: use httpClient to get state of sun.sun
+		// to get next sunrise time
+
+		// retrieve next sunrise time
+
+		// use carbon.Parse() to create time.Time of that time
+
+		// return Time() of that many hours and minutes to set offset from midnight
+	} else if t.minutes() >= 1440 {
+		log.Fatalln("Offset (set via At() or Offset()) cannot be more than 1 day (23h59m)")
+	}
+	return TimeOfDay(0, t.minutes())
 }
