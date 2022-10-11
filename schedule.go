@@ -9,9 +9,9 @@ import (
 )
 
 type sunriseSunset struct {
-	base        timeOfDay
-	addition    timeOfDay
-	subtraction timeOfDay
+	base        time.Duration
+	addition    time.Duration
+	subtraction time.Duration
 }
 
 func Sunrise() *sunriseSunset {
@@ -30,50 +30,28 @@ func Sunset() *sunriseSunset {
 	}
 }
 
-func (ss *sunriseSunset) Add(hm timeOfDay) *sunriseSunset {
+func (ss *sunriseSunset) Add(hm time.Duration) *sunriseSunset {
 	ss.addition = hm
 	return ss
 }
 
-func (ss *sunriseSunset) Subtract(hm timeOfDay) *sunriseSunset {
+func (ss *sunriseSunset) Subtract(hm time.Duration) *sunriseSunset {
 	ss.subtraction = hm
 	return ss
 }
 
-func (ss *sunriseSunset) Minutes() int {
-	return ss.base.minute +
-		(ss.addition.hour*60 + ss.addition.minute) -
-		(ss.subtraction.hour*60 + ss.subtraction.minute)
+func (ss *sunriseSunset) Minutes() float64 {
+	return ss.base.Minutes() + ss.addition.Minutes() - ss.subtraction.Minutes()
 }
 
-// timeOfDay is used to express a time of day
-// but it shouldn't be used directly. Use
-// TimeOfDay(), Sunset(), or Sunrise() to
-// create one. Add() and Subtract() can be
-// called on Sunset and Sunrise to offset
-// the time, e.g. Sunset().Subtract(TimeOfDay(0, 30))
-// would be 30 minutes before sunset.
-type timeOfDay struct {
-	hour   int
-	minute int
-}
-
-type timeOfDayInterface interface {
+type timeOfDay interface {
 	// Time represented as number of Minutes
 	// after midnight. E.g. 02:00 would be 120.
-	Minutes() int
+	Minutes() float64
 }
 
-func (hm timeOfDay) minutes() int {
-	return hm.hour*60 + hm.minute
-}
-
-func TimeOfDay(Hour, Minute int) timeOfDay {
-	return timeOfDay{Hour, Minute}
-}
-
-func (hm timeOfDay) String() string {
-	return fmt.Sprintf("%02d:%02d", hm.hour, hm.minute)
+func TimeOfDay(Hour, Minute int) time.Duration {
+	return time.Hour*time.Duration(Hour) + time.Minute*time.Duration(Minute)
 }
 
 type scheduleCallback func(Service, State)
@@ -102,7 +80,7 @@ type schedule struct {
 				offset: "0003"
 			}
 	*/
-	offset timeOfDay
+	offset time.Duration
 	/*
 		This will be set rather than returning an error to avoid checking err for nil on every schedule :)
 		RegisterSchedule will exit if the error is set.
@@ -135,7 +113,7 @@ func ScheduleBuilder() scheduleBuilder {
 	return scheduleBuilder{
 		schedule{
 			frequency: 0,
-			offset:    timeOfDay{0, 0},
+			offset:    TimeOfDay(0, 0),
 		},
 	}
 }
@@ -144,8 +122,15 @@ func (s schedule) String() string {
 	return fmt.Sprintf("Run %q %s %s",
 		getFunctionName(s.callback),
 		frequencyToString(s.frequency),
-		s.offset,
+		offsetToString(s),
 	)
+}
+
+func offsetToString(s schedule) string {
+	if s.frequency.Hours() == 24 {
+		return fmt.Sprintf("%02d:%02d", int(s.offset.Hours()), int(s.offset.Minutes())%60)
+	}
+	return s.offset.String()
 }
 
 func frequencyToString(d time.Duration) string {
@@ -165,7 +150,7 @@ func (sb scheduleBuilderCall) Daily() scheduleBuilderDaily {
 	return scheduleBuilderDaily(sb)
 }
 
-func (sb scheduleBuilderDaily) At(t timeOfDayInterface) scheduleBuilderEnd {
+func (sb scheduleBuilderDaily) At(t timeOfDay) scheduleBuilderEnd {
 	sb.schedule.offset = convertTimeOfDayToActualOffset(t)
 	return scheduleBuilderEnd(sb)
 }
@@ -175,7 +160,7 @@ func (sb scheduleBuilderCall) Every(duration time.Duration) scheduleBuilderCusto
 	return scheduleBuilderCustom(sb)
 }
 
-func (sb scheduleBuilderCustom) Offset(t timeOfDay) scheduleBuilderEnd {
+func (sb scheduleBuilderCustom) Offset(t time.Duration) scheduleBuilderEnd {
 	sb.schedule.offset = t
 	return scheduleBuilderEnd(sb)
 }
@@ -192,7 +177,7 @@ func getFunctionName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
-func convertTimeOfDayToActualOffset(t timeOfDayInterface) timeOfDay {
+func convertTimeOfDayToActualOffset(t timeOfDay) time.Duration {
 	mins := t.Minutes()
 	if mins > 15000 {
 		// TODO: same as below but w/ sunset
@@ -211,5 +196,5 @@ func convertTimeOfDayToActualOffset(t timeOfDayInterface) timeOfDay {
 	} else if mins >= 1440 {
 		log.Fatalln("Offset (set via At() or Offset()) cannot be more than 1 day (23h59m)")
 	}
-	return TimeOfDay(0, mins)
+	return TimeOfDay(0, int(mins))
 }

@@ -64,13 +64,13 @@ func (a *app) RegisterSchedule(s schedule) {
 		log.Fatalln("A schedule must call either Daily() or Every() when built.")
 	}
 
+	// TODO: consider moving all time stuff to carbon?
 	now := time.Now()
 	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // start at midnight today
 
 	// apply offset if set
-	if s.offset.minutes() != 0 {
-		startTime.Add(time.Hour * time.Duration(s.offset.hour))
-		startTime.Add(time.Minute * time.Duration(s.offset.minute))
+	if s.offset.Minutes() > 0 {
+		startTime.Add(s.offset)
 	}
 
 	// advance first scheduled time by frequency until it is in the future

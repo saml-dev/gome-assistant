@@ -1,19 +1,21 @@
 package gomeassistant
 
+import "time"
+
 type entityListener struct {
 	entityId     string
 	callback     entityListenerCallback
 	fromState    string
 	toState      string
-	betweenStart timeOfDay
-	betweenEnd   timeOfDay
+	betweenStart time.Duration
+	betweenEnd   time.Duration
 }
 
 type entityListenerCallback func(Service, Data)
 
 type Data struct{}
 
-func (b elBuilder3) OnlyBetween(start timeOfDay, end timeOfDay) elBuilder3 {
+func (b elBuilder3) OnlyBetween(start time.Duration, end time.Duration) elBuilder3 {
 	b.entityListener.betweenStart = start
 	b.entityListener.betweenEnd = end
 	return b
