@@ -16,17 +16,17 @@ type sunriseSunset struct {
 
 func Sunrise() *sunriseSunset {
 	return &sunriseSunset{
-		base:        Duration(0, 10000),
-		addition:    Duration(0, 0),
-		subtraction: Duration(0, 0),
+		base:        TimeOfDay(0, 10000),
+		addition:    TimeOfDay(0, 0),
+		subtraction: TimeOfDay(0, 0),
 	}
 }
 
 func Sunset() *sunriseSunset {
 	return &sunriseSunset{
-		base:        Duration(0, 20000),
-		addition:    Duration(0, 0),
-		subtraction: Duration(0, 0),
+		base:        TimeOfDay(0, 20000),
+		addition:    TimeOfDay(0, 0),
+		subtraction: TimeOfDay(0, 0),
 	}
 }
 
@@ -50,8 +50,16 @@ type timeOfDay interface {
 	Minutes() float64
 }
 
-func Duration(Hour, Minute int) time.Duration {
-	return time.Hour*time.Duration(Hour) + time.Minute*time.Duration(Minute)
+// TimeOfDay is a helper function to easily represent
+// a time of day as a time.Duration since midnight.
+func TimeOfDay(hour, minute int) time.Duration {
+	return time.Hour*time.Duration(hour) + time.Minute*time.Duration(minute)
+}
+
+// Duration is a wrapper for TimeOfDay that makes
+// semantic sense when used with Every()
+func Duration(hour, minute int) time.Duration {
+	return TimeOfDay(hour, minute)
 }
 
 type scheduleCallback func(Service, State)
@@ -113,7 +121,7 @@ func ScheduleBuilder() scheduleBuilder {
 	return scheduleBuilder{
 		schedule{
 			frequency: 0,
-			offset:    Duration(0, 0),
+			offset:    TimeOfDay(0, 0),
 		},
 	}
 }
@@ -182,7 +190,7 @@ func convertTimeOfDayToActualOffset(t timeOfDay) time.Duration {
 	if mins > 15000 {
 		// TODO: same as below but w/ sunset
 		// don't forget to subtract 20000 here
-		return Duration(0, 0)
+		return TimeOfDay(0, 0)
 	} else if mins > 5000 {
 		// TODO: use httpClient to get state of sun.sun
 		// to get next sunrise time
@@ -196,5 +204,5 @@ func convertTimeOfDayToActualOffset(t timeOfDay) time.Duration {
 	} else if mins >= 1440 {
 		log.Fatalln("Offset (set via At() or Offset()) cannot be more than 1 day (23h59m)")
 	}
-	return Duration(0, int(mins))
+	return TimeOfDay(0, int(mins))
 }
