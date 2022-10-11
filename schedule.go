@@ -14,16 +14,20 @@ type sunriseSunset struct {
 	subtraction timeOfDay
 }
 
-var Sunrise *sunriseSunset = &sunriseSunset{
-	base:        TimeOfDay(0, 10000),
-	addition:    TimeOfDay(0, 0),
-	subtraction: TimeOfDay(0, 0),
+func Sunrise() *sunriseSunset {
+	return &sunriseSunset{
+		base:        TimeOfDay(0, 10000),
+		addition:    TimeOfDay(0, 0),
+		subtraction: TimeOfDay(0, 0),
+	}
 }
 
-var Sunset *sunriseSunset = &sunriseSunset{
-	base:        TimeOfDay(0, 20000),
-	addition:    TimeOfDay(0, 0),
-	subtraction: TimeOfDay(0, 0),
+func Sunset() *sunriseSunset {
+	return &sunriseSunset{
+		base:        TimeOfDay(0, 20000),
+		addition:    TimeOfDay(0, 0),
+		subtraction: TimeOfDay(0, 0),
+	}
 }
 
 func (ss *sunriseSunset) Add(hm timeOfDay) *sunriseSunset {
@@ -36,27 +40,28 @@ func (ss *sunriseSunset) Subtract(hm timeOfDay) *sunriseSunset {
 	return ss
 }
 
-func (ss *sunriseSunset) minutes() int {
+func (ss *sunriseSunset) Minutes() int {
 	return ss.base.minute +
 		(ss.addition.hour*60 + ss.addition.minute) -
 		(ss.subtraction.hour*60 + ss.subtraction.minute)
 }
 
-// HourMinute is used to express a time of day
+// timeOfDay is used to express a time of day
 // but it shouldn't be used directly. Use
-// HourMinute(), Sunset(), or Sunrise() to
+// TimeOfDay(), Sunset(), or Sunrise() to
 // create one. Add() and Subtract() can be
 // called on Sunset and Sunrise to offset
-// from that time.
+// the time, e.g. Sunset().Subtract(TimeOfDay(0, 30))
+// would be 30 minutes before sunset.
 type timeOfDay struct {
 	hour   int
 	minute int
 }
 
 type timeOfDayInterface interface {
-	// Time represented as number of minutes
+	// Time represented as number of Minutes
 	// after midnight. E.g. 02:00 would be 120.
-	minutes() int
+	Minutes() int
 }
 
 func (hm timeOfDay) minutes() int {
@@ -188,20 +193,23 @@ func getFunctionName(i interface{}) string {
 }
 
 func convertTimeOfDayToActualOffset(t timeOfDayInterface) timeOfDay {
-	if t.minutes() > 15000 {
+	mins := t.Minutes()
+	if mins > 15000 {
 		// TODO: same as below but w/ sunset
+		// don't forget to subtract 20000 here
 		return TimeOfDay(0, 0)
-	} else if t.minutes() > 5000 {
+	} else if mins > 5000 {
 		// TODO: use httpClient to get state of sun.sun
 		// to get next sunrise time
+		// don't forget to subtract 10000 here to get +- from sunrise that user requested
 
 		// retrieve next sunrise time
 
 		// use carbon.Parse() to create time.Time of that time
 
 		// return Time() of that many hours and minutes to set offset from midnight
-	} else if t.minutes() >= 1440 {
+	} else if mins >= 1440 {
 		log.Fatalln("Offset (set via At() or Offset()) cannot be more than 1 day (23h59m)")
 	}
-	return TimeOfDay(0, t.minutes())
+	return TimeOfDay(0, mins)
 }

@@ -10,11 +10,10 @@ import (
 func main() {
 	app := ga.App("192.168.86.67:8123")
 	defer app.Cleanup()
-
-	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(ga.Sunset.Subtract(ga.TimeOfDay(0, 30))).Build()
+	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(ga.Sunset().Subtract(ga.TimeOfDay(0, 30))).Build()
 	s2 := ga.ScheduleBuilder().Call(lightsOut).Every(time.Hour*4 + time.Minute*30).Offset(ga.TimeOfDay(1, 0)).Build()
 	app.RegisterSchedule(s2)
-	// err = app.Start()
+	app.Start()
 
 	simpleListener := ga.EntityListenerBuilder().
 		EntityId("light.lights").
