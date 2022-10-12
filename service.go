@@ -15,7 +15,7 @@ type Service struct {
 
 func NewService(conn *websocket.Conn, ctx context.Context, httpClient *http.HttpClient) *Service {
 	return &Service{
-		Light:         services.BuildService[services.Light](conn, ctx),
-		HomeAssistant: services.BuildService[services.HomeAssistant](conn, ctx),
+		Light:         services.BuildService[services.Light](conn, ctx, httpClient),
+		HomeAssistant: services.BuildService[services.HomeAssistant](conn, ctx, httpClient),
 	}
 }

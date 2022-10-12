@@ -23,7 +23,7 @@ type AuthMessage struct {
 
 func WriteMessage[T any](msg T, conn *websocket.Conn, ctx context.Context) error {
 	msgJson, err := json.Marshal(msg)
-	// fmt.Println(string(msgJson))
+	fmt.Println(string(msgJson))
 	if err != nil {
 		return err
 	}
@@ -100,6 +100,7 @@ func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
 
 	var authResp authResponse
 	json.Unmarshal(msg, &authResp)
+	log.Println(authResp.MsgType)
 	if authResp.MsgType != "auth_ok" {
 		return errors.New("invalid auth token")
 	}

@@ -62,7 +62,7 @@ func Duration(hour, minute int) time.Duration {
 	return TimeOfDay(hour, minute)
 }
 
-type scheduleCallback func(Service, State)
+type scheduleCallback func(*Service, *State)
 
 type schedule struct {
 	/*

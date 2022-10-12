@@ -24,8 +24,8 @@ func main() {
 	log.Println(s2)
 }
 
-func lightsOut(service ga.Service, state ga.State) {
-	// ga.TurnOff("light.all_lights")
+func lightsOut(service *ga.Service, state *ga.State) {
+	service.HomeAssistant.Toggle("light.office_ceiling_lights")
 }
 
 func cool(service ga.Service, data ga.Data) {
