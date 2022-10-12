@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/saml-dev/gome-assistant/internal/http"
-	"github.com/saml-dev/gome-assistant/internal/setup"
+	ws "github.com/saml-dev/gome-assistant/internal/websocket"
 	"nhooyr.io/websocket"
 )
 
@@ -30,7 +30,7 @@ you can use to register schedules and listeners.
 */
 func App(connString string) app {
 	token := os.Getenv("AUTH_TOKEN")
-	conn, ctx, ctxCancel := setup.SetupConnection(connString)
+	conn, ctx, ctxCancel := ws.SetupConnection(connString)
 
 	httpClient := http.NewHttpClient(connString, token)
 

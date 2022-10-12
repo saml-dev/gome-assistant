@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/saml-dev/gome-assistant/internal/http"
-	"github.com/saml-dev/gome-assistant/internal/setup"
+	ws "github.com/saml-dev/gome-assistant/internal/websocket"
 	"nhooyr.io/websocket"
 )
 
@@ -28,12 +28,12 @@ type LightRequest struct {
 
 func (l Light) TurnOn(entityId string) {
 	req := newLightOnRequest(entityId)
-	setup.WriteMessage(req, l.conn, l.ctx)
+	ws.WriteMessage(req, l.conn, l.ctx)
 }
 
 func (l Light) TurnOff(entityId string) {
 	req := newLightOffRequest(entityId)
-	setup.WriteMessage(req, l.conn, l.ctx)
+	ws.WriteMessage(req, l.conn, l.ctx)
 }
 
 /* Internal */
