@@ -56,6 +56,7 @@ func (a *app) Cleanup() {
 }
 
 func (a *app) RegisterSchedule(s schedule) {
+	s.callback(a.service, a.state)
 	if s.err != nil {
 		log.Fatalln(s.err) // something wasn't configured properly when the schedule was built
 	}

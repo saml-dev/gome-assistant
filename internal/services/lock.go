@@ -9,19 +9,19 @@ import (
 
 /* Structs */
 
-type Light struct {
+type Lock struct {
 	conn *websocket.Conn
 	ctx  context.Context
 }
 
 /* Public API */
 
-// TurnOn a light entity. Takes an entityId and an optional
+// Lock a lock entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
+func (l Lock) Lock(entityId string, serviceData ...map[string]any) {
 	req := NewBaseServiceRequest(entityId)
-	req.Domain = "light"
-	req.Service = "turn_on"
+	req.Domain = "lock"
+	req.Service = "lock"
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
@@ -29,22 +29,15 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
 	ws.WriteMessage(req, l.conn, l.ctx)
 }
 
-// Toggle a light entity. Takes an entityId and an optional
+// Unlock a lock entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
+func (l Lock) Unlock(entityId string, serviceData ...map[string]any) {
 	req := NewBaseServiceRequest(entityId)
-	req.Domain = "light"
-	req.Service = "toggle"
+	req.Domain = "lock"
+	req.Service = "unlock"
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, l.conn, l.ctx)
-}
-
-func (l Light) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "light"
-	req.Service = "turn_off"
 	ws.WriteMessage(req, l.conn, l.ctx)
 }

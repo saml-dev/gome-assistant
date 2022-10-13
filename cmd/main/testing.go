@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	ga "github.com/saml-dev/gome-assistant"
 )
@@ -25,7 +26,10 @@ func main() {
 }
 
 func lightsOut(service *ga.Service, state *ga.State) {
-	service.HomeAssistant.Toggle("light.office_ceiling_lights")
+	service.InputDatetime.Set("input_datetime.garage_last_triggered_ts", time.Now())
+	// service.HomeAssistant.Toggle("group.living_room_lamps", map[string]any{"brightness_pct": 100})
+	// service.Light.Toggle("light.entryway_lamp", map[string]any{"brightness_pct": 100})
+	// service.Switch.Toggle("switch.espurna_sunroom_lamp")
 }
 
 func cool(service ga.Service, data ga.Data) {
