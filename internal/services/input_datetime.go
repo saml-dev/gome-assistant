@@ -25,7 +25,6 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 	req.ServiceData = map[string]any{
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
-	fmt.Println(req)
 
 	ws.WriteMessage(req, ib.conn, ib.ctx) // TODO: this ain't working for some reason
 }
