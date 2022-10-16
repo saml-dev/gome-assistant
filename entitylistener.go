@@ -1,17 +1,21 @@
 package gomeassistant
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type entityListener struct {
-	entityId     string
+	entityIds    []string
 	callback     entityListenerCallback
 	fromState    string
 	toState      string
 	betweenStart time.Duration
 	betweenEnd   time.Duration
+	err          error
 }
 
-type entityListenerCallback func(Service, Data)
+type entityListenerCallback func(*Service, *Data)
 
 type Data struct{}
 
@@ -41,8 +45,12 @@ type elBuilder1 struct {
 	entityListener
 }
 
-func (b elBuilder1) EntityId(eid string) elBuilder2 {
-	b.entityListener.entityId = eid
+func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
+	if len(entityIds) == 0 {
+		b.err = errors.New("must pass at least one entityId to EntityIds()")
+	} else {
+		b.entityListener.entityIds = entityIds
+	}
 	return elBuilder2(b)
 }
 
@@ -51,7 +59,9 @@ type elBuilder2 struct {
 }
 
 func (b elBuilder2) Call(callback entityListenerCallback) elBuilder3 {
-	b.entityListener.callback = callback
+	if b.err == nil {
+		b.entityListener.callback = callback
+	}
 	return elBuilder3(b)
 }
 

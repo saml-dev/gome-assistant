@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/saml-dev/gome-assistant/internal/http"
+	pq "github.com/saml-dev/gome-assistant/internal/priorityqueue"
 	ws "github.com/saml-dev/gome-assistant/internal/websocket"
 	"nhooyr.io/websocket"
 )
@@ -20,15 +21,15 @@ type app struct {
 	service *Service
 	state   *State
 
-	schedules       []schedule
+	schedules       pq.PriorityQueue
 	entityListeners []entityListener
 }
 
 /*
-App establishes the websocket connection and returns an object
+NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
-func App(connString string) app {
+func NewApp(connString string) app {
 	token := os.Getenv("AUTH_TOKEN")
 	conn, ctx, ctxCancel := ws.SetupConnection(connString)
 
@@ -44,7 +45,7 @@ func App(connString string) app {
 		httpClient:      httpClient,
 		service:         service,
 		state:           state,
-		schedules:       []schedule{},
+		schedules:       pq.New(),
 		entityListeners: []entityListener{},
 	}
 }
@@ -56,7 +57,6 @@ func (a *app) Cleanup() {
 }
 
 func (a *app) RegisterSchedule(s schedule) {
-	s.callback(a.service, a.state)
 	if s.err != nil {
 		log.Fatalln(s.err) // something wasn't configured properly when the schedule was built
 	}
@@ -80,10 +80,16 @@ func (a *app) RegisterSchedule(s schedule) {
 	}
 
 	s.realStartTime = startTime
-	a.schedules = append(a.schedules, s)
+	a.schedules.Insert(s, float64(startTime.Unix())) // TODO: this blows up because schedule can't be used as key for map in prio queue lib. Just copy/paste and tweak as needed
 }
 
 func (a *app) Start() {
+
+	// schedules
+	if a.schedules.Len() != 0 {
+		go RunSchedules(a)
+	}
+
 	// NOTE:should the prio queue and websocket listener both write to a channel or something?
 	// then select from that and spawn new goroutine to call callback?
 

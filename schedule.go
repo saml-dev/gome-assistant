@@ -90,11 +90,15 @@ type schedule struct {
 	*/
 	offset time.Duration
 	/*
-		This will be set rather than returning an error to avoid checking err for nil on every schedule :)
+		err will be set rather than returning an error to avoid checking err for nil on every schedule :)
 		RegisterSchedule will exit if the error is set.
 	*/
 	err           error
 	realStartTime time.Time
+}
+
+func (s schedule) Hash() string {
+	return fmt.Sprint(s.offset, s.frequency, s.callback)
 }
 
 type scheduleBuilder struct {
@@ -205,4 +209,34 @@ func convertTimeOfDayToActualOffset(t timeOfDay) time.Duration {
 		log.Fatalln("Offset (set via At() or Offset()) cannot be more than 1 day (23h59m)")
 	}
 	return TimeOfDay(0, int(mins))
+}
+
+// app.Start() functions
+func RunSchedules(a *app) {
+	for {
+		sched := popSchedule(a)
+		// log.Default().Println(sched.realStartTime)
+
+		// run callback for all schedules before now in case they overlap
+		for sched.realStartTime.Before(time.Now()) {
+			go sched.callback(a.service, a.state)
+			requeueSchedule(a, sched)
+
+			sched = popSchedule(a)
+		}
+
+		time.Sleep(time.Until(sched.realStartTime))
+		go sched.callback(a.service, a.state)
+		requeueSchedule(a, sched)
+	}
+}
+
+func popSchedule(a *app) schedule {
+	_sched, _ := a.schedules.Pop()
+	return _sched.(schedule)
+}
+
+func requeueSchedule(a *app, s schedule) {
+	s.realStartTime = s.realStartTime.Add(s.frequency)
+	a.schedules.Insert(s, float64(s.realStartTime.Unix()))
 }
