@@ -6,10 +6,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/gorilla/websocket"
+	"github.com/saml-dev/gome-assistant/internal"
 	"github.com/saml-dev/gome-assistant/internal/http"
 	pq "github.com/saml-dev/gome-assistant/internal/priorityqueue"
 	ws "github.com/saml-dev/gome-assistant/internal/websocket"
-	"nhooyr.io/websocket"
 )
 
 type app struct {
@@ -21,8 +22,9 @@ type app struct {
 	service *Service
 	state   *State
 
-	schedules       pq.PriorityQueue
-	entityListeners []entityListener
+	schedules         pq.PriorityQueue
+	entityListeners   map[string][]entityListener
+	entityListenerIds map[int64]entityListenerCallback
 }
 
 /*
@@ -30,8 +32,8 @@ NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
 func NewApp(connString string) app {
-	token := os.Getenv("AUTH_TOKEN")
-	conn, ctx, ctxCancel := ws.SetupConnection(connString)
+	token := os.Getenv("HA_AUTH_TOKEN")
+	conn, ctx, ctxCancel := ws.SetupConnection(connString, token)
 
 	httpClient := http.NewHttpClient(connString, token)
 
@@ -39,14 +41,15 @@ func NewApp(connString string) app {
 	state := NewState(httpClient)
 
 	return app{
-		conn:            conn,
-		ctx:             ctx,
-		ctxCancel:       ctxCancel,
-		httpClient:      httpClient,
-		service:         service,
-		state:           state,
-		schedules:       pq.New(),
-		entityListeners: []entityListener{},
+		conn:              conn,
+		ctx:               ctx,
+		ctxCancel:         ctxCancel,
+		httpClient:        httpClient,
+		service:           service,
+		state:             state,
+		schedules:         pq.New(),
+		entityListeners:   map[string][]entityListener{},
+		entityListenerIds: map[int64]entityListenerCallback{},
 	}
 }
 
@@ -83,11 +86,48 @@ func (a *app) RegisterSchedule(s schedule) {
 	a.schedules.Insert(s, float64(startTime.Unix())) // TODO: this blows up because schedule can't be used as key for map in prio queue lib. Just copy/paste and tweak as needed
 }
 
-func (a *app) Start() {
+func (a *app) RegisterEntityListener(el entityListener) {
+	for _, entity := range el.entityIds {
+		id := internal.GetId()
+		subscribeTriggerMsg := subscribeMsg{
+			Id:   id,
+			Type: "subscribe_trigger",
+			Trigger: subscribeMsgTrigger{
+				Platform: "state",
+				EntityId: entity,
+			},
+		}
+		if el.fromState != "" {
+			subscribeTriggerMsg.Trigger.From = el.fromState
+		}
+		if el.toState != "" {
+			subscribeTriggerMsg.Trigger.To = el.toState
+		}
+		log.Default().Println(subscribeTriggerMsg)
+		ws.WriteMessage(subscribeTriggerMsg, a.conn, a.ctx)
+		msg, _ := ws.ReadMessage(a.conn, a.ctx)
+		log.Default().Println(string(msg))
+		a.entityListenerIds[id] = el.callback
+	}
 
+}
+
+func (a *app) Start() {
 	// schedules
-	if a.schedules.Len() != 0 {
-		go RunSchedules(a)
+	go RunSchedules(a)
+
+	// entity listeners
+	elChan := make(chan ws.ChanMsg)
+	go ws.ListenWebsocket(a.conn, a.ctx, elChan)
+
+	log.Default().Println(a.entityListenerIds)
+	var msg ws.ChanMsg
+	for {
+		msg = <-elChan
+		log.Default().Println(string(msg.Raw))
+		if callback, ok := a.entityListenerIds[msg.Id]; ok {
+			log.Default().Println(msg, callback)
+		}
 	}
 
 	// NOTE:should the prio queue and websocket listener both write to a channel or something?

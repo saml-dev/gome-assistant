@@ -2,15 +2,35 @@ package websocket
 
 import (
 	"context"
+	"encoding/json"
 
-	"nhooyr.io/websocket"
+	"github.com/gorilla/websocket"
 )
 
 type BaseMessage struct {
-	MsgType string `json:"type"`
-	Other   any
+	Type string `json:"type"`
+	Id   int64  `json:"id"`
 }
 
-func ReadWebsocket(ws *websocket.Conn, ctx context.Context) {
+type ChanMsg struct {
+	Id   int64
+	Type string
+	Raw  []byte
+}
 
+func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) {
+	for {
+		// log.Default().Println("reading message")
+		bytes, _ := ReadMessage(conn, ctx)
+		base := BaseMessage{}
+		json.Unmarshal(bytes, &base)
+
+		chanMsg := ChanMsg{
+			Type: base.Type,
+			Id:   base.Id,
+			Raw:  bytes,
+		}
+
+		c <- chanMsg
+	}
 }

@@ -15,24 +15,49 @@ type entityListener struct {
 	err          error
 }
 
-type entityListenerCallback func(*Service, *Data)
+type entityListenerCallback func(*Service, *EntityData)
 
-type Data struct{}
-
-func (b elBuilder3) OnlyBetween(start time.Duration, end time.Duration) elBuilder3 {
-	b.entityListener.betweenStart = start
-	b.entityListener.betweenEnd = end
-	return b
+// TODO: use this to flatten json sent from HA for trigger event
+type EntityData struct {
+	TriggerEntityId string
+	FromState       string
+	FromAttributes  map[string]any
+	ToState         string
+	ToAttributes    map[string]any
+	LastChanged     time.Time
 }
 
-func (b elBuilder3) FromState(s string) elBuilder3 {
-	b.entityListener.fromState = s
-	return b
+type triggerMsg struct {
+	Id    int64  `json:"id"`
+	Type  string `json:"type"`
+	Event struct {
+		Variables struct {
+			Trigger struct {
+				EntityId  string          `json:"entity_id"`
+				FromState triggerMsgState `json:"from_state"`
+				ToState   triggerMsgState `json:"to_state"`
+			}
+		} `json:"variables"`
+	} `json:"event"`
 }
 
-func (b elBuilder3) ToState(s string) elBuilder3 {
-	b.entityListener.toState = s
-	return b
+type triggerMsgState struct {
+	State       string         `json:"state"`
+	Attributes  map[string]any `json:"attributes"`
+	LastChanged string         `json:"last_changed"`
+}
+
+type subscribeMsg struct {
+	Id      int64               `json:"id"`
+	Type    string              `json:"type"`
+	Trigger subscribeMsgTrigger `json:"trigger"`
+}
+
+type subscribeMsgTrigger struct {
+	Platform string `json:"platform"`
+	EntityId string `json:"entity_id"`
+	From     string `json:"from"`
+	To       string `json:"to"`
 }
 
 /* Builders */
@@ -67,4 +92,24 @@ func (b elBuilder2) Call(callback entityListenerCallback) elBuilder3 {
 
 type elBuilder3 struct {
 	entityListener
+}
+
+func (b elBuilder3) OnlyBetween(start time.Duration, end time.Duration) elBuilder3 {
+	b.entityListener.betweenStart = start
+	b.entityListener.betweenEnd = end
+	return b
+}
+
+func (b elBuilder3) FromState(s string) elBuilder3 {
+	b.entityListener.fromState = s
+	return b
+}
+
+func (b elBuilder3) ToState(s string) elBuilder3 {
+	b.entityListener.toState = s
+	return b
+}
+
+func (b elBuilder3) Build() entityListener {
+	return b.entityListener
 }

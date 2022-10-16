@@ -10,10 +10,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	"nhooyr.io/websocket"
+	"github.com/gorilla/websocket"
 )
 
 type AuthMessage struct {
@@ -28,7 +27,7 @@ func WriteMessage[T any](msg T, conn *websocket.Conn, ctx context.Context) error
 		return err
 	}
 
-	err = conn.Write(ctx, websocket.MessageText, msgJson)
+	err = conn.WriteMessage(websocket.TextMessage, msgJson)
 	if err != nil {
 		return err
 	}
@@ -36,19 +35,20 @@ func WriteMessage[T any](msg T, conn *websocket.Conn, ctx context.Context) error
 	return nil
 }
 
-func ReadMessage(conn *websocket.Conn, ctx context.Context) (string, error) {
-	_, msg, err := conn.Read(ctx)
+func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
+	_, msg, err := conn.ReadMessage()
 	if err != nil {
-		return "", err
+		return []byte{}, err
 	}
-	return string(msg), nil
+	return msg, nil
 }
 
-func SetupConnection(connString string) (*websocket.Conn, context.Context, context.CancelFunc) {
+func SetupConnection(connString string, authToken string) (*websocket.Conn, context.Context, context.CancelFunc) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
 
 	// Init websocket connection
-	conn, _, err := websocket.Dial(ctx, fmt.Sprintf("ws://%s/api/websocket", connString), nil)
+	dialer := websocket.DefaultDialer
+	conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("ws://%s/api/websocket", connString), nil)
 	if err != nil {
 		ctxCancel()
 		log.Fatalf("ERROR: Failed to connect to websocket at ws://%s/api/websocket. Check IP address and port\n", connString)
@@ -62,13 +62,13 @@ func SetupConnection(connString string) (*websocket.Conn, context.Context, conte
 	}
 
 	// Send auth message
-	err = SendAuthMessage(conn, ctx)
+	err = SendAuthMessage(conn, ctx, authToken)
 	if err != nil {
 		ctxCancel()
 		log.Fatalln("Unknown error creating websocket client")
 	}
 
-	// Verify auth message
+	// Verify auth message was successful
 	err = VerifyAuthResponse(conn, ctx)
 	if err != nil {
 		ctxCancel()
@@ -78,8 +78,7 @@ func SetupConnection(connString string) (*websocket.Conn, context.Context, conte
 	return conn, ctx, ctxCancel
 }
 
-func SendAuthMessage(conn *websocket.Conn, ctx context.Context) error {
-	token := os.Getenv("AUTH_TOKEN")
+func SendAuthMessage(conn *websocket.Conn, ctx context.Context, token string) error {
 	err := WriteMessage(AuthMessage{MsgType: "auth", AccessToken: token}, conn, ctx)
 	if err != nil {
 		return err
@@ -93,7 +92,7 @@ type authResponse struct {
 }
 
 func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
-	_, msg, err := conn.Read(ctx)
+	msg, err := ReadMessage(conn, ctx)
 	if err != nil {
 		return err
 	}

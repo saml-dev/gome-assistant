@@ -3,8 +3,10 @@ package services
 import (
 	"context"
 	"fmt"
+	"log"
 
-	"nhooyr.io/websocket"
+	"github.com/gorilla/websocket"
+	"github.com/saml-dev/gome-assistant/internal"
 )
 
 func BuildService[
@@ -32,9 +34,9 @@ type BaseServiceRequest struct {
 	} `json:"target,omitempty"`
 }
 
-var id int64 = 1
-
 func NewBaseServiceRequest(entityId string) BaseServiceRequest {
+	id := internal.GetId()
+	log.Default().Println("service id", id)
 	bsr := BaseServiceRequest{
 		Id:          fmt.Sprint(id),
 		RequestType: "call_service",

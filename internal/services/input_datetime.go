@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gorilla/websocket"
 	ws "github.com/saml-dev/gome-assistant/internal/websocket"
-	"nhooyr.io/websocket"
 )
 
 /* Structs */

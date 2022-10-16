@@ -3,9 +3,9 @@ package gomeassistant
 import (
 	"context"
 
+	"github.com/gorilla/websocket"
 	"github.com/saml-dev/gome-assistant/internal/http"
 	"github.com/saml-dev/gome-assistant/internal/services"
-	"nhooyr.io/websocket"
 )
 
 type Service struct {

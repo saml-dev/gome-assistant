@@ -213,6 +213,10 @@ func convertTimeOfDayToActualOffset(t timeOfDay) time.Duration {
 
 // app.Start() functions
 func RunSchedules(a *app) {
+	if a.schedules.Len() == 0 {
+		return
+	}
+
 	for {
 		sched := popSchedule(a)
 		// log.Default().Println(sched.realStartTime)
