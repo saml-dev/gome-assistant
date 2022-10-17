@@ -26,7 +26,7 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
 
-	ws.WriteMessage(req, ib.conn, ib.ctx) // TODO: this ain't working for some reason
+	ws.WriteMessage(req, ib.conn, ib.ctx)
 }
 
 func (ib InputDatetime) Reload() {

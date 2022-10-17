@@ -67,9 +67,8 @@ func (a *app) RegisterSchedule(s schedule) {
 		log.Fatalln("A schedule must call either Daily() or Every() when built.")
 	}
 
-	// TODO: consider moving all time stuff to carbon?
 	now := time.Now()
-	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // start at midnight today
+	startTime := carbon.Now().StartOfDay().Carbon2Time()
 	// apply offset if set
 	if s.offset.Minutes() > 0 {
 		startTime = startTime.Add(s.offset)
@@ -81,7 +80,7 @@ func (a *app) RegisterSchedule(s schedule) {
 	}
 
 	s.realStartTime = startTime
-	a.schedules.Insert(s, float64(startTime.Unix())) // TODO: this blows up because schedule can't be used as key for map in prio queue lib. Just copy/paste and tweak as needed
+	a.schedules.Insert(s, float64(startTime.Unix()))
 }
 
 func (a *app) RegisterEntityListener(el entityListener) {

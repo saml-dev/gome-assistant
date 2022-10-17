@@ -15,13 +15,13 @@ func main() {
 		Call(pantryLights).
 		Build()
 	app.RegisterEntityListener(pantryDoor)
+	app.RegisterSchedule(ga.ScheduleBuilder().Call(cool).Every("5s").Build())
 
 	app.Start()
 
 }
 
 func pantryLights(service *ga.Service, data ga.EntityData) {
-	// service.InputDatetime.Set("input_datetime.garage_last_triggered_ts", time.Now())
 	// service.HomeAssistant.Toggle("group.living_room_lamps", map[string]any{"brightness_pct": 100})
 	// service.Light.Toggle("light.entryway_lamp", map[string]any{"brightness_pct": 100})
 	if data.ToState == "on" {
@@ -32,6 +32,7 @@ func pantryLights(service *ga.Service, data ga.EntityData) {
 }
 
 func cool(service *ga.Service, state *ga.State) {
+	// service.InputDatetime.Set("input_datetime.garage_last_triggered_ts", time.Now())
 	// service.Light.TurnOn("light.entryway_lamp")
 	// log.Default().Println("B")
 }
@@ -43,5 +44,3 @@ func c(service *ga.Service, state *ga.State) {
 func listenerCB(service *ga.Service, data ga.EntityData) {
 	log.Default().Println("hi katie")
 }
-
-// TODO: randomly placed, add .Throttle to Listener
