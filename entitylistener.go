@@ -14,8 +14,8 @@ type entityListener struct {
 	callback     entityListenerCallback
 	fromState    string
 	toState      string
-	betweenStart Time
-	betweenEnd   Time
+	betweenStart string
+	betweenEnd   string
 	err          error
 }
 
@@ -119,7 +119,7 @@ type elBuilder3 struct {
 	entityListener
 }
 
-func (b elBuilder3) OnlyBetween(start Time, end Time) elBuilder3 {
+func (b elBuilder3) OnlyBetween(start string, end string) elBuilder3 {
 	b.entityListener.betweenStart = start
 	b.entityListener.betweenEnd = end
 	return b

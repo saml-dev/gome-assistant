@@ -30,12 +30,6 @@ type app struct {
 }
 
 /*
-Time is a 24-hr format string with hour and minute,
-e.g. "07:00" for 7AM or "23:00" for 11PM.
-*/
-type Time string
-
-/*
 NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
@@ -67,10 +61,6 @@ func (a *app) Cleanup() {
 }
 
 func (a *app) RegisterSchedule(s schedule) {
-	if s.err != nil {
-		log.Fatalln(s.err) // something wasn't configured properly when the schedule was built
-	}
-
 	if s.frequency == 0 {
 		log.Fatalln("A schedule must call either Daily() or Every() when built.")
 	}
@@ -105,18 +95,18 @@ func (a *app) RegisterEntityListener(el entityListener) {
 // Sunrise take an optional string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (a *app) Sunrise(offset ...string) Time {
+func (a *app) Sunrise(offset ...string) string {
 	return getSunriseSunset(a, true, offset)
 }
 
 // Sunset take an optional string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (a *app) Sunset(offset ...string) Time {
+func (a *app) Sunset(offset ...string) string {
 	return getSunriseSunset(a, false, offset)
 }
 
-func getSunriseSunset(a *app, sunrise bool, offset []string) Time {
+func getSunriseSunset(a *app, sunrise bool, offset []string) string {
 	printString := "Sunset"
 	attrKey := "next_setting"
 	if sunrise {
@@ -138,19 +128,17 @@ func getSunriseSunset(a *app, sunrise bool, offset []string) Time {
 	}
 
 	nextSetOrRise := carbon.Parse(state.Attributes[attrKey].(string))
-	log.Default().Println(nextSetOrRise)
 
 	// add offset if set, this code works for negative values too
 	if t.Microseconds() != 0 {
 		nextSetOrRise = nextSetOrRise.AddMinutes(int(t.Minutes()))
-		log.Default().Println(nextSetOrRise)
 	}
 
 	return carbon2TimeString(nextSetOrRise)
 }
 
-func carbon2TimeString(c carbon.Carbon) Time {
-	return Time(fmt.Sprintf("%02d:%02d", c.Hour(), c.Minute()))
+func carbon2TimeString(c carbon.Carbon) string {
+	return fmt.Sprintf("%02d:%02d", c.Hour(), c.Minute())
 }
 
 type subEvent struct {

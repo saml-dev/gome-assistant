@@ -14,8 +14,8 @@ func GetId() int64 {
 	return id
 }
 
-func ParseTime[T ~string](s T) carbon.Carbon {
-	t, err := time.Parse("15:04", string(s))
+func ParseTime(s string) carbon.Carbon {
+	t, err := time.Parse("15:04", s)
 	if err != nil {
 		log.Fatalf("Failed to parse time string \"%s\"; format must be HH:MM.", s)
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	ga "github.com/saml-dev/gome-assistant"
@@ -10,7 +11,10 @@ func main() {
 	app := ga.NewApp("192.168.86.67:8123")
 	defer app.Cleanup()
 	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(app.Sunset("1h")).Build()
+	s2 := ga.ScheduleBuilder().Call(lightsOut).Every("2h").Offset("10m").Build()
+	fmt.Println(s2)
 	app.RegisterSchedule(s)
+	app.RegisterSchedule(s2)
 	simpleListener := ga.EntityListenerBuilder().
 		EntityIds("group.office_ceiling_lights").
 		Call(listenerCB).

@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"runtime"
 	"time"
@@ -24,23 +25,13 @@ type schedule struct {
 	frequency time.Duration
 	callback  scheduleCallback
 	/*
-		offset is 4 character string representing hours and minutes
-		in a 24-hr format.
-		It is the base that your frequency will be added to.
-		Defaults to "0000" (which is probably fine for most cases).
+		offset is the base that your frequency will be added to.
+		Defaults to 0 (which is probably fine for most cases).
 
 		Example: Run in the 3rd minute of every hour.
-			Schedule{
-				frequency: gomeassistant.Hourly // helper const for time.Hour
-				offset: "0003"
-			}
+			ScheduleBuilder().Call(myFunc).Every("1h").Offset("3m")
 	*/
-	offset time.Duration
-	/*
-		err will be set rather than returning an error to avoid checking err for nil on every schedule :)
-		RegisterSchedule will exit if the error is set.
-	*/
-	err           error
+	offset        time.Duration
 	realStartTime time.Time
 }
 
@@ -110,18 +101,26 @@ func (sb scheduleBuilderCall) Daily() scheduleBuilderDaily {
 }
 
 // At takes a string 24hr format time like "15:30".
-func (sb scheduleBuilderDaily) At(s Time) scheduleBuilderEnd {
+func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 	t := internal.ParseTime(s)
 	sb.schedule.offset = time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderCall) Every(duration time.Duration) scheduleBuilderCustom {
-	sb.schedule.frequency = duration
+func (sb scheduleBuilderCall) Every(s string) scheduleBuilderCustom {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		log.Fatalf("couldn't parse string duration passed to Every(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
+	}
+	sb.schedule.frequency = d
 	return scheduleBuilderCustom(sb)
 }
 
-func (sb scheduleBuilderCustom) Offset(t time.Duration) scheduleBuilderEnd {
+func (sb scheduleBuilderCustom) Offset(s string) scheduleBuilderEnd {
+	t, err := time.ParseDuration(s)
+	if err != nil {
+		log.Fatalf("Couldn't parse string duration passed to Offset(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
+	}
 	sb.schedule.offset = t
 	return scheduleBuilderEnd(sb)
 }
