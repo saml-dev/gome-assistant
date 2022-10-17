@@ -107,8 +107,8 @@ func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderCall) Every(s string) scheduleBuilderCustom {
-	d, err := time.ParseDuration(s)
+func (sb scheduleBuilderCall) Every(s TimeString) scheduleBuilderCustom {
+	d, err := time.ParseDuration(string(s))
 	if err != nil {
 		log.Fatalf("couldn't parse string duration passed to Every(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
 	}
@@ -116,8 +116,8 @@ func (sb scheduleBuilderCall) Every(s string) scheduleBuilderCustom {
 	return scheduleBuilderCustom(sb)
 }
 
-func (sb scheduleBuilderCustom) Offset(s string) scheduleBuilderEnd {
-	t, err := time.ParseDuration(s)
+func (sb scheduleBuilderCustom) Offset(s TimeString) scheduleBuilderEnd {
+	t, err := time.ParseDuration(string(s))
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Offset(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
 	}

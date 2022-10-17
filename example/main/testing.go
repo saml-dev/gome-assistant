@@ -19,6 +19,7 @@ func main() {
 		EntityIds("group.office_ceiling_lights").
 		Call(listenerCB).
 		OnlyAfter("23:03").
+		// Throttle("5s").
 		Build()
 	app.RegisterEntityListener(simpleListener)
 

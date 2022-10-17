@@ -25,9 +25,11 @@ type app struct {
 	state   *State
 
 	schedules         pq.PriorityQueue
-	entityListeners   map[string][]entityListener
+	entityListeners   map[string][]*entityListener
 	entityListenersId int64
 }
+
+type TimeString string
 
 /*
 NewApp establishes the websocket connection and returns an object
@@ -50,7 +52,7 @@ func NewApp(connString string) app {
 		service:         service,
 		state:           state,
 		schedules:       pq.New(),
-		entityListeners: map[string][]entityListener{},
+		entityListeners: map[string][]*entityListener{},
 	}
 }
 
@@ -85,9 +87,9 @@ func (a *app) RegisterSchedule(s schedule) {
 func (a *app) RegisterEntityListener(el entityListener) {
 	for _, entity := range el.entityIds {
 		if elList, ok := a.entityListeners[entity]; ok {
-			a.entityListeners[entity] = append(elList, el)
+			a.entityListeners[entity] = append(elList, &el)
 		} else {
-			a.entityListeners[entity] = []entityListener{el}
+			a.entityListeners[entity] = []*entityListener{&el}
 		}
 	}
 }
@@ -95,32 +97,34 @@ func (a *app) RegisterEntityListener(el entityListener) {
 // Sunrise take an optional string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (a *app) Sunrise(offset ...string) string {
+func (a *app) Sunrise(offset ...TimeString) string {
 	return getSunriseSunset(a, true, offset)
 }
 
 // Sunset take an optional string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (a *app) Sunset(offset ...string) string {
+func (a *app) Sunset(offset ...TimeString) string {
 	return getSunriseSunset(a, false, offset)
 }
 
-func getSunriseSunset(a *app, sunrise bool, offset []string) string {
+func getSunriseSunset(a *app, sunrise bool, offset []TimeString) string {
 	printString := "Sunset"
 	attrKey := "next_setting"
 	if sunrise {
 		printString = "Sunrise"
 		attrKey = "next_rising"
 	}
+
 	var t time.Duration
 	var err error
 	if len(offset) == 1 {
-		t, err = time.ParseDuration(offset[0])
+		t, err = time.ParseDuration(string(offset[0]))
 		if err != nil {
 			log.Fatalf("Could not parse offset passed to %s: \"%s\"", printString, offset[0])
 		}
 	}
+
 	// get next sunrise/sunset time from HA
 	state, err := a.state.Get("sun.sun")
 	if err != nil {
@@ -172,20 +176,4 @@ func (a *app) Start() {
 			go callEntityListeners(a, msg.Raw)
 		}
 	}
-
-	// NOTE:should the prio queue and websocket listener both write to a channel or something?
-	// then select from that and spawn new goroutine to call callback?
-
-	// TODO: loop through schedules and create heap priority queue
-
-	// TODO: figure out looping listening to messages for
-	// listeners
 }
-
-const (
-	FrequencyMissing time.Duration = 0
-
-	Daily    time.Duration = time.Hour * 24
-	Hourly   time.Duration = time.Hour
-	Minutely time.Duration = time.Minute
-)

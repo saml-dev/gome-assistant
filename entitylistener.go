@@ -3,6 +3,7 @@ package gomeassistant
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -16,12 +17,13 @@ type entityListener struct {
 	toState      string
 	betweenStart string
 	betweenEnd   string
+	throttle     time.Duration
+	lastRan      carbon.Carbon
 	err          error
 }
 
 type entityListenerCallback func(*Service, EntityData)
 
-// TODO: use this to flatten json sent from HA for trigger event
 type EntityData struct {
 	TriggerEntityId string
 	FromState       string
@@ -52,43 +54,12 @@ type msgState struct {
 	Attributes  map[string]any `json:"attributes"`
 }
 
-type triggerMsg struct {
-	Id    int64  `json:"id"`
-	Type  string `json:"type"`
-	Event struct {
-		Variables struct {
-			Trigger struct {
-				EntityId  string          `json:"entity_id"`
-				FromState triggerMsgState `json:"from_state"`
-				ToState   triggerMsgState `json:"to_state"`
-			}
-		} `json:"variables"`
-	} `json:"event"`
-}
-
-type triggerMsgState struct {
-	State       string         `json:"state"`
-	Attributes  map[string]any `json:"attributes"`
-	LastChanged string         `json:"last_changed"`
-}
-
-type subscribeMsg struct {
-	Id      int64               `json:"id"`
-	Type    string              `json:"type"`
-	Trigger subscribeMsgTrigger `json:"trigger"`
-}
-
-type subscribeMsgTrigger struct {
-	Platform string `json:"platform"`
-	EntityId string `json:"entity_id"`
-	From     string `json:"from"`
-	To       string `json:"to"`
-}
-
 /* Methods */
 
 func EntityListenerBuilder() elBuilder1 {
-	return elBuilder1{entityListener{}}
+	return elBuilder1{entityListener{
+		lastRan: carbon.Now().StartOfCentury(),
+	}}
 }
 
 type elBuilder1 struct {
@@ -145,6 +116,15 @@ func (b elBuilder3) ToState(s string) elBuilder3 {
 	return b
 }
 
+func (b elBuilder3) Throttle(s TimeString) elBuilder3 {
+	d, err := time.ParseDuration(string(s))
+	if err != nil {
+		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
+	}
+	b.entityListener.throttle = d
+	return b
+}
+
 func (b elBuilder3) Build() entityListener {
 	return b.entityListener
 }
@@ -197,6 +177,13 @@ func callEntityListeners(app *app, msgBytes []byte) {
 			return
 		}
 
+		// don't run callback if Throttle is set and that duration hasn't passed since lastRan
+		if l.throttle.Seconds() > 0 && // throttle is set
+			!l.lastRan.Eq(carbon.Now().StartOfCentury()) && // lastRan is set aka this callback has been called since starting gomeassistant
+			l.lastRan.DiffAbsInSeconds(carbon.Now()) < int64(l.throttle.Seconds()) { // it's been less than <throttle> seconds since it last ran
+			return
+		}
+
 		entityData := EntityData{
 			TriggerEntityId: eid,
 			FromState:       data.OldState.State,
@@ -205,6 +192,7 @@ func callEntityListeners(app *app, msgBytes []byte) {
 			ToAttributes:    data.NewState.Attributes,
 			LastChanged:     data.OldState.LastChanged,
 		}
-		l.callback(app.service, entityData)
+		go l.callback(app.service, entityData)
+		l.lastRan = carbon.Now()
 	}
 }
