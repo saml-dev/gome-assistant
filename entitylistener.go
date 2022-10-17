@@ -125,6 +125,16 @@ func (b elBuilder3) OnlyBetween(start string, end string) elBuilder3 {
 	return b
 }
 
+func (b elBuilder3) OnlyAfter(start string) elBuilder3 {
+	b.entityListener.betweenStart = start
+	return b
+}
+
+func (b elBuilder3) OnlyBefore(end string) elBuilder3 {
+	b.entityListener.betweenEnd = end
+	return b
+}
+
 func (b elBuilder3) FromState(s string) elBuilder3 {
 	b.entityListener.fromState = s
 	return b
@@ -171,12 +181,11 @@ func callEntityListeners(app *app, msgBytes []byte) {
 			if !carbon.Now().BetweenIncludedStart(start, end) {
 				return
 			}
-		}
-		// otherwise, just check if before/after the individual times
-		if l.betweenStart != "" && i.ParseTime(l.betweenStart).IsFuture() {
+
+			// otherwise just check individual before/after
+		} else if l.betweenStart != "" && i.ParseTime(l.betweenStart).IsFuture() {
 			return
-		}
-		if l.betweenEnd != "" && i.ParseTime(l.betweenEnd).IsPast() {
+		} else if l.betweenEnd != "" && i.ParseTime(l.betweenEnd).IsPast() {
 			return
 		}
 

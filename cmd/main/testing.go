@@ -18,7 +18,7 @@ func main() {
 	simpleListener := ga.EntityListenerBuilder().
 		EntityIds("group.office_ceiling_lights").
 		Call(listenerCB).
-		// OnlyBetween("07:00", "14:00").
+		OnlyAfter("23:03").
 		Build()
 	app.RegisterEntityListener(simpleListener)
 
