@@ -1,20 +1,35 @@
 package gomeassistant
 
-import "github.com/saml-dev/gome-assistant/internal/http"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/saml-dev/gome-assistant/internal/http"
+)
 
 // State is used to retrieve state from Home Assistant.
 type State struct {
 	httpClient *http.HttpClient
 }
 
+type EntityState struct {
+	EntityID    string         `json:"entity_id"`
+	State       string         `json:"state"`
+	Attributes  map[string]any `json:"attributes"`
+	LastChanged time.Time      `json:"last_changed"`
+	LastUpdated time.Time      `json:"last_updated"`
+}
+
 func NewState(c *http.HttpClient) *State {
 	return &State{httpClient: c}
 }
 
-func (s *State) Get(entityId string) (string, error) {
+func (s *State) Get(entityId string) (EntityState, error) {
 	resp, err := s.httpClient.GetState(entityId)
 	if err != nil {
-		return "", err
+		return EntityState{}, err
 	}
-	return string(resp), nil
+	es := EntityState{}
+	json.Unmarshal(resp, &es)
+	return es, nil
 }

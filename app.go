@@ -2,10 +2,12 @@ package gomeassistant
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"github.com/golang-module/carbon"
 	"github.com/gorilla/websocket"
 	"github.com/saml-dev/gome-assistant/internal"
 	"github.com/saml-dev/gome-assistant/internal/http"
@@ -24,8 +26,14 @@ type app struct {
 
 	schedules         pq.PriorityQueue
 	entityListeners   map[string][]entityListener
-	entityListenerIds map[int64]entityListenerCallback
+	entityListenersId int64
 }
+
+/*
+Time is a 24-hr format string with hour and minute,
+e.g. "07:00" for 7AM or "23:00" for 11PM.
+*/
+type Time string
 
 /*
 NewApp establishes the websocket connection and returns an object
@@ -41,15 +49,14 @@ func NewApp(connString string) app {
 	state := NewState(httpClient)
 
 	return app{
-		conn:              conn,
-		ctx:               ctx,
-		ctxCancel:         ctxCancel,
-		httpClient:        httpClient,
-		service:           service,
-		state:             state,
-		schedules:         pq.New(),
-		entityListeners:   map[string][]entityListener{},
-		entityListenerIds: map[int64]entityListenerCallback{},
+		conn:            conn,
+		ctx:             ctx,
+		ctxCancel:       ctxCancel,
+		httpClient:      httpClient,
+		service:         service,
+		state:           state,
+		schedules:       pq.New(),
+		entityListeners: map[string][]entityListener{},
 	}
 }
 
@@ -71,10 +78,9 @@ func (a *app) RegisterSchedule(s schedule) {
 	// TODO: consider moving all time stuff to carbon?
 	now := time.Now()
 	startTime := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()) // start at midnight today
-
 	// apply offset if set
 	if s.offset.Minutes() > 0 {
-		startTime.Add(s.offset)
+		startTime = startTime.Add(s.offset)
 	}
 
 	// advance first scheduled time by frequency until it is in the future
@@ -88,45 +94,94 @@ func (a *app) RegisterSchedule(s schedule) {
 
 func (a *app) RegisterEntityListener(el entityListener) {
 	for _, entity := range el.entityIds {
-		id := internal.GetId()
-		subscribeTriggerMsg := subscribeMsg{
-			Id:   id,
-			Type: "subscribe_trigger",
-			Trigger: subscribeMsgTrigger{
-				Platform: "state",
-				EntityId: entity,
-			},
+		if elList, ok := a.entityListeners[entity]; ok {
+			a.entityListeners[entity] = append(elList, el)
+		} else {
+			a.entityListeners[entity] = []entityListener{el}
 		}
-		if el.fromState != "" {
-			subscribeTriggerMsg.Trigger.From = el.fromState
+	}
+}
+
+// Sunrise take an optional string that is passed to time.ParseDuration.
+// Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
+// for full list.
+func (a *app) Sunrise(offset ...string) Time {
+	return getSunriseSunset(a, true, offset)
+}
+
+// Sunset take an optional string that is passed to time.ParseDuration.
+// Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
+// for full list.
+func (a *app) Sunset(offset ...string) Time {
+	return getSunriseSunset(a, false, offset)
+}
+
+func getSunriseSunset(a *app, sunrise bool, offset []string) Time {
+	printString := "Sunset"
+	attrKey := "next_setting"
+	if sunrise {
+		printString = "Sunrise"
+		attrKey = "next_rising"
+	}
+	var t time.Duration
+	var err error
+	if len(offset) == 1 {
+		t, err = time.ParseDuration(offset[0])
+		if err != nil {
+			log.Fatalf("Could not parse offset passed to %s: \"%s\"", printString, offset[0])
 		}
-		if el.toState != "" {
-			subscribeTriggerMsg.Trigger.To = el.toState
-		}
-		log.Default().Println(subscribeTriggerMsg)
-		ws.WriteMessage(subscribeTriggerMsg, a.conn, a.ctx)
-		msg, _ := ws.ReadMessage(a.conn, a.ctx)
-		log.Default().Println(string(msg))
-		a.entityListenerIds[id] = el.callback
+	}
+	// get next sunrise/sunset time from HA
+	state, err := a.state.Get("sun.sun")
+	if err != nil {
+		log.Fatalln("Couldn't get sun.sun state from HA to calculate", printString)
 	}
 
+	nextSetOrRise := carbon.Parse(state.Attributes[attrKey].(string))
+	log.Default().Println(nextSetOrRise)
+
+	// add offset if set, this code works for negative values too
+	if t.Microseconds() != 0 {
+		nextSetOrRise = nextSetOrRise.AddMinutes(int(t.Minutes()))
+		log.Default().Println(nextSetOrRise)
+	}
+
+	return carbon2TimeString(nextSetOrRise)
+}
+
+func carbon2TimeString(c carbon.Carbon) Time {
+	return Time(fmt.Sprintf("%02d:%02d", c.Hour(), c.Minute()))
+}
+
+type subEvent struct {
+	Id        int64  `json:"id"`
+	Type      string `json:"type"`
+	EventType string `json:"event_type"`
 }
 
 func (a *app) Start() {
 	// schedules
 	go RunSchedules(a)
 
+	// subscribe to state_changed events
+	id := internal.GetId()
+	e := subEvent{
+		Id:        id,
+		Type:      "subscribe_events",
+		EventType: "state_changed",
+	}
+	ws.WriteMessage(e, a.conn, a.ctx)
+	a.entityListenersId = id
+
 	// entity listeners
 	elChan := make(chan ws.ChanMsg)
 	go ws.ListenWebsocket(a.conn, a.ctx, elChan)
 
-	log.Default().Println(a.entityListenerIds)
 	var msg ws.ChanMsg
 	for {
 		msg = <-elChan
-		log.Default().Println(string(msg.Raw))
-		if callback, ok := a.entityListenerIds[msg.Id]; ok {
-			log.Default().Println(msg, callback)
+		if a.entityListenersId == msg.Id {
+			go callEntityListeners(a, msg.Raw)
 		}
 	}
 

@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/gorilla/websocket"
 	"github.com/saml-dev/gome-assistant/internal"
@@ -36,7 +35,6 @@ type BaseServiceRequest struct {
 
 func NewBaseServiceRequest(entityId string) BaseServiceRequest {
 	id := internal.GetId()
-	log.Default().Println("service id", id)
 	bsr := BaseServiceRequest{
 		Id:          fmt.Sprint(id),
 		RequestType: "call_service",

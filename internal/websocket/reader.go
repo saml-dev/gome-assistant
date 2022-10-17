@@ -20,7 +20,6 @@ type ChanMsg struct {
 
 func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) {
 	for {
-		// log.Default().Println("reading message")
 		bytes, _ := ReadMessage(conn, ctx)
 		base := BaseMessage{}
 		json.Unmarshal(bytes, &base)
