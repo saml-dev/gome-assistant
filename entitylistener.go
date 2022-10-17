@@ -178,9 +178,8 @@ func callEntityListeners(app *app, msgBytes []byte) {
 		}
 
 		// don't run callback if Throttle is set and that duration hasn't passed since lastRan
-		if l.throttle.Seconds() > 0 && // throttle is set
-			!l.lastRan.Eq(carbon.Now().StartOfCentury()) && // lastRan is set aka this callback has been called since starting gomeassistant
-			l.lastRan.DiffAbsInSeconds(carbon.Now()) < int64(l.throttle.Seconds()) { // it's been less than <throttle> seconds since it last ran
+		if l.throttle.Seconds() > 0 &&
+			l.lastRan.DiffAbsInSeconds(carbon.Now()) < int64(l.throttle.Seconds()) {
 			return
 		}
 

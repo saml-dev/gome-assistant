@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	ga "github.com/saml-dev/gome-assistant"
@@ -10,31 +9,26 @@ import (
 func main() {
 	app := ga.NewApp("192.168.86.67:8123")
 	defer app.Cleanup()
-	s := ga.ScheduleBuilder().Call(lightsOut).Daily().At(app.Sunset("1h")).Build()
-	s2 := ga.ScheduleBuilder().Call(lightsOut).Every("2h").Offset("10m").Build()
-	fmt.Println(s2)
-	app.RegisterSchedule(s)
-	app.RegisterSchedule(s2)
-	simpleListener := ga.EntityListenerBuilder().
-		EntityIds("group.office_ceiling_lights").
-		Call(listenerCB).
-		OnlyAfter("23:03").
-		// Throttle("5s").
+	pantryDoor := ga.
+		EntityListenerBuilder().
+		EntityIds("binary_sensor.pantry_door").
+		Call(pantryLights).
 		Build()
-	app.RegisterEntityListener(simpleListener)
+	app.RegisterEntityListener(pantryDoor)
 
 	app.Start()
 
 }
 
-func lightsOut(service *ga.Service, state *ga.State) {
+func pantryLights(service *ga.Service, data ga.EntityData) {
 	// service.InputDatetime.Set("input_datetime.garage_last_triggered_ts", time.Now())
 	// service.HomeAssistant.Toggle("group.living_room_lamps", map[string]any{"brightness_pct": 100})
 	// service.Light.Toggle("light.entryway_lamp", map[string]any{"brightness_pct": 100})
-	service.HomeAssistant.Toggle("light.entryway_lamp")
-	log.Default().Println("running lightsOut")
-	// service.HomeAssistant.Toggle("light.entryway_lamp")
-	// log.Default().Println("A")
+	if data.ToState == "on" {
+		service.HomeAssistant.TurnOn("switch.pantry_light_2")
+	} else {
+		service.HomeAssistant.TurnOff("switch.pantry_light_2")
+	}
 }
 
 func cool(service *ga.Service, state *ga.State) {
