@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	i "github.com/saml-dev/gome-assistant/internal"
 )
 
 type AuthMessage struct {
@@ -105,4 +106,34 @@ func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
 	}
 
 	return nil
+}
+
+type SubEvent struct {
+	Id        int64  `json:"id"`
+	Type      string `json:"type"`
+	EventType string `json:"event_type"`
+}
+
+func SubscribeToStateChangedEvents(id int64, conn *websocket.Conn, ctx context.Context) {
+	SubscribeToEventType("state_changed", conn, ctx, id)
+}
+
+func SubscribeToEventType(eventType string, conn *websocket.Conn, ctx context.Context, id ...int64) {
+	var finalId int64
+	if len(id) == 0 {
+		finalId = i.GetId()
+	} else {
+		finalId = id[0]
+	}
+	e := SubEvent{
+		Id:        finalId,
+		Type:      "subscribe_events",
+		EventType: eventType,
+	}
+	err := WriteMessage(e, conn, ctx)
+	if err != nil {
+		log.Fatalln("Error writing to websocket: ", err)
+	}
+	// m, _ := ReadMessage(conn, ctx)
+	// log.Default().Println(string(m))
 }

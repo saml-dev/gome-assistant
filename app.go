@@ -27,6 +27,7 @@ type app struct {
 	schedules         pq.PriorityQueue
 	entityListeners   map[string][]*entityListener
 	entityListenersId int64
+	eventListeners    map[string][]*eventListener
 }
 
 type TimeString string
@@ -53,6 +54,7 @@ func NewApp(connString string) app {
 		state:           state,
 		schedules:       pq.New(),
 		entityListeners: map[string][]*entityListener{},
+		eventListeners:  map[string][]*eventListener{},
 	}
 }
 
@@ -83,12 +85,23 @@ func (a *app) RegisterSchedule(s schedule) {
 	a.schedules.Insert(s, float64(startTime.Unix()))
 }
 
-func (a *app) RegisterEntityListener(el entityListener) {
-	for _, entity := range el.entityIds {
+func (a *app) RegisterEntityListener(etl entityListener) {
+	for _, entity := range etl.entityIds {
 		if elList, ok := a.entityListeners[entity]; ok {
-			a.entityListeners[entity] = append(elList, &el)
+			a.entityListeners[entity] = append(elList, &etl)
 		} else {
-			a.entityListeners[entity] = []*entityListener{&el}
+			a.entityListeners[entity] = []*entityListener{&etl}
+		}
+	}
+}
+
+func (a *app) RegisterEventListener(evl eventListener) {
+	for _, eventType := range evl.eventTypes {
+		if elList, ok := a.eventListeners[eventType]; ok {
+			a.eventListeners[eventType] = append(elList, &evl)
+		} else {
+			ws.SubscribeToEventType(eventType, a.conn, a.ctx)
+			a.eventListeners[eventType] = []*eventListener{&evl}
 		}
 	}
 }
@@ -144,24 +157,13 @@ func carbon2TimeString(c carbon.Carbon) string {
 	return fmt.Sprintf("%02d:%02d", c.Hour(), c.Minute())
 }
 
-type subEvent struct {
-	Id        int64  `json:"id"`
-	Type      string `json:"type"`
-	EventType string `json:"event_type"`
-}
-
 func (a *app) Start() {
 	// schedules
 	go RunSchedules(a)
 
 	// subscribe to state_changed events
 	id := internal.GetId()
-	e := subEvent{
-		Id:        id,
-		Type:      "subscribe_events",
-		EventType: "state_changed",
-	}
-	ws.WriteMessage(e, a.conn, a.ctx)
+	ws.SubscribeToStateChangedEvents(id, a.conn, a.ctx)
 	a.entityListenersId = id
 
 	// entity listeners
@@ -173,6 +175,8 @@ func (a *app) Start() {
 		msg = <-elChan
 		if a.entityListenersId == msg.Id {
 			go callEntityListeners(a, msg.Raw)
+		} else {
+			go callEventListeners(a, msg)
 		}
 	}
 }

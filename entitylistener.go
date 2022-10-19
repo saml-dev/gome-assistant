@@ -2,12 +2,10 @@ package gomeassistant
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"time"
 
 	"github.com/golang-module/carbon"
-	i "github.com/saml-dev/gome-assistant/internal"
 )
 
 type entityListener struct {
@@ -19,7 +17,6 @@ type entityListener struct {
 	betweenEnd   string
 	throttle     time.Duration
 	lastRan      carbon.Carbon
-	err          error
 }
 
 type entityListenerCallback func(*Service, EntityData)
@@ -68,7 +65,7 @@ type elBuilder1 struct {
 
 func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
 	if len(entityIds) == 0 {
-		b.err = errors.New("must pass at least one entityId to EntityIds()")
+		log.Fatalln("must pass at least one entityId to EntityIds()")
 	} else {
 		b.entityListener.entityIds = entityIds
 	}
@@ -80,9 +77,7 @@ type elBuilder2 struct {
 }
 
 func (b elBuilder2) Call(callback entityListenerCallback) elBuilder3 {
-	if b.err == nil {
-		b.entityListener.callback = callback
-	}
+	b.entityListener.callback = callback
 	return elBuilder3(b)
 }
 
@@ -142,44 +137,17 @@ func callEntityListeners(app *app, msgBytes []byte) {
 	}
 
 	for _, l := range listeners {
-		// if betweenStart and betweenEnd both set, first account for midnight
-		// overlap, then only run if between those times.
-		if l.betweenStart != "" && l.betweenEnd != "" {
-			start := i.ParseTime(l.betweenStart)
-			end := i.ParseTime(l.betweenEnd)
-
-			// check for midnight overlap
-			if end.Lt(start) { // example turn on night lights when motion from 23:00 to 07:00
-				if end.IsPast() { // such as at 15:00, 22:00
-					end = end.AddDay()
-				} else {
-					start = start.SubDay() // such as at 03:00, 05:00
-				}
-			}
-
-			// skip callback if not inside the range
-			if !carbon.Now().BetweenIncludedStart(start, end) {
-				return
-			}
-
-			// otherwise just check individual before/after
-		} else if l.betweenStart != "" && i.ParseTime(l.betweenStart).IsFuture() {
-			return
-		} else if l.betweenEnd != "" && i.ParseTime(l.betweenEnd).IsPast() {
+		// Check conditions
+		if c := CheckWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 			return
 		}
-
-		// don't run callback if fromState or toState are set and don't match
-		if l.fromState != "" && l.fromState != data.OldState.State {
+		if c := CheckStatesMatch(l.fromState, data.OldState.State); c.fail {
 			return
 		}
-		if l.toState != "" && l.toState != data.NewState.State {
+		if c := CheckStatesMatch(l.toState, data.NewState.State); c.fail {
 			return
 		}
-
-		// don't run callback if Throttle is set and that duration hasn't passed since lastRan
-		if l.throttle.Seconds() > 0 &&
-			l.lastRan.DiffAbsInSeconds(carbon.Now()) < int64(l.throttle.Seconds()) {
+		if c := CheckThrottle(l.throttle, l.lastRan); c.fail {
 			return
 		}
 

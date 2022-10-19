@@ -23,7 +23,6 @@ func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) 
 		bytes, _ := ReadMessage(conn, ctx)
 		base := BaseMessage{}
 		json.Unmarshal(bytes, &base)
-
 		chanMsg := ChanMsg{
 			Type: base.Type,
 			Id:   base.Id,

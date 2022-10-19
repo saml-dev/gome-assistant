@@ -14,21 +14,32 @@ func main() {
 		EntityIds("binary_sensor.pantry_door").
 		Call(pantryLights).
 		Build()
+	zwaveEventListener := ga.
+		EventListenerBuilder().
+		EventType("zwave_js_value_notification").
+		Call(onEvent).
+		Build()
 	app.RegisterEntityListener(pantryDoor)
 	app.RegisterSchedule(ga.ScheduleBuilder().Call(cool).Every("5s").Build())
+	app.RegisterEventListener(zwaveEventListener)
 
 	app.Start()
 
 }
 
 func pantryLights(service *ga.Service, data ga.EntityData) {
+	l := "group.kitchen_ceiling_lights"
 	// service.HomeAssistant.Toggle("group.living_room_lamps", map[string]any{"brightness_pct": 100})
 	// service.Light.Toggle("light.entryway_lamp", map[string]any{"brightness_pct": 100})
 	if data.ToState == "on" {
-		service.HomeAssistant.TurnOn("switch.pantry_light_2")
+		service.HomeAssistant.TurnOn(l)
 	} else {
-		service.HomeAssistant.TurnOff("switch.pantry_light_2")
+		service.HomeAssistant.TurnOff(l)
 	}
+}
+
+func onEvent(service *ga.Service, data ga.EventData) {
+	service.HomeAssistant.Toggle("light.el_gato_key_lights")
 }
 
 func cool(service *ga.Service, state *ga.State) {
@@ -42,5 +53,5 @@ func c(service *ga.Service, state *ga.State) {
 }
 
 func listenerCB(service *ga.Service, data ga.EntityData) {
-	log.Default().Println("hi katie")
+	log.Default().Println("hi")
 }
