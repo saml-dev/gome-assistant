@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 
 	ga "github.com/saml-dev/gome-assistant"
@@ -39,7 +40,10 @@ func pantryLights(service *ga.Service, data ga.EntityData) {
 }
 
 func onEvent(service *ga.Service, data ga.EventData) {
-	service.HomeAssistant.Toggle("light.el_gato_key_lights")
+	// service.HomeAssistant.Toggle("light.el_gato_key_lights")
+	ev := ga.EventZWaveJSValueNotification{}
+	json.Unmarshal(data.RawEventJSON, &ev)
+	log.Default().Println(ev)
 }
 
 func cool(service *ga.Service, state *ga.State) {
