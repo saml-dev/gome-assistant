@@ -40,7 +40,7 @@ type eventListenerBuilder1 struct {
 	eventListener
 }
 
-func (b eventListenerBuilder1) EventType(ets ...string) eventListenerBuilder2 {
+func (b eventListenerBuilder1) EventTypes(ets ...string) eventListenerBuilder2 {
 	b.eventTypes = ets
 	return eventListenerBuilder2(b)
 }
