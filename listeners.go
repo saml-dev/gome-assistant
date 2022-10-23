@@ -11,7 +11,7 @@ type conditionCheck struct {
 	fail bool
 }
 
-func CheckWithinTimeRange(startTime, endTime string) conditionCheck {
+func checkWithinTimeRange(startTime, endTime string) conditionCheck {
 	cc := conditionCheck{fail: false}
 	// if betweenStart and betweenEnd both set, first account for midnight
 	// overlap, then check if between those times.
@@ -42,7 +42,7 @@ func CheckWithinTimeRange(startTime, endTime string) conditionCheck {
 	return cc
 }
 
-func CheckStatesMatch(listenerState, s string) conditionCheck {
+func checkStatesMatch(listenerState, s string) conditionCheck {
 	cc := conditionCheck{fail: false}
 	// check if fromState or toState are set and don't match
 	if listenerState != "" && listenerState != s {
@@ -51,7 +51,7 @@ func CheckStatesMatch(listenerState, s string) conditionCheck {
 	return cc
 }
 
-func CheckThrottle(throttle time.Duration, lastRan carbon.Carbon) conditionCheck {
+func checkThrottle(throttle time.Duration, lastRan carbon.Carbon) conditionCheck {
 	cc := conditionCheck{fail: false}
 	// check if Throttle is set and that duration hasn't passed since lastRan
 	if throttle.Seconds() > 0 &&

@@ -138,16 +138,16 @@ func callEntityListeners(app *app, msgBytes []byte) {
 
 	for _, l := range listeners {
 		// Check conditions
-		if c := CheckWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
+		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 			return
 		}
-		if c := CheckStatesMatch(l.fromState, data.OldState.State); c.fail {
+		if c := checkStatesMatch(l.fromState, data.OldState.State); c.fail {
 			return
 		}
-		if c := CheckStatesMatch(l.toState, data.NewState.State); c.fail {
+		if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
 			return
 		}
-		if c := CheckThrottle(l.throttle, l.lastRan); c.fail {
+		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
 			return
 		}
 

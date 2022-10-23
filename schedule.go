@@ -138,7 +138,7 @@ func getFunctionName(i interface{}) string {
 }
 
 // app.Start() functions
-func RunSchedules(a *app) {
+func runSchedules(a *app) {
 	if a.schedules.Len() == 0 {
 		return
 	}
@@ -167,6 +167,11 @@ func popSchedule(a *app) schedule {
 }
 
 func requeueSchedule(a *app, s schedule) {
+	// TODO: figure out how to handle sunset/sunrise in here. Maybe just
+	// add sunrise bool and sunset bool to Schedule, might have to change
+	// API to be .Call().Sunset("1h") instead of .Call().At(ga.Sunset("1h"))
+	// then that function could easily set the flag. Kinda ruins the english
+	// language sentence structure but maybe simplest way to get it working
 	s.realStartTime = s.realStartTime.Add(s.frequency)
 	a.schedules.Insert(s, float64(s.realStartTime.Unix()))
 }

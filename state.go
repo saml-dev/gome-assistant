@@ -17,10 +17,9 @@ type EntityState struct {
 	State       string         `json:"state"`
 	Attributes  map[string]any `json:"attributes"`
 	LastChanged time.Time      `json:"last_changed"`
-	LastUpdated time.Time      `json:"last_updated"`
 }
 
-func NewState(c *http.HttpClient) *State {
+func newState(c *http.HttpClient) *State {
 	return &State{httpClient: c}
 }
 

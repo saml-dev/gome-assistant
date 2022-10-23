@@ -43,7 +43,7 @@ func NewApp(connString string) app {
 	httpClient := http.NewHttpClient(connString, token)
 
 	service := NewService(conn, ctx, httpClient)
-	state := NewState(httpClient)
+	state := newState(httpClient)
 
 	return app{
 		conn:            conn,
@@ -159,7 +159,7 @@ func carbon2TimeString(c carbon.Carbon) string {
 
 func (a *app) Start() {
 	// schedules
-	go RunSchedules(a)
+	go runSchedules(a)
 
 	// subscribe to state_changed events
 	id := internal.GetId()

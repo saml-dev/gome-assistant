@@ -105,10 +105,10 @@ func callEventListeners(app *app, msg ws.ChanMsg) {
 
 	for _, l := range listeners {
 		// Check conditions
-		if c := CheckWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
+		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 			return
 		}
-		if c := CheckThrottle(l.throttle, l.lastRan); c.fail {
+		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
 			return
 		}
 
