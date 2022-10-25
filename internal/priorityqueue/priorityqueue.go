@@ -5,6 +5,10 @@ import (
 	"errors"
 )
 
+type Hashable interface {
+	Hash() string
+}
+
 // PriorityQueue represents the queue
 type PriorityQueue struct {
 	itemHeap *itemHeap
@@ -25,16 +29,17 @@ func (p *PriorityQueue) Len() int {
 }
 
 // Insert inserts a new element into the queue. No action is performed on duplicate elements.
-func (p *PriorityQueue) Insert(v interface{ Hash() string }, priority float64) {
-	_, ok := p.lookup[v.Hash()]
-	if ok {
-		return
-	}
-
+func (p *PriorityQueue) Insert(v Hashable, priority float64) {
+	_, dupe := p.lookup[v.Hash()]
 	newItem := &item{
 		value:    v,
 		priority: priority,
 	}
+
+	if dupe {
+		return
+	}
+
 	heap.Push(p.itemHeap, newItem)
 	p.lookup[v.Hash()] = newItem
 }

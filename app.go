@@ -64,24 +64,23 @@ func (a *app) Cleanup() {
 	}
 }
 
-func (a *app) RegisterSchedule(s schedule) {
-	if s.frequency == 0 {
-		log.Fatalln("A schedule must call either Daily() or Every() when built.")
-	}
+type ScheduleInterface interface {
+	// GetNext returns the next time the schedule should execute.
+	// The returned time must be in the future.
+	GetNext() time.Time
+	// Hash must return a string that uniquely identifies
+	// a schedule.
+	Hash() string
+}
 
+func (a *app) RegisterSchedule(s ScheduleInterface) {
 	now := time.Now()
-	startTime := carbon.Now().StartOfDay().Carbon2Time()
-	// apply offset if set
-	if s.offset.Minutes() > 0 {
-		startTime = startTime.Add(s.offset)
+	startTime := s.GetNext()
+
+	if startTime.Before(now) {
+		log.Fatalln("s.GetFirst() must return time in the future")
 	}
 
-	// advance first scheduled time by frequency until it is in the future
-	for startTime.Before(now) {
-		startTime = startTime.Add(s.frequency)
-	}
-
-	s.realStartTime = startTime
 	a.schedules.Insert(s, float64(startTime.Unix()))
 }
 

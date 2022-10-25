@@ -107,6 +107,24 @@ func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 	return scheduleBuilderEnd(sb)
 }
 
+func (sb scheduleBuilderDaily) Sunrise(s string) scheduleBuilderEnd {
+	// TODO: this function should calculate sunrise time,
+	// set isSunrise on schedule,
+	// return sb.At() with the string value caluclated via sunrise and offset time
+
+	// for calculating next sunset with -30m offset, just do today's sunset + 24 hours. It'll only ever be like a minute off
+
+	// since we have isSunrise flag and it's daily schedule, could use offset field on schedule
+	// to hold optional offset here
+	// NOTE: this doesn't work, At() IS setting the offset with a duration of 24h. Prolly need to set sunRiseSetOffset or something on schedule
+
+	// NOTE: below line can't work because needs connString and auth token for http client.
+	// Maybe just pass app to NewSchedule or put NewSchedule/NewEntList/NewEvList
+	// ON app itself? Then it has access to app through the builders?
+	// sunriseString := getSunriseSunset()
+	// d, err :=
+}
+
 func (sb scheduleBuilderCall) Every(s TimeString) scheduleBuilderCustom {
 	d, err := time.ParseDuration(string(s))
 	if err != nil {
@@ -137,6 +155,10 @@ func getFunctionName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
+type SunsetSchedule struct {
+	offset TimeString
+}
+
 // app.Start() functions
 func runSchedules(a *app) {
 	if a.schedules.Len() == 0 {
@@ -161,17 +183,12 @@ func runSchedules(a *app) {
 	}
 }
 
-func popSchedule(a *app) schedule {
+func popSchedule(a *app) ScheduleInterface {
 	_sched, _ := a.schedules.Pop()
-	return _sched.(schedule)
+	return _sched.(ScheduleInterface)
 }
 
-func requeueSchedule(a *app, s schedule) {
-	// TODO: figure out how to handle sunset/sunrise in here. Maybe just
-	// add sunrise bool and sunset bool to Schedule, might have to change
-	// API to be .Call().Sunset("1h") instead of .Call().At(ga.Sunset("1h"))
-	// then that function could easily set the flag. Kinda ruins the english
-	// language sentence structure but maybe simplest way to get it working
-	s.realStartTime = s.realStartTime.Add(s.frequency)
-	a.schedules.Insert(s, float64(s.realStartTime.Unix()))
+func requeueSchedule(a *app, s ScheduleInterface) {
+	nextTime := s.GetNext()
+	a.schedules.Insert(s, float64(nextTime.Unix()))
 }
