@@ -25,6 +25,13 @@ func main() {
 		At("23:00").
 		Build()
 
+	_30minsBeforeSunrise := ga.
+		ScheduleBuilder().
+		Call(sunriseSched).
+		Daily().
+		Sunrise(app, "-30m").
+		Build()
+
 	zwaveEventListener := ga.
 		EventListenerBuilder().
 		EventTypes("zwave_js_value_notification").
@@ -33,6 +40,7 @@ func main() {
 
 	app.RegisterEntityListener(pantryDoor)
 	app.RegisterSchedule(_11pmSched)
+	app.RegisterSchedule(_30minsBeforeSunrise)
 	app.RegisterEventListener(zwaveEventListener)
 
 	app.Start()
@@ -71,4 +79,9 @@ func lightsOut(service *ga.Service, state *ga.State) {
 	if s.State == "off" && time.Now().Sub(s.LastChanged).Minutes() > 30 {
 		service.Light.TurnOff("light.main_lights")
 	}
+}
+
+func sunriseSched(service *ga.Service, state *ga.State) {
+	service.Light.TurnOn("light.living_room_lamps")
+	service.Light.TurnOff("light.christmas_lights")
 }

@@ -33,6 +33,10 @@ type schedule struct {
 	*/
 	offset        time.Duration
 	realStartTime time.Time
+
+	isSunrise bool
+	isSunset  bool
+	sunOffset TimeString
 }
 
 func (s schedule) Hash() string {
@@ -107,6 +111,24 @@ func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 	return scheduleBuilderEnd(sb)
 }
 
+// Sunrise takes an app pointer and an optional duration string that is passed to time.ParseDuration.
+// Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
+// for full list.
+func (sb scheduleBuilderDaily) Sunrise(a *app, offset ...TimeString) scheduleBuilderEnd {
+	sb.schedule.realStartTime = getSunriseSunset(a, true, offset).Carbon2Time()
+	sb.schedule.isSunrise = true
+	return scheduleBuilderEnd(sb)
+}
+
+// Sunset takes an app pointer and an optional duration string that is passed to time.ParseDuration.
+// Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
+// for full list.
+func (sb scheduleBuilderDaily) Sunset(a *app, offset ...TimeString) scheduleBuilderEnd {
+	sb.schedule.realStartTime = getSunriseSunset(a, false, offset).Carbon2Time()
+	sb.schedule.isSunset = true
+	return scheduleBuilderEnd(sb)
+}
+
 func (sb scheduleBuilderCall) Every(s TimeString) scheduleBuilderCustom {
 	d, err := time.ParseDuration(string(s))
 	if err != nil {
@@ -145,7 +167,7 @@ func runSchedules(a *app) {
 
 	for {
 		sched := popSchedule(a)
-		// log.Default().Println(sched.realStartTime)
+		log.Default().Println(sched.realStartTime)
 
 		// run callback for all schedules before now in case they overlap
 		for sched.realStartTime.Before(time.Now()) {
@@ -167,11 +189,20 @@ func popSchedule(a *app) schedule {
 }
 
 func requeueSchedule(a *app, s schedule) {
-	// TODO: figure out how to handle sunset/sunrise in here. Maybe just
-	// add sunrise bool and sunset bool to Schedule, might have to change
-	// API to be .Call().Sunset("1h") instead of .Call().At(ga.Sunset("1h"))
-	// then that function could easily set the flag. Kinda ruins the english
-	// language sentence structure but maybe simplest way to get it working
-	s.realStartTime = s.realStartTime.Add(s.frequency)
+	if s.isSunrise || s.isSunset {
+		nextSunTime := getSunriseSunset(a, s.isSunrise, []TimeString{s.sunOffset})
+
+		// this is true when there is a negative offset, so schedule runs before sunset/sunrise and
+		// HA still shows today's sunset as next sunset. Just add 24h as a default handler
+		// since we can't get tomorrow's sunset from HA at this point.
+		if nextSunTime.IsToday() {
+			nextSunTime = nextSunTime.AddHours(24)
+		}
+
+		s.realStartTime = nextSunTime.Carbon2Time()
+	} else {
+		s.realStartTime = s.realStartTime.Add(s.frequency)
+	}
+
 	a.schedules.Insert(s, float64(s.realStartTime.Unix()))
 }

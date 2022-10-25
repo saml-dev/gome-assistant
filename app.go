@@ -36,7 +36,7 @@ type TimeString string
 NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
-func NewApp(connString string) app {
+func NewApp(connString string) *app {
 	token := os.Getenv("HA_AUTH_TOKEN")
 	conn, ctx, ctxCancel := ws.SetupConnection(connString, token)
 
@@ -45,7 +45,7 @@ func NewApp(connString string) app {
 	service := NewService(conn, ctx, httpClient)
 	state := newState(httpClient)
 
-	return app{
+	return &app{
 		conn:            conn,
 		ctx:             ctx,
 		ctxCancel:       ctxCancel,
@@ -65,6 +65,12 @@ func (a *app) Cleanup() {
 }
 
 func (a *app) RegisterSchedule(s schedule) {
+	// realStartTime already set for sunset/sunrise
+	if s.isSunrise || s.isSunset {
+		a.schedules.Insert(s, float64(s.realStartTime.Unix()))
+		return
+	}
+
 	if s.frequency == 0 {
 		log.Fatalln("A schedule must call either Daily() or Every() when built.")
 	}
@@ -106,21 +112,7 @@ func (a *app) RegisterEventListener(evl eventListener) {
 	}
 }
 
-// Sunrise take an optional string that is passed to time.ParseDuration.
-// Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
-// for full list.
-func (a *app) Sunrise(offset ...TimeString) string {
-	return getSunriseSunset(a, true, offset)
-}
-
-// Sunset take an optional string that is passed to time.ParseDuration.
-// Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
-// for full list.
-func (a *app) Sunset(offset ...TimeString) string {
-	return getSunriseSunset(a, false, offset)
-}
-
-func getSunriseSunset(a *app, sunrise bool, offset []TimeString) string {
+func getSunriseSunset(a *app, sunrise bool, offset []TimeString) carbon.Carbon {
 	printString := "Sunset"
 	attrKey := "next_setting"
 	if sunrise {
@@ -150,7 +142,7 @@ func getSunriseSunset(a *app, sunrise bool, offset []TimeString) string {
 		nextSetOrRise = nextSetOrRise.AddMinutes(int(t.Minutes()))
 	}
 
-	return carbon2TimeString(nextSetOrRise)
+	return nextSetOrRise
 }
 
 func carbon2TimeString(c carbon.Carbon) string {
