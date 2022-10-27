@@ -9,16 +9,16 @@ import (
 	ws "github.com/saml-dev/gome-assistant/internal/websocket"
 )
 
-type eventListener struct {
+type EventListener struct {
 	eventTypes   []string
-	callback     eventListenerCallback
+	callback     EventListenerCallback
 	betweenStart string
 	betweenEnd   string
 	throttle     time.Duration
 	lastRan      carbon.Carbon
 }
 
-type eventListenerCallback func(*Service, EventData)
+type EventListenerCallback func(*Service, EventData)
 
 type EventData struct {
 	Type         string
@@ -28,13 +28,13 @@ type EventData struct {
 /* Methods */
 
 func EventListenerBuilder() eventListenerBuilder1 {
-	return eventListenerBuilder1{eventListener{
+	return eventListenerBuilder1{EventListener{
 		lastRan: carbon.Now().StartOfCentury(),
 	}}
 }
 
 type eventListenerBuilder1 struct {
-	eventListener
+	EventListener
 }
 
 func (b eventListenerBuilder1) EventTypes(ets ...string) eventListenerBuilder2 {
@@ -43,31 +43,31 @@ func (b eventListenerBuilder1) EventTypes(ets ...string) eventListenerBuilder2 {
 }
 
 type eventListenerBuilder2 struct {
-	eventListener
+	EventListener
 }
 
-func (b eventListenerBuilder2) Call(callback eventListenerCallback) eventListenerBuilder3 {
-	b.eventListener.callback = callback
+func (b eventListenerBuilder2) Call(callback EventListenerCallback) eventListenerBuilder3 {
+	b.EventListener.callback = callback
 	return eventListenerBuilder3(b)
 }
 
 type eventListenerBuilder3 struct {
-	eventListener
+	EventListener
 }
 
 func (b eventListenerBuilder3) OnlyBetween(start string, end string) eventListenerBuilder3 {
-	b.eventListener.betweenStart = start
-	b.eventListener.betweenEnd = end
+	b.EventListener.betweenStart = start
+	b.EventListener.betweenEnd = end
 	return b
 }
 
 func (b eventListenerBuilder3) OnlyAfter(start string) eventListenerBuilder3 {
-	b.eventListener.betweenStart = start
+	b.EventListener.betweenStart = start
 	return b
 }
 
 func (b eventListenerBuilder3) OnlyBefore(end string) eventListenerBuilder3 {
-	b.eventListener.betweenEnd = end
+	b.EventListener.betweenEnd = end
 	return b
 }
 
@@ -76,12 +76,12 @@ func (b eventListenerBuilder3) Throttle(s TimeString) eventListenerBuilder3 {
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
 	}
-	b.eventListener.throttle = d
+	b.EventListener.throttle = d
 	return b
 }
 
-func (b eventListenerBuilder3) Build() eventListener {
-	return b.eventListener
+func (b eventListenerBuilder3) Build() EventListener {
+	return b.EventListener
 }
 
 type BaseEventMsg struct {

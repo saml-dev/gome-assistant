@@ -10,27 +10,11 @@ import (
 	"github.com/saml-dev/gome-assistant/internal"
 )
 
-type scheduleCallback func(*Service, *State)
+type ScheduleCallback func(*Service, *State)
 
-type schedule struct {
-	/*
-		frequency is a time.Duration representing how often you want to run your function.
-
-		Some examples:
-			time.Second * 5 // runs every 5 seconds at 00:00:00, 00:00:05, etc.
-			time.Hour * 12 // runs at offset, +12 hours, +24 hours, etc.
-			gomeassistant.Daily // runs at offset, +24 hours, +48 hours, etc. Daily is a const helper for time.Hour * 24
-			// Helpers include Daily, Hourly, Minutely
-	*/
-	frequency time.Duration
-	callback  scheduleCallback
-	/*
-		offset is the base that your frequency will be added to.
-		Defaults to 0 (which is probably fine for most cases).
-
-		Example: Run in the 3rd minute of every hour.
-			ScheduleBuilder().Call(myFunc).Every("1h").Offset("3m")
-	*/
+type Schedule struct {
+	frequency     time.Duration
+	callback      ScheduleCallback
 	offset        time.Duration
 	realStartTime time.Time
 
@@ -39,40 +23,40 @@ type schedule struct {
 	sunOffset TimeString
 }
 
-func (s schedule) Hash() string {
+func (s Schedule) Hash() string {
 	return fmt.Sprint(s.offset, s.frequency, s.callback)
 }
 
 type scheduleBuilder struct {
-	schedule schedule
+	schedule Schedule
 }
 
 type scheduleBuilderCall struct {
-	schedule schedule
+	schedule Schedule
 }
 
 type scheduleBuilderDaily struct {
-	schedule schedule
+	schedule Schedule
 }
 
 type scheduleBuilderCustom struct {
-	schedule schedule
+	schedule Schedule
 }
 
 type scheduleBuilderEnd struct {
-	schedule schedule
+	schedule Schedule
 }
 
 func ScheduleBuilder() scheduleBuilder {
 	return scheduleBuilder{
-		schedule{
+		Schedule{
 			frequency: 0,
 			offset:    0,
 		},
 	}
 }
 
-func (s schedule) String() string {
+func (s Schedule) String() string {
 	return fmt.Sprintf("Schedule{ call %q %s %s }",
 		getFunctionName(s.callback),
 		frequencyToString(s.frequency),
@@ -80,7 +64,7 @@ func (s schedule) String() string {
 	)
 }
 
-func offsetToString(s schedule) string {
+func offsetToString(s Schedule) string {
 	if s.frequency.Hours() == 24 {
 		return fmt.Sprintf("%02d:%02d", int(s.offset.Hours()), int(s.offset.Minutes())%60)
 	}
@@ -94,7 +78,7 @@ func frequencyToString(d time.Duration) string {
 	return "every " + d.String() + " with offset"
 }
 
-func (sb scheduleBuilder) Call(callback scheduleCallback) scheduleBuilderCall {
+func (sb scheduleBuilder) Call(callback ScheduleCallback) scheduleBuilderCall {
 	sb.schedule.callback = callback
 	return scheduleBuilderCall(sb)
 }
@@ -147,11 +131,11 @@ func (sb scheduleBuilderCustom) Offset(s TimeString) scheduleBuilderEnd {
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderCustom) Build() schedule {
+func (sb scheduleBuilderCustom) Build() Schedule {
 	return sb.schedule
 }
 
-func (sb scheduleBuilderEnd) Build() schedule {
+func (sb scheduleBuilderEnd) Build() Schedule {
 	return sb.schedule
 }
 
@@ -183,12 +167,12 @@ func runSchedules(a *app) {
 	}
 }
 
-func popSchedule(a *app) schedule {
+func popSchedule(a *app) Schedule {
 	_sched, _ := a.schedules.Pop()
-	return _sched.(schedule)
+	return _sched.(Schedule)
 }
 
-func requeueSchedule(a *app, s schedule) {
+func requeueSchedule(a *app, s Schedule) {
 	if s.isSunrise || s.isSunset {
 		nextSunTime := getSunriseSunset(a, s.isSunrise, []TimeString{s.sunOffset})
 

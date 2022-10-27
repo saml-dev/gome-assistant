@@ -25,9 +25,9 @@ type app struct {
 	state   *State
 
 	schedules         pq.PriorityQueue
-	entityListeners   map[string][]*entityListener
+	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
-	eventListeners    map[string][]*eventListener
+	eventListeners    map[string][]*EventListener
 }
 
 type TimeString string
@@ -53,8 +53,8 @@ func NewApp(connString string) *app {
 		service:         service,
 		state:           state,
 		schedules:       pq.New(),
-		entityListeners: map[string][]*entityListener{},
-		eventListeners:  map[string][]*eventListener{},
+		entityListeners: map[string][]*EntityListener{},
+		eventListeners:  map[string][]*EventListener{},
 	}
 }
 
@@ -64,7 +64,7 @@ func (a *app) Cleanup() {
 	}
 }
 
-func (a *app) RegisterSchedule(s schedule) {
+func (a *app) RegisterSchedule(s Schedule) {
 	// realStartTime already set for sunset/sunrise
 	if s.isSunrise || s.isSunset {
 		a.schedules.Insert(s, float64(s.realStartTime.Unix()))
@@ -91,23 +91,23 @@ func (a *app) RegisterSchedule(s schedule) {
 	a.schedules.Insert(s, float64(startTime.Unix()))
 }
 
-func (a *app) RegisterEntityListener(etl entityListener) {
+func (a *app) RegisterEntityListener(etl EntityListener) {
 	for _, entity := range etl.entityIds {
 		if elList, ok := a.entityListeners[entity]; ok {
 			a.entityListeners[entity] = append(elList, &etl)
 		} else {
-			a.entityListeners[entity] = []*entityListener{&etl}
+			a.entityListeners[entity] = []*EntityListener{&etl}
 		}
 	}
 }
 
-func (a *app) RegisterEventListener(evl eventListener) {
+func (a *app) RegisterEventListener(evl EventListener) {
 	for _, eventType := range evl.eventTypes {
 		if elList, ok := a.eventListeners[eventType]; ok {
 			a.eventListeners[eventType] = append(elList, &evl)
 		} else {
 			ws.SubscribeToEventType(eventType, a.conn, a.ctx)
-			a.eventListeners[eventType] = []*eventListener{&evl}
+			a.eventListeners[eventType] = []*EventListener{&evl}
 		}
 	}
 }

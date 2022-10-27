@@ -8,9 +8,9 @@ import (
 	"github.com/golang-module/carbon"
 )
 
-type entityListener struct {
+type EntityListener struct {
 	entityIds    []string
-	callback     entityListenerCallback
+	callback     EntityListenerCallback
 	fromState    string
 	toState      string
 	betweenStart string
@@ -19,7 +19,7 @@ type entityListener struct {
 	lastRan      carbon.Carbon
 }
 
-type entityListenerCallback func(*Service, EntityData)
+type EntityListenerCallback func(*Service, EntityData)
 
 type EntityData struct {
 	TriggerEntityId string
@@ -54,60 +54,60 @@ type msgState struct {
 /* Methods */
 
 func EntityListenerBuilder() elBuilder1 {
-	return elBuilder1{entityListener{
+	return elBuilder1{EntityListener{
 		lastRan: carbon.Now().StartOfCentury(),
 	}}
 }
 
 type elBuilder1 struct {
-	entityListener
+	EntityListener
 }
 
 func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
 	if len(entityIds) == 0 {
 		log.Fatalln("must pass at least one entityId to EntityIds()")
 	} else {
-		b.entityListener.entityIds = entityIds
+		b.EntityListener.entityIds = entityIds
 	}
 	return elBuilder2(b)
 }
 
 type elBuilder2 struct {
-	entityListener
+	EntityListener
 }
 
-func (b elBuilder2) Call(callback entityListenerCallback) elBuilder3 {
-	b.entityListener.callback = callback
+func (b elBuilder2) Call(callback EntityListenerCallback) elBuilder3 {
+	b.EntityListener.callback = callback
 	return elBuilder3(b)
 }
 
 type elBuilder3 struct {
-	entityListener
+	EntityListener
 }
 
 func (b elBuilder3) OnlyBetween(start string, end string) elBuilder3 {
-	b.entityListener.betweenStart = start
-	b.entityListener.betweenEnd = end
+	b.EntityListener.betweenStart = start
+	b.EntityListener.betweenEnd = end
 	return b
 }
 
 func (b elBuilder3) OnlyAfter(start string) elBuilder3 {
-	b.entityListener.betweenStart = start
+	b.EntityListener.betweenStart = start
 	return b
 }
 
 func (b elBuilder3) OnlyBefore(end string) elBuilder3 {
-	b.entityListener.betweenEnd = end
+	b.EntityListener.betweenEnd = end
 	return b
 }
 
 func (b elBuilder3) FromState(s string) elBuilder3 {
-	b.entityListener.fromState = s
+	b.EntityListener.fromState = s
 	return b
 }
 
 func (b elBuilder3) ToState(s string) elBuilder3 {
-	b.entityListener.toState = s
+	b.EntityListener.toState = s
 	return b
 }
 
@@ -116,12 +116,12 @@ func (b elBuilder3) Throttle(s TimeString) elBuilder3 {
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
 	}
-	b.entityListener.throttle = d
+	b.EntityListener.throttle = d
 	return b
 }
 
-func (b elBuilder3) Build() entityListener {
-	return b.entityListener
+func (b elBuilder3) Build() EntityListener {
+	return b.EntityListener
 }
 
 /* Functions */
