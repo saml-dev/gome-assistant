@@ -60,54 +60,54 @@ func EntityListenerBuilder() elBuilder1 {
 }
 
 type elBuilder1 struct {
-	EntityListener
+	entityListener EntityListener
 }
 
 func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
 	if len(entityIds) == 0 {
 		log.Fatalln("must pass at least one entityId to EntityIds()")
 	} else {
-		b.EntityListener.entityIds = entityIds
+		b.entityListener.entityIds = entityIds
 	}
 	return elBuilder2(b)
 }
 
 type elBuilder2 struct {
-	EntityListener
+	entityListener EntityListener
 }
 
 func (b elBuilder2) Call(callback EntityListenerCallback) elBuilder3 {
-	b.EntityListener.callback = callback
+	b.entityListener.callback = callback
 	return elBuilder3(b)
 }
 
 type elBuilder3 struct {
-	EntityListener
+	entityListener EntityListener
 }
 
 func (b elBuilder3) OnlyBetween(start string, end string) elBuilder3 {
-	b.EntityListener.betweenStart = start
-	b.EntityListener.betweenEnd = end
+	b.entityListener.betweenStart = start
+	b.entityListener.betweenEnd = end
 	return b
 }
 
 func (b elBuilder3) OnlyAfter(start string) elBuilder3 {
-	b.EntityListener.betweenStart = start
+	b.entityListener.betweenStart = start
 	return b
 }
 
 func (b elBuilder3) OnlyBefore(end string) elBuilder3 {
-	b.EntityListener.betweenEnd = end
+	b.entityListener.betweenEnd = end
 	return b
 }
 
 func (b elBuilder3) FromState(s string) elBuilder3 {
-	b.EntityListener.fromState = s
+	b.entityListener.fromState = s
 	return b
 }
 
 func (b elBuilder3) ToState(s string) elBuilder3 {
-	b.EntityListener.toState = s
+	b.entityListener.toState = s
 	return b
 }
 
@@ -116,12 +116,12 @@ func (b elBuilder3) Throttle(s TimeString) elBuilder3 {
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
 	}
-	b.EntityListener.throttle = d
+	b.entityListener.throttle = d
 	return b
 }
 
 func (b elBuilder3) Build() EntityListener {
-	return b.EntityListener
+	return b.entityListener
 }
 
 /* Functions */
@@ -139,16 +139,16 @@ func callEntityListeners(app *app, msgBytes []byte) {
 	for _, l := range listeners {
 		// Check conditions
 		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
-			return
+			continue
 		}
 		if c := checkStatesMatch(l.fromState, data.OldState.State); c.fail {
-			return
+			continue
 		}
 		if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
-			return
+			continue
 		}
 		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
-			return
+			continue
 		}
 
 		entityData := EntityData{
