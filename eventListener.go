@@ -34,40 +34,40 @@ func EventListenerBuilder() eventListenerBuilder1 {
 }
 
 type eventListenerBuilder1 struct {
-	EventListener
+	eventListener EventListener
 }
 
 func (b eventListenerBuilder1) EventTypes(ets ...string) eventListenerBuilder2 {
-	b.eventTypes = ets
+	b.eventListener.eventTypes = ets
 	return eventListenerBuilder2(b)
 }
 
 type eventListenerBuilder2 struct {
-	EventListener
+	eventListener EventListener
 }
 
 func (b eventListenerBuilder2) Call(callback EventListenerCallback) eventListenerBuilder3 {
-	b.EventListener.callback = callback
+	b.eventListener.callback = callback
 	return eventListenerBuilder3(b)
 }
 
 type eventListenerBuilder3 struct {
-	EventListener
+	eventListener EventListener
 }
 
 func (b eventListenerBuilder3) OnlyBetween(start string, end string) eventListenerBuilder3 {
-	b.EventListener.betweenStart = start
-	b.EventListener.betweenEnd = end
+	b.eventListener.betweenStart = start
+	b.eventListener.betweenEnd = end
 	return b
 }
 
 func (b eventListenerBuilder3) OnlyAfter(start string) eventListenerBuilder3 {
-	b.EventListener.betweenStart = start
+	b.eventListener.betweenStart = start
 	return b
 }
 
 func (b eventListenerBuilder3) OnlyBefore(end string) eventListenerBuilder3 {
-	b.EventListener.betweenEnd = end
+	b.eventListener.betweenEnd = end
 	return b
 }
 
@@ -76,12 +76,12 @@ func (b eventListenerBuilder3) Throttle(s TimeString) eventListenerBuilder3 {
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
 	}
-	b.EventListener.throttle = d
+	b.eventListener.throttle = d
 	return b
 }
 
 func (b eventListenerBuilder3) Build() EventListener {
-	return b.EventListener
+	return b.eventListener
 }
 
 type BaseEventMsg struct {
