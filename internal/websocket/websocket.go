@@ -59,21 +59,21 @@ func SetupConnection(connString string, authToken string) (*websocket.Conn, cont
 	_, err = ReadMessage(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		log.Fatalln("Unknown error creating websocket client")
+		panic("Unknown error creating websocket client")
 	}
 
 	// Send auth message
 	err = SendAuthMessage(conn, ctx, authToken)
 	if err != nil {
 		ctxCancel()
-		log.Fatalln("Unknown error creating websocket client")
+		panic("Unknown error creating websocket client")
 	}
 
 	// Verify auth message was successful
 	err = VerifyAuthResponse(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		log.Fatalln("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
+		panic("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
 	}
 
 	return conn, ctx, ctxCancel
@@ -132,7 +132,7 @@ func SubscribeToEventType(eventType string, conn *websocket.Conn, ctx context.Co
 	}
 	err := WriteMessage(e, conn, ctx)
 	if err != nil {
-		log.Fatalln("Error writing to websocket: ", err)
+		panic("Error writing to websocket: ", err)
 	}
 	// m, _ := ReadMessage(conn, ctx)
 	// log.Default().Println(string(m))

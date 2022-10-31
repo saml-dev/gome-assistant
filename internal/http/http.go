@@ -71,12 +71,12 @@ func get(url, token string) ([]byte, error) {
 // 	defer resp.Body.Close()
 
 // 	if resp.StatusCode == 401 {
-// 		log.Fatalln("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
+// 		panic("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
 // 	}
 
 // 	body, err := io.ReadAll(resp.Body)
 // 	if err != nil {
-// 		log.Fatalln(err)
+// 		panic(err)
 // 	}
 
 // 	return body, nil

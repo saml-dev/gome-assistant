@@ -67,7 +67,7 @@ type elBuilder1 struct {
 
 func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
 	if len(entityIds) == 0 {
-		log.Fatalln("must pass at least one entityId to EntityIds()")
+		panic("must pass at least one entityId to EntityIds()")
 	} else {
 		b.entityListener.entityIds = entityIds
 	}

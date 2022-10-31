@@ -75,7 +75,7 @@ func (a *app) RegisterSchedule(s Schedule) {
 	}
 
 	if s.frequency == 0 {
-		log.Fatalln("A schedule must call either Daily() or Every() when built.")
+		panic("A schedule must use either Daily() or Every() when built.")
 	}
 
 	now := time.Now()
@@ -95,6 +95,10 @@ func (a *app) RegisterSchedule(s Schedule) {
 }
 
 func (a *app) RegisterEntityListener(etl EntityListener) {
+	if etl.delay != 0 && etl.toState == "" {
+		panic("EntityListener error: you have to use ToState() when using Duration()")
+	}
+
 	for _, entity := range etl.entityIds {
 		if elList, ok := a.entityListeners[entity]; ok {
 			a.entityListeners[entity] = append(elList, &etl)
@@ -135,7 +139,7 @@ func getSunriseSunset(a *app, sunrise bool, offset []DurationString) carbon.Carb
 	// get next sunrise/sunset time from HA
 	state, err := a.state.Get("sun.sun")
 	if err != nil {
-		log.Fatalln("Couldn't get sun.sun state from HA to calculate", printString)
+		panic("Couldn't get sun.sun state from HA to calculate", printString)
 	}
 
 	nextSetOrRise := carbon.Parse(state.Attributes[attrKey].(string))
