@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -139,7 +140,7 @@ func getSunriseSunset(a *app, sunrise bool, offset []DurationString) carbon.Carb
 	// get next sunrise/sunset time from HA
 	state, err := a.state.Get("sun.sun")
 	if err != nil {
-		panic("Couldn't get sun.sun state from HA to calculate", printString)
+		panic(fmt.Sprintf("Couldn't get sun.sun state from HA to calculate %s", printString))
 	}
 
 	nextSetOrRise := carbon.Parse(state.Attributes[attrKey].(string))
