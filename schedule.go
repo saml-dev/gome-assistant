@@ -20,7 +20,7 @@ type Schedule struct {
 
 	isSunrise bool
 	isSunset  bool
-	sunOffset TimeString
+	sunOffset DurationString
 }
 
 func (s Schedule) Hash() string {
@@ -98,7 +98,7 @@ func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 // Sunrise takes an app pointer and an optional duration string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (sb scheduleBuilderDaily) Sunrise(a *app, offset ...TimeString) scheduleBuilderEnd {
+func (sb scheduleBuilderDaily) Sunrise(a *app, offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.realStartTime = getSunriseSunset(a, true, offset).Carbon2Time()
 	sb.schedule.isSunrise = true
 	return scheduleBuilderEnd(sb)
@@ -107,13 +107,13 @@ func (sb scheduleBuilderDaily) Sunrise(a *app, offset ...TimeString) scheduleBui
 // Sunset takes an app pointer and an optional duration string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (sb scheduleBuilderDaily) Sunset(a *app, offset ...TimeString) scheduleBuilderEnd {
+func (sb scheduleBuilderDaily) Sunset(a *app, offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.realStartTime = getSunriseSunset(a, false, offset).Carbon2Time()
 	sb.schedule.isSunset = true
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderCall) Every(s TimeString) scheduleBuilderCustom {
+func (sb scheduleBuilderCall) Every(s DurationString) scheduleBuilderCustom {
 	d, err := time.ParseDuration(string(s))
 	if err != nil {
 		log.Fatalf("couldn't parse string duration passed to Every(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
@@ -122,7 +122,7 @@ func (sb scheduleBuilderCall) Every(s TimeString) scheduleBuilderCustom {
 	return scheduleBuilderCustom(sb)
 }
 
-func (sb scheduleBuilderCustom) Offset(s TimeString) scheduleBuilderEnd {
+func (sb scheduleBuilderCustom) Offset(s DurationString) scheduleBuilderEnd {
 	t, err := time.ParseDuration(string(s))
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Offset(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
@@ -174,7 +174,7 @@ func popSchedule(a *app) Schedule {
 
 func requeueSchedule(a *app, s Schedule) {
 	if s.isSunrise || s.isSunset {
-		nextSunTime := getSunriseSunset(a, s.isSunrise, []TimeString{s.sunOffset})
+		nextSunTime := getSunriseSunset(a, s.isSunrise, []DurationString{s.sunOffset})
 
 		// this is true when there is a negative offset, so schedule runs before sunset/sunrise and
 		// HA still shows today's sunset as next sunset. Just add 24h as a default handler

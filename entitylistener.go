@@ -17,6 +17,8 @@ type EntityListener struct {
 	betweenEnd   string
 	throttle     time.Duration
 	lastRan      carbon.Carbon
+	delay        time.Duration
+	delayTimer   *time.Timer
 }
 
 type EntityListenerCallback func(*Service, EntityData)
@@ -111,7 +113,20 @@ func (b elBuilder3) ToState(s string) elBuilder3 {
 	return b
 }
 
-func (b elBuilder3) Throttle(s TimeString) elBuilder3 {
+func (b elBuilder3) Duration(s DurationString) elBuilder3 {
+	// TODO: test this, should rename duration? not sure if Delay implies that state change cancels the callback
+	// if change name to Duration then enforce being used with ToState, should FromState be allowed?
+	// if FromState set to 3, then state changes to 2 and changes again to 1 halfway through delay, should the
+	// delay reset?
+	d, err := time.ParseDuration(string(s))
+	if err != nil {
+		log.Fatalf("Couldn't parse string duration passed to For(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
+	}
+	b.entityListener.delay = d
+	return b
+}
+
+func (b elBuilder3) Throttle(s DurationString) elBuilder3 {
 	d, err := time.ParseDuration(string(s))
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
@@ -145,6 +160,9 @@ func callEntityListeners(app *app, msgBytes []byte) {
 			continue
 		}
 		if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
+			if l.delayTimer != nil {
+				l.delayTimer.Stop()
+			}
 			continue
 		}
 		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
@@ -159,6 +177,16 @@ func callEntityListeners(app *app, msgBytes []byte) {
 			ToAttributes:    data.NewState.Attributes,
 			LastChanged:     data.OldState.LastChanged,
 		}
+
+		if l.delay != 0 {
+			l.delayTimer = time.AfterFunc(l.delay, func() {
+				go l.callback(app.service, entityData)
+				l.lastRan = carbon.Now()
+			})
+			return
+		}
+
+		// run now if no delay set
 		go l.callback(app.service, entityData)
 		l.lastRan = carbon.Now()
 	}

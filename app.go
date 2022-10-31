@@ -2,7 +2,6 @@ package gomeassistant
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -30,7 +29,11 @@ type app struct {
 	eventListeners    map[string][]*EventListener
 }
 
-type TimeString string
+/*
+DurationString represents a duration, such as "2s" or "24h".
+See https://pkg.go.dev/time#ParseDuration for all valid time units.
+*/
+type DurationString string
 
 /*
 NewApp establishes the websocket connection and returns an object
@@ -112,7 +115,7 @@ func (a *app) RegisterEventListener(evl EventListener) {
 	}
 }
 
-func getSunriseSunset(a *app, sunrise bool, offset []TimeString) carbon.Carbon {
+func getSunriseSunset(a *app, sunrise bool, offset []DurationString) carbon.Carbon {
 	printString := "Sunset"
 	attrKey := "next_setting"
 	if sunrise {
@@ -143,10 +146,6 @@ func getSunriseSunset(a *app, sunrise bool, offset []TimeString) carbon.Carbon {
 	}
 
 	return nextSetOrRise
-}
-
-func carbon2TimeString(c carbon.Carbon) string {
-	return fmt.Sprintf("%02d:%02d", c.Hour(), c.Minute())
 }
 
 func (a *app) Start() {

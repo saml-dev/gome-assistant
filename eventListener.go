@@ -71,7 +71,7 @@ func (b eventListenerBuilder3) OnlyBefore(end string) eventListenerBuilder3 {
 	return b
 }
 
-func (b eventListenerBuilder3) Throttle(s TimeString) eventListenerBuilder3 {
+func (b eventListenerBuilder3) Throttle(s DurationString) eventListenerBuilder3 {
 	d, err := time.ParseDuration(string(s))
 	if err != nil {
 		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
