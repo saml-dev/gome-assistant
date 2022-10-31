@@ -21,6 +21,9 @@ type Schedule struct {
 	isSunrise bool
 	isSunset  bool
 	sunOffset DurationString
+
+	exceptionDays   []time.Time
+	exceptionRanges []timeRange
 }
 
 func (s Schedule) Hash() string {
@@ -125,8 +128,28 @@ func (sb scheduleBuilderCustom) Offset(s DurationString) scheduleBuilderEnd {
 	return scheduleBuilderEnd(sb)
 }
 
+func (sb scheduleBuilderCustom) ExceptionDay(t time.Time) scheduleBuilderCustom {
+	sb.schedule.exceptionDays = append(sb.schedule.exceptionDays, t)
+	return sb
+}
+
+func (sb scheduleBuilderCustom) ExceptionRange(start, end time.Time) scheduleBuilderCustom {
+	sb.schedule.exceptionRanges = append(sb.schedule.exceptionRanges, timeRange{start, end})
+	return sb
+}
+
 func (sb scheduleBuilderCustom) Build() Schedule {
 	return sb.schedule
+}
+
+func (sb scheduleBuilderEnd) ExceptionDay(t time.Time) scheduleBuilderEnd {
+	sb.schedule.exceptionDays = append(sb.schedule.exceptionDays, t)
+	return sb
+}
+
+func (sb scheduleBuilderEnd) ExceptionRange(start, end time.Time) scheduleBuilderEnd {
+	sb.schedule.exceptionRanges = append(sb.schedule.exceptionRanges, timeRange{start, end})
+	return sb
 }
 
 func (sb scheduleBuilderEnd) Build() Schedule {
@@ -149,16 +172,26 @@ func runSchedules(a *app) {
 
 		// run callback for all schedules before now in case they overlap
 		for sched.realStartTime.Before(time.Now()) {
-			go sched.callback(a.service, a.state)
+			maybeRunCallback(a, sched)
 			requeueSchedule(a, sched)
 
 			sched = popSchedule(a)
 		}
 
 		time.Sleep(time.Until(sched.realStartTime))
-		go sched.callback(a.service, a.state)
+		maybeRunCallback(a, sched)
 		requeueSchedule(a, sched)
 	}
+}
+
+func maybeRunCallback(a *app, s Schedule) {
+	if c := checkExceptionDays(s.exceptionDays); c.fail {
+		return
+	}
+	if c := checkExceptionRanges(s.exceptionRanges); c.fail {
+		return
+	}
+	go s.callback(a.service, a.state)
 }
 
 func popSchedule(a *app) Schedule {
