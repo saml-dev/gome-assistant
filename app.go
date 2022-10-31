@@ -3,7 +3,6 @@ package gomeassistant
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -133,7 +132,7 @@ func getSunriseSunset(a *app, sunrise bool, offset []DurationString) carbon.Carb
 	if len(offset) == 1 {
 		t, err = time.ParseDuration(string(offset[0]))
 		if err != nil {
-			log.Fatalf("Could not parse offset passed to %s: \"%s\"", printString, offset[0])
+			panic(fmt.Sprintf("Could not parse offset passed to %s: \"%s\"", printString, offset[0]))
 		}
 	}
 

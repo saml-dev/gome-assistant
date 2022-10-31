@@ -114,20 +114,14 @@ func (sb scheduleBuilderDaily) Sunset(a *app, offset ...DurationString) schedule
 }
 
 func (sb scheduleBuilderCall) Every(s DurationString) scheduleBuilderCustom {
-	d, err := time.ParseDuration(string(s))
-	if err != nil {
-		log.Fatalf("couldn't parse string duration passed to Every(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
-	}
+	d := internal.ParseDuration(string(s))
 	sb.schedule.frequency = d
 	return scheduleBuilderCustom(sb)
 }
 
 func (sb scheduleBuilderCustom) Offset(s DurationString) scheduleBuilderEnd {
-	t, err := time.ParseDuration(string(s))
-	if err != nil {
-		log.Fatalf("Couldn't parse string duration passed to Offset(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
-	}
-	sb.schedule.offset = t
+	d := internal.ParseDuration(string(s))
+	sb.schedule.offset = d
 	return scheduleBuilderEnd(sb)
 }
 

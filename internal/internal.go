@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -20,4 +21,12 @@ func ParseTime(s string) carbon.Carbon {
 		log.Fatalf("Failed to parse time string \"%s\"; format must be HH:MM.", s)
 	}
 	return carbon.Now().StartOfDay().SetHour(t.Hour()).SetMinute(t.Minute())
+}
+
+func ParseDuration(s string) time.Duration {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		panic(fmt.Sprintf("Couldn't parse string duration: \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s))
+	}
+	return d
 }

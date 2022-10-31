@@ -2,10 +2,10 @@ package gomeassistant
 
 import (
 	"encoding/json"
-	"log"
 	"time"
 
 	"github.com/golang-module/carbon"
+	"github.com/saml-dev/gome-assistant/internal"
 )
 
 type EntityListener struct {
@@ -114,23 +114,13 @@ func (b elBuilder3) ToState(s string) elBuilder3 {
 }
 
 func (b elBuilder3) Duration(s DurationString) elBuilder3 {
-	// TODO: test this, should rename duration? not sure if Delay implies that state change cancels the callback
-	// if change name to Duration then enforce being used with ToState, should FromState be allowed?
-	// if FromState set to 3, then state changes to 2 and changes again to 1 halfway through delay, should the
-	// delay reset?
-	d, err := time.ParseDuration(string(s))
-	if err != nil {
-		log.Fatalf("Couldn't parse string duration passed to For(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
-	}
+	d := internal.ParseDuration(string(s))
 	b.entityListener.delay = d
 	return b
 }
 
 func (b elBuilder3) Throttle(s DurationString) elBuilder3 {
-	d, err := time.ParseDuration(string(s))
-	if err != nil {
-		log.Fatalf("Couldn't parse string duration passed to Throttle(): \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s)
-	}
+	d := internal.ParseDuration(string(s))
 	b.entityListener.throttle = d
 	return b
 }
