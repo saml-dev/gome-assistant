@@ -9,16 +9,21 @@ import (
 )
 
 type EntityListener struct {
-	entityIds    []string
-	callback     EntityListenerCallback
-	fromState    string
-	toState      string
+	entityIds []string
+	callback  EntityListenerCallback
+	fromState string
+	toState   string
+	throttle  time.Duration
+	lastRan   carbon.Carbon
+
 	betweenStart string
 	betweenEnd   string
-	throttle     time.Duration
-	lastRan      carbon.Carbon
-	delay        time.Duration
-	delayTimer   *time.Timer
+
+	delay      time.Duration
+	delayTimer *time.Timer
+
+	exceptionDays   []time.Time
+	exceptionRanges []timeRange
 }
 
 type EntityListenerCallback func(*Service, EntityData)
@@ -125,6 +130,16 @@ func (b elBuilder3) Throttle(s DurationString) elBuilder3 {
 	return b
 }
 
+func (b elBuilder3) ExceptionDay(t time.Time) elBuilder3 {
+	b.entityListener.exceptionDays = append(b.entityListener.exceptionDays, t)
+	return b
+}
+
+func (b elBuilder3) ExceptionRange(start, end time.Time) elBuilder3 {
+	b.entityListener.exceptionRanges = append(b.entityListener.exceptionRanges, timeRange{start, end})
+	return b
+}
+
 func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
@@ -156,6 +171,12 @@ func callEntityListeners(app *app, msgBytes []byte) {
 			continue
 		}
 		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
+			continue
+		}
+		if c := checkExceptionDays(l.exceptionDays); c.fail {
+			continue
+		}
+		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
 			continue
 		}
 
