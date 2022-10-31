@@ -16,6 +16,9 @@ type EventListener struct {
 	betweenEnd   string
 	throttle     time.Duration
 	lastRan      carbon.Carbon
+
+	exceptionDays   []time.Time
+	exceptionRanges []timeRange
 }
 
 type EventListenerCallback func(*Service, EventData)
@@ -77,6 +80,16 @@ func (b eventListenerBuilder3) Throttle(s DurationString) eventListenerBuilder3 
 	return b
 }
 
+func (b eventListenerBuilder3) ExceptionDay(t time.Time) eventListenerBuilder3 {
+	b.eventListener.exceptionDays = append(b.eventListener.exceptionDays, t)
+	return b
+}
+
+func (b eventListenerBuilder3) ExceptionRange(start, end time.Time) eventListenerBuilder3 {
+	b.eventListener.exceptionRanges = append(b.eventListener.exceptionRanges, timeRange{start, end})
+	return b
+}
+
 func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
@@ -100,10 +113,16 @@ func callEventListeners(app *app, msg ws.ChanMsg) {
 	for _, l := range listeners {
 		// Check conditions
 		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
-			return
+			continue
 		}
 		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
-			return
+			continue
+		}
+		if c := checkExceptionDays(l.exceptionDays); c.fail {
+			continue
+		}
+		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
+			continue
 		}
 
 		eventData := EventData{

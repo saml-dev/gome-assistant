@@ -36,4 +36,4 @@ _Note: I may provide a Docker image in the future with file watching to restart 
 
 Gome-Assistant is a new library, and I'm opening it up early to get some user feedback on the API and help shape the direction. I plan for it to grow to cover all Home Assistant use cases, services, and event types. So it's possible — maybe likely — that breaking changes will happen before v1.0.0!
 
-## API Reference (WIP)
+## API Reference (TODO)

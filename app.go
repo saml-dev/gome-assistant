@@ -35,6 +35,11 @@ See https://pkg.go.dev/time#ParseDuration for all valid time units.
 */
 type DurationString string
 
+type timeRange struct {
+	start time.Time
+	end   time.Time
+}
+
 /*
 NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
