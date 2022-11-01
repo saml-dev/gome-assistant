@@ -21,6 +21,7 @@ type EventListener struct {
 	exceptionRanges []timeRange
 }
 
+// TODO: add state object as second arg
 type EventListenerCallback func(*Service, EventData)
 
 type EventData struct {
@@ -30,7 +31,7 @@ type EventData struct {
 
 /* Methods */
 
-func EventListenerBuilder() eventListenerBuilder1 {
+func NewEventListener() eventListenerBuilder1 {
 	return eventListenerBuilder1{EventListener{
 		lastRan: carbon.Now().StartOfCentury(),
 	}}

@@ -50,7 +50,7 @@ type scheduleBuilderEnd struct {
 	schedule Schedule
 }
 
-func ScheduleBuilder() scheduleBuilder {
+func NewSchedule() scheduleBuilder {
 	return scheduleBuilder{
 		Schedule{
 			frequency: 0,

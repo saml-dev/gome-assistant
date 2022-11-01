@@ -20,7 +20,7 @@ type Service struct {
 	InputNumber   *services.InputNumber
 }
 
-func NewService(conn *websocket.Conn, ctx context.Context, httpClient *http.HttpClient) *Service {
+func newService(conn *websocket.Conn, ctx context.Context, httpClient *http.HttpClient) *Service {
 	return &Service{
 		Light:         services.BuildService[services.Light](conn, ctx),
 		HomeAssistant: services.BuildService[services.HomeAssistant](conn, ctx),

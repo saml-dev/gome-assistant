@@ -26,6 +26,7 @@ type EntityListener struct {
 	exceptionRanges []timeRange
 }
 
+// TODO: add state object as second arg
 type EntityListenerCallback func(*Service, EntityData)
 
 type EntityData struct {
@@ -60,7 +61,7 @@ type msgState struct {
 
 /* Methods */
 
-func EntityListenerBuilder() elBuilder1 {
+func NewEntityListener() elBuilder1 {
 	return elBuilder1{EntityListener{
 		lastRan: carbon.Now().StartOfCentury(),
 	}}

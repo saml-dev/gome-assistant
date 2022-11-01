@@ -9,39 +9,39 @@ import (
 )
 
 func main() {
-	app := ga.NewApp("0.0.0.0:8123") // Replace with your Home Assistant IP Address
+	app := ga.App("0.0.0.0:8123") // Replace with your Home Assistant IP Address
 	defer app.Cleanup()
 
 	pantryDoor := ga.
-		EntityListenerBuilder().
+		NewEntityListener().
 		EntityIds("binary_sensor.pantry_door").
 		Call(pantryLights).
 		Build()
 
 	_11pmSched := ga.
-		ScheduleBuilder().
+		NewSchedule().
 		Call(lightsOut).
 		Daily().
 		At("23:00").
 		Build()
 
 	_30minsBeforeSunrise := ga.
-		ScheduleBuilder().
+		NewSchedule().
 		Call(sunriseSched).
 		Daily().
 		Sunrise(app, "-30m").
 		Build()
 
 	zwaveEventListener := ga.
-		EventListenerBuilder().
+		NewEventListener().
 		EventTypes("zwave_js_value_notification").
 		Call(onEvent).
 		Build()
 
-	app.RegisterEntityListener(pantryDoor)
-	app.RegisterSchedule(_11pmSched)
-	app.RegisterSchedule(_30minsBeforeSunrise)
-	app.RegisterEventListener(zwaveEventListener)
+	app.RegisterEntityListeners(pantryDoor)
+	app.RegisterSchedules(_11pmSched)
+	app.RegisterSchedules(_30minsBeforeSunrise)
+	app.RegisterEventListeners(zwaveEventListener)
 
 	app.Start()
 

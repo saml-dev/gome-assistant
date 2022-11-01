@@ -41,16 +41,16 @@ type timeRange struct {
 }
 
 /*
-NewApp establishes the websocket connection and returns an object
+App establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
-func NewApp(connString string) *app {
+func App(connString string) *app {
 	token := os.Getenv("HA_AUTH_TOKEN")
 	conn, ctx, ctxCancel := ws.SetupConnection(connString, token)
 
 	httpClient := http.NewHttpClient(connString, token)
 
-	service := NewService(conn, ctx, httpClient)
+	service := newService(conn, ctx, httpClient)
 	state := newState(httpClient)
 
 	return &app{
@@ -72,54 +72,60 @@ func (a *app) Cleanup() {
 	}
 }
 
-func (a *app) RegisterSchedule(s Schedule) {
-	// realStartTime already set for sunset/sunrise
-	if s.isSunrise || s.isSunset {
-		a.schedules.Insert(s, float64(s.realStartTime.Unix()))
-		return
-	}
+func (a *app) RegisterSchedules(schedules ...Schedule) {
+	for _, s := range schedules {
+		// realStartTime already set for sunset/sunrise
+		if s.isSunrise || s.isSunset {
+			a.schedules.Insert(s, float64(s.realStartTime.Unix()))
+			return
+		}
 
-	if s.frequency == 0 {
-		panic("A schedule must use either Daily() or Every() when built.")
-	}
+		if s.frequency == 0 {
+			panic("A schedule must use either Daily() or Every() when built.")
+		}
 
-	now := time.Now()
-	startTime := carbon.Now().StartOfDay().Carbon2Time()
-	// apply offset if set
-	if s.offset.Minutes() > 0 {
-		startTime = startTime.Add(s.offset)
-	}
+		now := time.Now()
+		startTime := carbon.Now().StartOfDay().Carbon2Time()
+		// apply offset if set
+		if s.offset.Minutes() > 0 {
+			startTime = startTime.Add(s.offset)
+		}
 
-	// advance first scheduled time by frequency until it is in the future
-	for startTime.Before(now) {
-		startTime = startTime.Add(s.frequency)
-	}
+		// advance first scheduled time by frequency until it is in the future
+		for startTime.Before(now) {
+			startTime = startTime.Add(s.frequency)
+		}
 
-	s.realStartTime = startTime
-	a.schedules.Insert(s, float64(startTime.Unix()))
+		s.realStartTime = startTime
+		a.schedules.Insert(s, float64(startTime.Unix()))
+	}
 }
 
-func (a *app) RegisterEntityListener(etl EntityListener) {
-	if etl.delay != 0 && etl.toState == "" {
-		panic("EntityListener error: you have to use ToState() when using Duration()")
-	}
+func (a *app) RegisterEntityListeners(etls ...EntityListener) {
+	for _, etl := range etls {
+		if etl.delay != 0 && etl.toState == "" {
+			panic("EntityListener error: you have to use ToState() when using Duration()")
+		}
 
-	for _, entity := range etl.entityIds {
-		if elList, ok := a.entityListeners[entity]; ok {
-			a.entityListeners[entity] = append(elList, &etl)
-		} else {
-			a.entityListeners[entity] = []*EntityListener{&etl}
+		for _, entity := range etl.entityIds {
+			if elList, ok := a.entityListeners[entity]; ok {
+				a.entityListeners[entity] = append(elList, &etl)
+			} else {
+				a.entityListeners[entity] = []*EntityListener{&etl}
+			}
 		}
 	}
 }
 
-func (a *app) RegisterEventListener(evl EventListener) {
-	for _, eventType := range evl.eventTypes {
-		if elList, ok := a.eventListeners[eventType]; ok {
-			a.eventListeners[eventType] = append(elList, &evl)
-		} else {
-			ws.SubscribeToEventType(eventType, a.conn, a.ctx)
-			a.eventListeners[eventType] = []*EventListener{&evl}
+func (a *app) RegisterEventListeners(evls ...EventListener) {
+	for _, evl := range evls {
+		for _, eventType := range evl.eventTypes {
+			if elList, ok := a.eventListeners[eventType]; ok {
+				a.eventListeners[eventType] = append(elList, &evl)
+			} else {
+				ws.SubscribeToEventType(eventType, a.conn, a.ctx)
+				a.eventListeners[eventType] = []*EventListener{&evl}
+			}
 		}
 	}
 }
