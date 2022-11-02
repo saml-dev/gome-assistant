@@ -27,7 +27,7 @@ type EntityListener struct {
 }
 
 // TODO: add state object as second arg
-type EntityListenerCallback func(*Service, EntityData)
+type EntityListenerCallback func(*Service, *State, EntityData)
 
 type EntityData struct {
 	TriggerEntityId string
@@ -192,14 +192,14 @@ func callEntityListeners(app *app, msgBytes []byte) {
 
 		if l.delay != 0 {
 			l.delayTimer = time.AfterFunc(l.delay, func() {
-				go l.callback(app.service, entityData)
+				go l.callback(app.service, app.state, entityData)
 				l.lastRan = carbon.Now()
 			})
 			return
 		}
 
 		// run now if no delay set
-		go l.callback(app.service, entityData)
+		go l.callback(app.service, app.state, entityData)
 		l.lastRan = carbon.Now()
 	}
 }

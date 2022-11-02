@@ -47,7 +47,7 @@ func main() {
 
 }
 
-func pantryLights(service *ga.Service, sensor ga.EntityData) {
+func pantryLights(service *ga.Service, state *ga.State, sensor ga.EntityData) {
 	l := "light.pantry"
 	if sensor.ToState == "on" {
 		service.HomeAssistant.TurnOn(l)
@@ -68,6 +68,7 @@ func onEvent(service *ga.Service, data ga.EventData) {
 }
 
 func lightsOut(service *ga.Service, state *ga.State) {
+	// always turn off outside lights
 	service.Light.TurnOff("light.outside_lights")
 	s, err := state.Get("binary_sensor.living_room_motion")
 	if err != nil {
@@ -76,7 +77,7 @@ func lightsOut(service *ga.Service, state *ga.State) {
 	}
 
 	// if no motion detected in living room for 30mins
-	if s.State == "off" && time.Now().Sub(s.LastChanged).Minutes() > 30 {
+	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
 		service.Light.TurnOff("light.main_lights")
 	}
 }

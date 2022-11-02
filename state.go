@@ -32,3 +32,11 @@ func (s *State) Get(entityId string) (EntityState, error) {
 	json.Unmarshal(resp, &es)
 	return es, nil
 }
+
+func (s *State) Equals(entityId string, expectedState string) (bool, error) {
+	currentState, err := s.Get(entityId)
+	if err != nil {
+		return false, err
+	}
+	return currentState.State == expectedState, nil
+}
