@@ -156,5 +156,3 @@ func myFunc(se *ga.Service, st *ga.State) {
   ...
 }
 ```
-
-<!-- TODO: add doc for State and Service, prolly don't need it for EntityData/EntityState -->
