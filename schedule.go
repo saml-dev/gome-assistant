@@ -101,7 +101,7 @@ func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 // Sunrise takes an app pointer and an optional duration string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (sb scheduleBuilderDaily) Sunrise(a *app, offset ...DurationString) scheduleBuilderEnd {
+func (sb scheduleBuilderDaily) Sunrise(a *App, offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.realStartTime = getSunriseSunset(a, true, offset).Carbon2Time()
 	sb.schedule.isSunrise = true
 	return scheduleBuilderEnd(sb)
@@ -110,7 +110,7 @@ func (sb scheduleBuilderDaily) Sunrise(a *app, offset ...DurationString) schedul
 // Sunset takes an app pointer and an optional duration string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (sb scheduleBuilderDaily) Sunset(a *app, offset ...DurationString) scheduleBuilderEnd {
+func (sb scheduleBuilderDaily) Sunset(a *App, offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.realStartTime = getSunriseSunset(a, false, offset).Carbon2Time()
 	sb.schedule.isSunset = true
 	return scheduleBuilderEnd(sb)
@@ -161,7 +161,7 @@ func getFunctionName(i interface{}) string {
 }
 
 // app.Start() functions
-func runSchedules(a *app) {
+func runSchedules(a *App) {
 	if a.schedules.Len() == 0 {
 		return
 	}
@@ -184,7 +184,7 @@ func runSchedules(a *app) {
 	}
 }
 
-func maybeRunCallback(a *app, s Schedule) {
+func maybeRunCallback(a *App, s Schedule) {
 	if c := checkExceptionDays(s.exceptionDays); c.fail {
 		return
 	}
@@ -194,12 +194,12 @@ func maybeRunCallback(a *app, s Schedule) {
 	go s.callback(a.service, a.state)
 }
 
-func popSchedule(a *app) Schedule {
+func popSchedule(a *App) Schedule {
 	_sched, _ := a.schedules.Pop()
 	return _sched.(Schedule)
 }
 
-func requeueSchedule(a *app, s Schedule) {
+func requeueSchedule(a *App, s Schedule) {
 	if s.isSunrise || s.isSunset {
 		nextSunTime := getSunriseSunset(a, s.isSunrise, []DurationString{s.sunOffset})
 

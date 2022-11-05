@@ -14,7 +14,7 @@ import (
 	ws "github.com/saml-dev/gome-assistant/internal/websocket"
 )
 
-type app struct {
+type App struct {
 	ctx        context.Context
 	ctxCancel  context.CancelFunc
 	conn       *websocket.Conn
@@ -41,10 +41,10 @@ type timeRange struct {
 }
 
 /*
-App establishes the websocket connection and returns an object
+NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
-func App(connString string) *app {
+func NewApp(connString string) *App {
 	token := os.Getenv("HA_AUTH_TOKEN")
 	conn, ctx, ctxCancel := ws.SetupConnection(connString, token)
 
@@ -53,7 +53,7 @@ func App(connString string) *app {
 	service := newService(conn, ctx, httpClient)
 	state := newState(httpClient)
 
-	return &app{
+	return &App{
 		conn:            conn,
 		ctx:             ctx,
 		ctxCancel:       ctxCancel,
@@ -66,13 +66,13 @@ func App(connString string) *app {
 	}
 }
 
-func (a *app) Cleanup() {
+func (a *App) Cleanup() {
 	if a.ctxCancel != nil {
 		a.ctxCancel()
 	}
 }
 
-func (a *app) RegisterSchedules(schedules ...Schedule) {
+func (a *App) RegisterSchedules(schedules ...Schedule) {
 	for _, s := range schedules {
 		// realStartTime already set for sunset/sunrise
 		if s.isSunrise || s.isSunset {
@@ -101,7 +101,7 @@ func (a *app) RegisterSchedules(schedules ...Schedule) {
 	}
 }
 
-func (a *app) RegisterEntityListeners(etls ...EntityListener) {
+func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
 		if etl.delay != 0 && etl.toState == "" {
 			panic("EntityListener error: you have to use ToState() when using Duration()")
@@ -117,7 +117,7 @@ func (a *app) RegisterEntityListeners(etls ...EntityListener) {
 	}
 }
 
-func (a *app) RegisterEventListeners(evls ...EventListener) {
+func (a *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
 		for _, eventType := range evl.eventTypes {
 			if elList, ok := a.eventListeners[eventType]; ok {
@@ -130,7 +130,7 @@ func (a *app) RegisterEventListeners(evls ...EventListener) {
 	}
 }
 
-func getSunriseSunset(a *app, sunrise bool, offset []DurationString) carbon.Carbon {
+func getSunriseSunset(a *App, sunrise bool, offset []DurationString) carbon.Carbon {
 	printString := "Sunset"
 	attrKey := "next_setting"
 	if sunrise {
@@ -163,7 +163,7 @@ func getSunriseSunset(a *app, sunrise bool, offset []DurationString) carbon.Carb
 	return nextSetOrRise
 }
 
-func (a *app) Start() {
+func (a *App) Start() {
 	// schedules
 	go runSchedules(a)
 

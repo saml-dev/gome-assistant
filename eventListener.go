@@ -102,7 +102,7 @@ type BaseEventMsg struct {
 }
 
 /* Functions */
-func callEventListeners(app *app, msg ws.ChanMsg) {
+func callEventListeners(app *App, msg ws.ChanMsg) {
 	baseEventMsg := BaseEventMsg{}
 	json.Unmarshal(msg.Raw, &baseEventMsg)
 	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]

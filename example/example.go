@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	app := ga.App("0.0.0.0:8123") // Replace with your Home Assistant IP Address
+	app := ga.NewApp("0.0.0.0:8123") // Replace with your Home Assistant IP Address
 	defer app.Cleanup()
 
 	pantryDoor := ga.
