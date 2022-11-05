@@ -36,16 +36,6 @@ func (ha *HomeAssistant) Toggle(entityId string, serviceData ...map[string]any) 
 	}
 
 	ws.WriteMessage(req, ha.conn, ha.ctx)
-	// msg, _ := ws.ReadMessage(ha.conn, ha.ctx)
-	// log.Default().Println(string(msg))
-	// msg, _ = ws.ReadMessage(ha.conn, ha.ctx)
-	// log.Default().Println(string(msg))
-	// msg, _ = ws.ReadMessage(ha.conn, ha.ctx)
-	// log.Default().Println(string(msg))
-	// msg, _ = ws.ReadMessage(ha.conn, ha.ctx)
-	// log.Default().Println(string(msg))
-	// msg, _ = ws.ReadMessage(ha.conn, ha.ctx)
-	// log.Default().Println(string(msg))
 }
 
 func (ha *HomeAssistant) TurnOff(entityId string) {

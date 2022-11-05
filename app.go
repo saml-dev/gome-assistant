@@ -77,7 +77,7 @@ func (a *App) RegisterSchedules(schedules ...Schedule) {
 		// realStartTime already set for sunset/sunrise
 		if s.isSunrise || s.isSunset {
 			a.schedules.Insert(s, float64(s.realStartTime.Unix()))
-			return
+			continue
 		}
 
 		if s.frequency == 0 {
