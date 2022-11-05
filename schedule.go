@@ -2,7 +2,6 @@ package gomeassistant
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"time"
@@ -168,7 +167,6 @@ func runSchedules(a *App) {
 
 	for {
 		sched := popSchedule(a)
-		log.Default().Println(sched.realStartTime)
 
 		// run callback for all schedules before now in case they overlap
 		for sched.realStartTime.Before(time.Now()) {
@@ -178,6 +176,7 @@ func runSchedules(a *App) {
 			sched = popSchedule(a)
 		}
 
+		fmt.Println("Next schedule:", sched.realStartTime)
 		time.Sleep(time.Until(sched.realStartTime))
 		maybeRunCallback(a, sched)
 		requeueSchedule(a, sched)
