@@ -40,3 +40,21 @@ func (s *State) Equals(entityId string, expectedState string) (bool, error) {
 	}
 	return currentState.State == expectedState, nil
 }
+
+func (s *State) BeforeSunrise(offset ...DurationString) bool {
+	sunrise := getSunriseSunsetFromState(s, true, offset...)
+	return sunrise.IsToday()
+}
+
+func (s *State) AfterSunrise(offset ...DurationString) bool {
+	return !s.BeforeSunrise(offset...)
+}
+
+func (s *State) BeforeSunset(offset ...DurationString) bool {
+	sunset := getSunriseSunsetFromState(s, false, offset...)
+	return sunset.IsToday()
+}
+
+func (s *State) AfterSunset(offset ...DurationString) bool {
+	return !s.BeforeSunset(offset...)
+}

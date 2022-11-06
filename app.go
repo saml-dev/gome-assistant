@@ -131,7 +131,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 	}
 }
 
-func getSunriseSunset(a *App, sunrise bool, offset []DurationString) carbon.Carbon {
+func getSunriseSunsetFromState(s *State, sunrise bool, offset ...DurationString) carbon.Carbon {
 	printString := "Sunset"
 	attrKey := "next_setting"
 	if sunrise {
@@ -149,7 +149,7 @@ func getSunriseSunset(a *App, sunrise bool, offset []DurationString) carbon.Carb
 	}
 
 	// get next sunrise/sunset time from HA
-	state, err := a.state.Get("sun.sun")
+	state, err := s.Get("sun.sun")
 	if err != nil {
 		panic(fmt.Sprintf("Couldn't get sun.sun state from HA to calculate %s", printString))
 	}
@@ -162,6 +162,10 @@ func getSunriseSunset(a *App, sunrise bool, offset []DurationString) carbon.Carb
 	}
 
 	return nextSetOrRise
+}
+
+func getSunriseSunsetFromApp(a *App, sunrise bool, offset ...DurationString) carbon.Carbon {
+	return getSunriseSunsetFromState(a.state, sunrise, offset...)
 }
 
 func (a *App) Start() {

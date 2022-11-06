@@ -101,7 +101,7 @@ func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
 func (sb scheduleBuilderDaily) Sunrise(a *App, offset ...DurationString) scheduleBuilderEnd {
-	sb.schedule.realStartTime = getSunriseSunset(a, true, offset).Carbon2Time()
+	sb.schedule.realStartTime = getSunriseSunsetFromApp(a, true, offset...).Carbon2Time()
 	sb.schedule.isSunrise = true
 	return scheduleBuilderEnd(sb)
 }
@@ -110,7 +110,7 @@ func (sb scheduleBuilderDaily) Sunrise(a *App, offset ...DurationString) schedul
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
 func (sb scheduleBuilderDaily) Sunset(a *App, offset ...DurationString) scheduleBuilderEnd {
-	sb.schedule.realStartTime = getSunriseSunset(a, false, offset).Carbon2Time()
+	sb.schedule.realStartTime = getSunriseSunsetFromApp(a, false, offset...).Carbon2Time()
 	sb.schedule.isSunset = true
 	return scheduleBuilderEnd(sb)
 }
@@ -200,7 +200,7 @@ func popSchedule(a *App) Schedule {
 
 func requeueSchedule(a *App, s Schedule) {
 	if s.isSunrise || s.isSunset {
-		nextSunTime := getSunriseSunset(a, s.isSunrise, []DurationString{s.sunOffset})
+		nextSunTime := getSunriseSunsetFromApp(a, s.isSunrise, s.sunOffset)
 
 		// this is true when there is a negative offset, so schedule runs before sunset/sunrise and
 		// HA still shows today's sunset as next sunset. Just add 24h as a default handler
