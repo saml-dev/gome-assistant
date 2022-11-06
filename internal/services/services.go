@@ -17,7 +17,8 @@ func BuildService[
 		InputButton |
 		InputDatetime |
 		InputText |
-		InputNumber,
+		InputNumber |
+		Notify,
 ](conn *websocket.Conn, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }
@@ -29,7 +30,7 @@ type BaseServiceRequest struct {
 	Service     string         `json:"service"`
 	ServiceData map[string]any `json:"service_data,omitempty"`
 	Target      struct {
-		EntityId string `json:"entity_id"`
+		EntityId string `json:"entity_id,omitempty"`
 	} `json:"target,omitempty"`
 }
 
@@ -42,6 +43,5 @@ func NewBaseServiceRequest(entityId string) BaseServiceRequest {
 	if entityId != "" {
 		bsr.Target.EntityId = entityId
 	}
-	id += 1
 	return bsr
 }

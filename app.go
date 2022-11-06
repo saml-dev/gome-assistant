@@ -3,6 +3,7 @@ package gomeassistant
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -164,6 +165,9 @@ func getSunriseSunset(a *App, sunrise bool, offset []DurationString) carbon.Carb
 }
 
 func (a *App) Start() {
+	log.Default().Println("Starting", a.schedules.Len(), "schedules")
+	log.Default().Println("Starting", len(a.entityListeners), "entity listeners")
+	log.Default().Println("Starting", len(a.eventListeners), "event listeners")
 	// schedules
 	go runSchedules(a)
 
