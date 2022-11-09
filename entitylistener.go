@@ -26,7 +26,8 @@ type EntityListener struct {
 	exceptionRanges []timeRange
 }
 
-// TODO: add state object as second arg
+// TODO: add RunOnStartup() to etl, evl, schedule
+
 type EntityListenerCallback func(*Service, *State, EntityData)
 
 type EntityData struct {

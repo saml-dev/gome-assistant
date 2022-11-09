@@ -86,6 +86,15 @@ func (a *App) RegisterSchedules(schedules ...Schedule) {
 		}
 
 		now := time.Now()
+		// TODO: on the day that daylight savings starts/ends,
+		// this results in schedules being an hour late or hour early because
+		// StartOfDay() occurs before the switch. This happens if you start
+		// gome assistant on this day, and VERIFY I think will persist until you
+		// start it again. Sunrise/sunset should be unaffected since those come
+		// from HA.
+		//
+		// IDEA: splitting schedule into Interval and DailySchedule could address this on schedule
+		// side, by using SetTime instead of Add(time.Duration).
 		startTime := carbon.Now().StartOfDay().Carbon2Time()
 		// apply offset if set
 		if s.offset.Minutes() > 0 {

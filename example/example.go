@@ -56,7 +56,7 @@ func pantryLights(service *ga.Service, state *ga.State, sensor ga.EntityData) {
 	}
 }
 
-func onEvent(service *ga.Service, data ga.EventData) {
+func onEvent(service *ga.Service, state *ga.State, data ga.EventData) {
 	// Since the structure of the event changes depending
 	// on the event type, you can Unmarshal the raw json
 	// into a Go type. If a type for your event doesn't

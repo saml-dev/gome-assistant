@@ -22,7 +22,7 @@ type EventListener struct {
 }
 
 // TODO: add state object as second arg
-type EventListenerCallback func(*Service, EventData)
+type EventListenerCallback func(*Service, *State, EventData)
 
 type EventData struct {
 	Type         string
@@ -130,7 +130,7 @@ func callEventListeners(app *App, msg ws.ChanMsg) {
 			Type:         baseEventMsg.Event.EventType,
 			RawEventJSON: msg.Raw,
 		}
-		go l.callback(app.service, eventData)
+		go l.callback(app.service, app.state, eventData)
 		l.lastRan = carbon.Now()
 	}
 }
