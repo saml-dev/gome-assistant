@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/golang-module/carbon"
 	"github.com/saml-dev/gome-assistant/internal"
 )
 
@@ -200,7 +201,12 @@ func popSchedule(a *App) Schedule {
 
 func requeueSchedule(a *App, s Schedule) {
 	if s.isSunrise || s.isSunset {
-		nextSunTime := getSunriseSunsetFromApp(a, s.isSunrise, s.sunOffset)
+		var nextSunTime carbon.Carbon
+		if s.sunOffset != "" {
+			nextSunTime = getSunriseSunsetFromApp(a, s.isSunrise, s.sunOffset)
+		} else {
+			nextSunTime = getSunriseSunsetFromApp(a, s.isSunrise)
+		}
 
 		// this is true when there is a negative offset, so schedule runs before sunset/sunrise and
 		// HA still shows today's sunset as next sunset. Just add 24h as a default handler
