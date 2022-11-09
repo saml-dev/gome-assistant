@@ -150,6 +150,7 @@ The function passed to `.Call()` must take
 
 - `*ga.Service` used to call home assistant services
 - `*ga.State` used to retrieve state from home assistant
+- `ga.EventData` containing the event data that triggered the listener
 
 ```go
 func myFunc(se *ga.Service, st *ga.State) {
