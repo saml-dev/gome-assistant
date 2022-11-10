@@ -189,10 +189,29 @@ func (a *App) Start() {
 	ws.SubscribeToStateChangedEvents(id, a.conn, a.ctx)
 	a.entityListenersId = id
 
-	// entity listeners
+	// entity listeners runOnStartup
+	for eid, etls := range a.entityListeners {
+		for _, etl := range etls {
+			if etl.runOnStartup && !etl.runOnStartupCompleted {
+				entityState, err := a.state.Get(eid)
+				if err != nil {
+					log.Default().Println("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
+				}
+				etl.callback(a.service, a.state, EntityData{
+					TriggerEntityId: eid,
+					FromState:       entityState.State,
+					FromAttributes:  entityState.Attributes,
+					ToState:         entityState.State,
+					ToAttributes:    entityState.Attributes,
+					LastChanged:     entityState.LastChanged,
+				})
+			}
+		}
+	}
+
+	// entity listeners and event listeners
 	elChan := make(chan ws.ChanMsg)
 	go ws.ListenWebsocket(a.conn, a.ctx, elChan)
-
 	var msg ws.ChanMsg
 	for {
 		msg = <-elChan

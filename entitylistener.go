@@ -24,9 +24,10 @@ type EntityListener struct {
 
 	exceptionDays   []time.Time
 	exceptionRanges []timeRange
-}
 
-// TODO: add RunOnStartup() to etl, evl, schedule
+	runOnStartup          bool
+	runOnStartupCompleted bool
+}
 
 type EntityListenerCallback func(*Service, *State, EntityData)
 
@@ -139,6 +140,11 @@ func (b elBuilder3) ExceptionDay(t time.Time) elBuilder3 {
 
 func (b elBuilder3) ExceptionRange(start, end time.Time) elBuilder3 {
 	b.entityListener.exceptionRanges = append(b.entityListener.exceptionRanges, timeRange{start, end})
+	return b
+}
+
+func (b elBuilder3) RunOnStartup() elBuilder3 {
+	b.entityListener.runOnStartup = true
 	return b
 }
 
