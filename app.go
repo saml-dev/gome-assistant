@@ -197,7 +197,8 @@ func (a *App) Start() {
 				if err != nil {
 					log.Default().Println("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
 				}
-				etl.callback(a.service, a.state, EntityData{
+				etl.runOnStartupCompleted = true
+				go etl.callback(a.service, a.state, EntityData{
 					TriggerEntityId: eid,
 					FromState:       entityState.State,
 					FromAttributes:  entityState.Attributes,
