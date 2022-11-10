@@ -110,6 +110,7 @@ Entity listeners have other functions to change the behavior.
 | OnlyBetween("03:00", "14:00")        | Only run your function between two specified times of day.                                        |
 | ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.                    |
 | ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered.               |
+| RunOnStartup()                       | Run your callback once during App.Start()                                                         |
 
 #### Entity Listener Callback function
 
