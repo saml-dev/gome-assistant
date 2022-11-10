@@ -18,7 +18,8 @@ func BuildService[
 		InputDatetime |
 		InputText |
 		InputNumber |
-		Notify,
+		Notify |
+		Number,
 ](conn *websocket.Conn, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }

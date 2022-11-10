@@ -19,6 +19,7 @@ type Service struct {
 	InputDatetime *services.InputDatetime
 	InputNumber   *services.InputNumber
 	Notify        *services.Notify
+	Number        *services.Number
 }
 
 func newService(conn *websocket.Conn, ctx context.Context, httpClient *http.HttpClient) *Service {
@@ -33,5 +34,6 @@ func newService(conn *websocket.Conn, ctx context.Context, httpClient *http.Http
 		InputDatetime: services.BuildService[services.InputDatetime](conn, ctx),
 		InputNumber:   services.BuildService[services.InputNumber](conn, ctx),
 		Notify:        services.BuildService[services.Notify](conn, ctx),
+		Number:        services.BuildService[services.Number](conn, ctx),
 	}
 }
