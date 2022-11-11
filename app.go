@@ -192,11 +192,14 @@ func (a *App) Start() {
 	// entity listeners runOnStartup
 	for eid, etls := range a.entityListeners {
 		for _, etl := range etls {
+			// ensure each ETL only runs once, even if
+			// it listens to multiple entities
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
 				entityState, err := a.state.Get(eid)
 				if err != nil {
 					log.Default().Println("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
 				}
+
 				etl.runOnStartupCompleted = true
 				go etl.callback(a.service, a.state, EntityData{
 					TriggerEntityId: eid,
