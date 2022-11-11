@@ -164,6 +164,14 @@ func callEntityListeners(app *App, msgBytes []byte) {
 		return
 	}
 
+	// if new state is same as old state, don't call
+	// event listener. I noticed this with iOS app location,
+	// every time I refresh the app it triggers a device_tracker
+	// entity listener.
+	if msg.Event.Data.NewState.State == msg.Event.Data.OldState.State {
+		return
+	}
+
 	for _, l := range listeners {
 		// Check conditions
 		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
