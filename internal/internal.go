@@ -3,6 +3,8 @@ package internal
 import (
 	"fmt"
 	"log"
+	"reflect"
+	"runtime"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -15,12 +17,13 @@ func GetId() int64 {
 	return id
 }
 
+// Parses a HH:MM string.
 func ParseTime(s string) carbon.Carbon {
 	t, err := time.Parse("15:04", s)
 	if err != nil {
 		log.Fatalf("Failed to parse time string \"%s\"; format must be HH:MM.", s)
 	}
-	return carbon.Now().StartOfDay().SetHour(t.Hour()).SetMinute(t.Minute())
+	return carbon.Now().SetTimeMilli(t.Hour(), t.Minute(), 0, 0)
 }
 
 func ParseDuration(s string) time.Duration {
@@ -29,4 +32,8 @@ func ParseDuration(s string) time.Duration {
 		panic(fmt.Sprintf("Couldn't parse string duration: \"%s\" see https://pkg.go.dev/time#ParseDuration for valid time units", s))
 	}
 	return d
+}
+
+func GetFunctionName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }

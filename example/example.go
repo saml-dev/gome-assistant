@@ -19,17 +19,15 @@ func main() {
 		Build()
 
 	_11pmSched := ga.
-		NewSchedule().
+		NewDailySchedule().
 		Call(lightsOut).
-		Daily().
 		At("23:00").
 		Build()
 
 	_30minsBeforeSunrise := ga.
-		NewSchedule().
+		NewDailySchedule().
 		Call(sunriseSched).
-		Daily().
-		Sunrise(app, "-30m").
+		Sunrise("-30m").
 		Build()
 
 	zwaveEventListener := ga.
@@ -39,8 +37,7 @@ func main() {
 		Build()
 
 	app.RegisterEntityListeners(pantryDoor)
-	app.RegisterSchedules(_11pmSched)
-	app.RegisterSchedules(_30minsBeforeSunrise)
+	app.RegisterSchedules(_11pmSched, _30minsBeforeSunrise)
 	app.RegisterEventListeners(zwaveEventListener)
 
 	app.Start()

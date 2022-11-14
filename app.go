@@ -25,6 +25,7 @@ type App struct {
 	state   *State
 
 	schedules         pq.PriorityQueue
+	intervals         pq.PriorityQueue
 	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
 	eventListeners    map[string][]*EventListener
@@ -35,6 +36,11 @@ DurationString represents a duration, such as "2s" or "24h".
 See https://pkg.go.dev/time#ParseDuration for all valid time units.
 */
 type DurationString string
+
+/*
+TimeString is a 24-hr format time "HH:MM" such as "07:30".
+*/
+type TimeString string
 
 type timeRange struct {
 	start time.Time
@@ -62,6 +68,7 @@ func NewApp(connString string) *App {
 		service:         service,
 		state:           state,
 		schedules:       pq.New(),
+		intervals:       pq.New(),
 		entityListeners: map[string][]*EntityListener{},
 		eventListeners:  map[string][]*EventListener{},
 	}
@@ -73,41 +80,41 @@ func (a *App) Cleanup() {
 	}
 }
 
-func (a *App) RegisterSchedules(schedules ...Schedule) {
+func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 	for _, s := range schedules {
 		// realStartTime already set for sunset/sunrise
 		if s.isSunrise || s.isSunset {
-			a.schedules.Insert(s, float64(s.realStartTime.Unix()))
+			s.nextRunTime = getSunriseSunsetFromApp(a, s.isSunrise, s.sunOffset).Carbon2Time()
+			a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
 			continue
 		}
 
-		if s.frequency == 0 {
-			panic("A schedule must use either Daily() or Every() when built.")
-		}
-
-		now := time.Now()
-		// TODO: on the day that daylight savings starts/ends,
-		// this results in schedules being an hour late or hour early because
-		// StartOfDay() occurs before the switch. This happens if you start
-		// gome assistant on this day, and VERIFY I think will persist until you
-		// start it again. Sunrise/sunset should be unaffected since those come
-		// from HA.
-		//
-		// IDEA: splitting schedule into Interval and DailySchedule could address this on schedule
-		// side, by using SetTime instead of Add(time.Duration).
-		startTime := carbon.Now().StartOfDay().Carbon2Time()
-		// apply offset if set
-		if s.offset.Minutes() > 0 {
-			startTime = startTime.Add(s.offset)
-		}
+		now := carbon.Now()
+		startTime := carbon.Now().SetTimeMilli(s.hour, s.minute, 0, 0)
 
 		// advance first scheduled time by frequency until it is in the future
-		for startTime.Before(now) {
-			startTime = startTime.Add(s.frequency)
+		if startTime.Lt(now) {
+			startTime = startTime.AddDay()
 		}
 
-		s.realStartTime = startTime
-		a.schedules.Insert(s, float64(startTime.Unix()))
+		s.nextRunTime = startTime.Carbon2Time()
+		a.schedules.Insert(s, float64(startTime.Carbon2Time().Unix()))
+	}
+}
+
+func (a *App) RegisterIntervals(intervals ...Interval) {
+	for _, i := range intervals {
+		if i.frequency == 0 {
+			panic("A schedule must use either set frequency via Every().")
+		}
+
+		i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
+		now := time.Now()
+		for i.nextRunTime.Before(now) {
+			i.nextRunTime = i.nextRunTime.Add(i.frequency)
+		}
+		fmt.Println(i)
+		a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
 	}
 }
 
@@ -181,8 +188,9 @@ func (a *App) Start() {
 	log.Default().Println("Starting", a.schedules.Len(), "schedules")
 	log.Default().Println("Starting", len(a.entityListeners), "entity listeners")
 	log.Default().Println("Starting", len(a.eventListeners), "event listeners")
-	// schedules
+
 	go runSchedules(a)
+	go runIntervals(a)
 
 	// subscribe to state_changed events
 	id := internal.GetId()

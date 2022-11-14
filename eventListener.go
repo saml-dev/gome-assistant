@@ -21,7 +21,6 @@ type EventListener struct {
 	exceptionRanges []timeRange
 }
 
-// TODO: add state object as second arg
 type EventListenerCallback func(*Service, *State, EventData)
 
 type EventData struct {

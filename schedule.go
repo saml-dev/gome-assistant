@@ -2,8 +2,6 @@ package gomeassistant
 
 import (
 	"fmt"
-	"reflect"
-	"runtime"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -12,11 +10,14 @@ import (
 
 type ScheduleCallback func(*Service, *State)
 
-type Schedule struct {
-	frequency     time.Duration
-	callback      ScheduleCallback
-	offset        time.Duration
-	realStartTime time.Time
+type DailySchedule struct {
+	// 0-23
+	hour int
+	// 0-59
+	minute int
+
+	callback    ScheduleCallback
+	nextRunTime time.Time
 
 	isSunrise bool
 	isSunset  bool
@@ -26,59 +27,41 @@ type Schedule struct {
 	exceptionRanges []timeRange
 }
 
-func (s Schedule) Hash() string {
-	return fmt.Sprint(s.offset, s.frequency, s.callback)
+func (s DailySchedule) Hash() string {
+	return fmt.Sprint(s.hour, s.minute, s.callback)
 }
 
 type scheduleBuilder struct {
-	schedule Schedule
+	schedule DailySchedule
 }
 
 type scheduleBuilderCall struct {
-	schedule Schedule
-}
-
-type scheduleBuilderDaily struct {
-	schedule Schedule
-}
-
-type scheduleBuilderCustom struct {
-	schedule Schedule
+	schedule DailySchedule
 }
 
 type scheduleBuilderEnd struct {
-	schedule Schedule
+	schedule DailySchedule
 }
 
-func NewSchedule() scheduleBuilder {
+func NewDailySchedule() scheduleBuilder {
 	return scheduleBuilder{
-		Schedule{
-			frequency: 0,
-			offset:    0,
+		DailySchedule{
+			hour:      0,
+			minute:    0,
+			sunOffset: "0s",
 		},
 	}
 }
 
-func (s Schedule) String() string {
-	return fmt.Sprintf("Schedule{ call %q %s %s }",
-		getFunctionName(s.callback),
-		frequencyToString(s.frequency),
-		offsetToString(s),
+func (s DailySchedule) String() string {
+	return fmt.Sprintf("Schedule{ call %q daily at %s }",
+		internal.GetFunctionName(s.callback),
+		stringHourMinute(s.hour, s.minute),
 	)
 }
 
-func offsetToString(s Schedule) string {
-	if s.frequency.Hours() == 24 {
-		return fmt.Sprintf("%02d:%02d", int(s.offset.Hours()), int(s.offset.Minutes())%60)
-	}
-	return s.offset.String()
-}
-
-func frequencyToString(d time.Duration) string {
-	if d.Hours() == 24 {
-		return "daily at"
-	}
-	return "every " + d.String() + " with offset"
+func stringHourMinute(hour, minute int) string {
+	return fmt.Sprintf("%02d:%02d", hour, minute)
 }
 
 func (sb scheduleBuilder) Call(callback ScheduleCallback) scheduleBuilderCall {
@@ -86,60 +69,28 @@ func (sb scheduleBuilder) Call(callback ScheduleCallback) scheduleBuilderCall {
 	return scheduleBuilderCall(sb)
 }
 
-func (sb scheduleBuilderCall) Daily() scheduleBuilderDaily {
-	sb.schedule.frequency = time.Hour * 24
-	return scheduleBuilderDaily(sb)
-}
-
-// At takes a string 24hr format time like "15:30".
-func (sb scheduleBuilderDaily) At(s string) scheduleBuilderEnd {
+// At takes a string in 24hr format time like "15:30".
+func (sb scheduleBuilderCall) At(s string) scheduleBuilderEnd {
 	t := internal.ParseTime(s)
-	sb.schedule.offset = time.Duration(t.Hour())*time.Hour + time.Duration(t.Minute())*time.Minute
+	sb.schedule.hour = t.Hour()
+	sb.schedule.minute = t.Minute()
 	return scheduleBuilderEnd(sb)
 }
 
-// Sunrise takes an app pointer and an optional duration string that is passed to time.ParseDuration.
+// Sunrise takes an optional duration string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (sb scheduleBuilderDaily) Sunrise(a *App, offset ...DurationString) scheduleBuilderEnd {
-	sb.schedule.realStartTime = getSunriseSunsetFromApp(a, true, offset...).Carbon2Time()
+func (sb scheduleBuilderCall) Sunrise(offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.isSunrise = true
 	return scheduleBuilderEnd(sb)
 }
 
-// Sunset takes an app pointer and an optional duration string that is passed to time.ParseDuration.
+// Sunset takes an optional duration string that is passed to time.ParseDuration.
 // Examples include "-1.5h", "30m", etc. See https://pkg.go.dev/time#ParseDuration
 // for full list.
-func (sb scheduleBuilderDaily) Sunset(a *App, offset ...DurationString) scheduleBuilderEnd {
-	sb.schedule.realStartTime = getSunriseSunsetFromApp(a, false, offset...).Carbon2Time()
+func (sb scheduleBuilderCall) Sunset(offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.isSunset = true
 	return scheduleBuilderEnd(sb)
-}
-
-func (sb scheduleBuilderCall) Every(s DurationString) scheduleBuilderCustom {
-	d := internal.ParseDuration(string(s))
-	sb.schedule.frequency = d
-	return scheduleBuilderCustom(sb)
-}
-
-func (sb scheduleBuilderCustom) Offset(s DurationString) scheduleBuilderEnd {
-	d := internal.ParseDuration(string(s))
-	sb.schedule.offset = d
-	return scheduleBuilderEnd(sb)
-}
-
-func (sb scheduleBuilderCustom) ExceptionDay(t time.Time) scheduleBuilderCustom {
-	sb.schedule.exceptionDays = append(sb.schedule.exceptionDays, t)
-	return sb
-}
-
-func (sb scheduleBuilderCustom) ExceptionRange(start, end time.Time) scheduleBuilderCustom {
-	sb.schedule.exceptionRanges = append(sb.schedule.exceptionRanges, timeRange{start, end})
-	return sb
-}
-
-func (sb scheduleBuilderCustom) Build() Schedule {
-	return sb.schedule
 }
 
 func (sb scheduleBuilderEnd) ExceptionDay(t time.Time) scheduleBuilderEnd {
@@ -152,12 +103,8 @@ func (sb scheduleBuilderEnd) ExceptionRange(start, end time.Time) scheduleBuilde
 	return sb
 }
 
-func (sb scheduleBuilderEnd) Build() Schedule {
+func (sb scheduleBuilderEnd) Build() DailySchedule {
 	return sb.schedule
-}
-
-func getFunctionName(i interface{}) string {
-	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
 // app.Start() functions
@@ -170,21 +117,21 @@ func runSchedules(a *App) {
 		sched := popSchedule(a)
 
 		// run callback for all schedules before now in case they overlap
-		for sched.realStartTime.Before(time.Now()) {
-			maybeRunCallback(a, sched)
+		for sched.nextRunTime.Before(time.Now()) {
+			sched.maybeRunCallback(a)
 			requeueSchedule(a, sched)
 
 			sched = popSchedule(a)
 		}
 
-		fmt.Println("Next schedule:", sched.realStartTime)
-		time.Sleep(time.Until(sched.realStartTime))
-		maybeRunCallback(a, sched)
+		fmt.Println("Next schedule:", sched.nextRunTime)
+		time.Sleep(time.Until(sched.nextRunTime))
+		sched.maybeRunCallback(a)
 		requeueSchedule(a, sched)
 	}
 }
 
-func maybeRunCallback(a *App, s Schedule) {
+func (s DailySchedule) maybeRunCallback(a *App) {
 	if c := checkExceptionDays(s.exceptionDays); c.fail {
 		return
 	}
@@ -194,31 +141,32 @@ func maybeRunCallback(a *App, s Schedule) {
 	go s.callback(a.service, a.state)
 }
 
-func popSchedule(a *App) Schedule {
+func popSchedule(a *App) DailySchedule {
 	_sched, _ := a.schedules.Pop()
-	return _sched.(Schedule)
+	return _sched.(DailySchedule)
 }
 
-func requeueSchedule(a *App, s Schedule) {
+func requeueSchedule(a *App, s DailySchedule) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
-		if s.sunOffset != "" {
+		// "0s" is default value
+		if s.sunOffset != "0s" {
 			nextSunTime = getSunriseSunsetFromApp(a, s.isSunrise, s.sunOffset)
 		} else {
 			nextSunTime = getSunriseSunsetFromApp(a, s.isSunrise)
 		}
 
 		// this is true when there is a negative offset, so schedule runs before sunset/sunrise and
-		// HA still shows today's sunset as next sunset. Just add 24h as a default handler
+		// HA still shows today's sunset as next sunset. Just add 1 day as a default handler
 		// since we can't get tomorrow's sunset from HA at this point.
 		if nextSunTime.IsToday() {
-			nextSunTime = nextSunTime.AddHours(24)
+			nextSunTime = nextSunTime.AddDay()
 		}
 
-		s.realStartTime = nextSunTime.Carbon2Time()
+		s.nextRunTime = nextSunTime.Carbon2Time()
 	} else {
-		s.realStartTime = s.realStartTime.Add(s.frequency)
+		s.nextRunTime = carbon.Time2Carbon(s.nextRunTime).AddDay().Carbon2Time()
 	}
 
-	a.schedules.Insert(s, float64(s.realStartTime.Unix()))
+	a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
 }

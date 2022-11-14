@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
+	"github.com/saml-dev/gome-assistant/internal"
 	i "github.com/saml-dev/gome-assistant/internal"
 )
 
@@ -81,6 +82,27 @@ func checkExceptionRanges(eList []timeRange) conditionCheck {
 		if now.After(eRange.start) && now.Before(eRange.end) {
 			cc.fail = true
 			break
+		}
+	}
+	return cc
+}
+
+func checkStartEndTime(s TimeString, isStart bool) conditionCheck {
+	cc := conditionCheck{fail: false}
+	// pass immediately if default
+	if s == "00:00" {
+		return cc
+	}
+
+	now := time.Now()
+	parsedTime := internal.ParseTime(string(s)).Carbon2Time()
+	if isStart {
+		if parsedTime.After(now) {
+			cc.fail = true
+		}
+	} else {
+		if parsedTime.Before(now) {
+			cc.fail = true
 		}
 	}
 	return cc
