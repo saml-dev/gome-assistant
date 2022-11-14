@@ -22,7 +22,7 @@ Check out `example/example.go` for an example of the 3 types of automations — 
 
 ### Run your code
 
-Keeping with the simplicity that Go is famous for, you don't need a specific environment or docker container to run Gome-Assistant. You just write your code like any other Go binary you would write. So once you have your automations, you can run it however you like — using `screen` or `tmux`, a cron job, or wrap it up in a docker container if you just can't get enough docker!
+Keeping with the simplicity that Go is famous for, you don't need a specific environment or docker container to run Gome-Assistant. You just write and run your code like any other Go binary. So once you build your code, you can run it however you like — using `screen` or `tmux`, a cron job, a linux service, or wrap it up in a docker container if you like!
 
 > _❗ No promises, but I may provide a Docker image with file watching to automatically restart gome-assistant, to make it easier to use gome-assistant on a fully managed Home Assistant installation._
 
@@ -52,29 +52,36 @@ app.RegisterEventListeners(...)
 app.Start()
 ```
 
-A full reference is available on [pkg.go.dev](https://pkg.go.dev/github.com/saml-dev/gome-assistant), but all you need to know to get started are the three types of automations in gome-assistant.
+A full reference is available on [pkg.go.dev](https://pkg.go.dev/github.com/saml-dev/gome-assistant), but all you need to know to get started are the four types of automations in gome-assistant.
 
-### Schedules
+- [Daily Schedules](#daily-schedule)
+- [Entity Listeners](#entity-listener)
+- [Event Listeners](#event-listener)
+- [Intervals](#interval)
 
-Schedules are simply a way to run a function on a schedule. The most common schedule is once a day at a certain time.
+### Daily Schedule
+
+Daily Schedules run at a specific time each day.
 
 ```go
-_7pm := ga.NewSchedule().Call(myFunc).Daily().At("19:00").Build()
+_7pm := ga.NewDailySchedule().Call(myFunc).At("19:00").Build()
 ```
 
 Schedules can also be run at sunrise or sunset, with an optional [offset](https://pkg.go.dev/time#ParseDuration).
 
 ```go
 // 30 mins before sunrise
-sunrise := ga.NewSchedule().Call(myFunc).Daily().Sunrise(app, "-30m").Build()
+sunrise := ga.NewDailySchedule().Call(myFunc).Sunrise(app, "-30m").Build()
+// at sunset
+sunset := ga.NewDailySchedule().Call(myFunc).Sunset().Build()
 ```
 
-Schedules are also used to run a function on an interval. Offset is used to offset the first run of a schedule from midnight.
+Daily schedules have other functions to change the behavior.
 
-```go
-// run every hour at the 30-minute mark
-interval := ga.NewSchedule().Call(a).Every("1h").Offset("30m").Build()
-```
+| Function                             | Info                                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.      |
+| ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered. |
 
 #### Schedule Callback function
 
@@ -85,11 +92,11 @@ The function passed to `.Call()` must take
 
 ```go
 func myFunc(se *ga.Service, st *ga.State) {
-  ...
+  // ...
 }
 ```
 
-### Entity Listeners
+### Entity Listener
 
 Entity Listeners are used to respond to entities changing state. The simplest entity listener looks like:
 
@@ -122,11 +129,11 @@ The function passed to `.Call()` must take
 
 ```go
 func myFunc(se *ga.Service, st *ga.State, e ga.EntityData) {
-  ...
+  // ...
 }
 ```
 
-### Event Listeners
+### Event Listener
 
 Event Listeners are used to respond to entities changing state. The simplest event listener looks like:
 
@@ -155,6 +162,39 @@ The function passed to `.Call()` must take
 
 ```go
 func myFunc(se *ga.Service, st *ga.State) {
-  ...
+  // ...
+}
+```
+
+### Interval
+
+Intervals are used to run a function on an interval.
+
+```go
+// run every hour at the 30-minute mark
+interval := ga.NewInterval().Call(myFunc).Every("1h").Build()
+// run every 5 minutes between 10am and 5pm
+interval = ga.NewInterval().Call(myFunc).Every("5m").StartingAt("10:00").EndingAt("17:00").Build()
+```
+
+Intervals have other functions to change the behavior.
+
+| Function                             | Info                                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------- |
+| StartingAt(TimeString)               | What time the interval begins to run each day.                                      |
+| EndingAt(TimeString)                 | What time the interval stops running each day.                                      |
+| ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.      |
+| ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered. |
+
+#### Interval Callback function
+
+The function passed to `.Call()` must take
+
+- `*ga.Service` used to call home assistant services
+- `*ga.State` used to retrieve state from home assistant
+
+```go
+func myFunc(se *ga.Service, st *ga.State) {
+  // ...
 }
 ```
