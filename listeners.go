@@ -62,7 +62,7 @@ func checkThrottle(throttle time.Duration, lastRan carbon.Carbon) conditionCheck
 	return cc
 }
 
-func checkExceptionDays(eList []time.Time) conditionCheck {
+func checkExceptionDates(eList []time.Time) conditionCheck {
 	cc := conditionCheck{fail: false}
 	for _, e := range eList {
 		y1, m1, d1 := e.Date()
@@ -81,6 +81,23 @@ func checkExceptionRanges(eList []timeRange) conditionCheck {
 	for _, eRange := range eList {
 		if now.After(eRange.start) && now.Before(eRange.end) {
 			cc.fail = true
+			break
+		}
+	}
+	return cc
+}
+
+func checkAllowlistDates(eList []time.Time) conditionCheck {
+	if len(eList) == 0 {
+		return conditionCheck{fail: false}
+	}
+
+	cc := conditionCheck{fail: true}
+	for _, e := range eList {
+		y1, m1, d1 := e.Date()
+		y2, m2, d2 := time.Now().Date()
+		if y1 == y2 && m1 == m2 && d1 == d2 {
+			cc.fail = false
 			break
 		}
 	}

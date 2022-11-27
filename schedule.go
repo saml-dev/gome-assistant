@@ -23,8 +23,8 @@ type DailySchedule struct {
 	isSunset  bool
 	sunOffset DurationString
 
-	exceptionDays   []time.Time
-	exceptionRanges []timeRange
+	exceptionDates []time.Time
+	allowlistDates []time.Time
 }
 
 func (s DailySchedule) Hash() string {
@@ -93,13 +93,13 @@ func (sb scheduleBuilderCall) Sunset(offset ...DurationString) scheduleBuilderEn
 	return scheduleBuilderEnd(sb)
 }
 
-func (sb scheduleBuilderEnd) ExceptionDay(t time.Time) scheduleBuilderEnd {
-	sb.schedule.exceptionDays = append(sb.schedule.exceptionDays, t)
+func (sb scheduleBuilderEnd) ExceptionDates(t time.Time, tl ...time.Time) scheduleBuilderEnd {
+	sb.schedule.exceptionDates = append(tl, t)
 	return sb
 }
 
-func (sb scheduleBuilderEnd) ExceptionRange(start, end time.Time) scheduleBuilderEnd {
-	sb.schedule.exceptionRanges = append(sb.schedule.exceptionRanges, timeRange{start, end})
+func (sb scheduleBuilderEnd) OnlyOnDates(t time.Time, tl ...time.Time) scheduleBuilderEnd {
+	sb.schedule.allowlistDates = append(tl, t)
 	return sb
 }
 
@@ -132,10 +132,10 @@ func runSchedules(a *App) {
 }
 
 func (s DailySchedule) maybeRunCallback(a *App) {
-	if c := checkExceptionDays(s.exceptionDays); c.fail {
+	if c := checkExceptionDates(s.exceptionDates); c.fail {
 		return
 	}
-	if c := checkExceptionRanges(s.exceptionRanges); c.fail {
+	if c := checkAllowlistDates(s.allowlistDates); c.fail {
 		return
 	}
 	go s.callback(a.service, a.state)

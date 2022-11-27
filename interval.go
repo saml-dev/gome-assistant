@@ -16,12 +16,12 @@ type Interval struct {
 	endTime     TimeString
 	nextRunTime time.Time
 
-	exceptionDays   []time.Time
+	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 }
 
 func (i Interval) Hash() string {
-	return fmt.Sprint(i.startTime, i.endTime, i.frequency, i.callback, i.exceptionDays, i.exceptionRanges)
+	return fmt.Sprint(i.startTime, i.endTime, i.frequency, i.callback, i.exceptionDates, i.exceptionRanges)
 }
 
 // Call
@@ -34,7 +34,7 @@ type intervalBuilderCall struct {
 	interval Interval
 }
 
-// Offset, ExceptionDay, ExceptionRange
+// Offset, ExceptionDates, ExceptionRange
 type intervalBuilderEnd struct {
 	interval Interval
 }
@@ -93,8 +93,8 @@ func (sb intervalBuilderEnd) EndingAt(s TimeString) intervalBuilderEnd {
 	return sb
 }
 
-func (sb intervalBuilderEnd) ExceptionDay(t time.Time) intervalBuilderEnd {
-	sb.interval.exceptionDays = append(sb.interval.exceptionDays, t)
+func (sb intervalBuilderEnd) ExceptionDates(t time.Time, tl ...time.Time) intervalBuilderEnd {
+	sb.interval.exceptionDates = append(tl, t)
 	return sb
 }
 
@@ -137,7 +137,7 @@ func (i Interval) maybeRunCallback(a *App) {
 	if c := checkStartEndTime(i.endTime /* isStart = */, false); c.fail {
 		return
 	}
-	if c := checkExceptionDays(i.exceptionDays); c.fail {
+	if c := checkExceptionDates(i.exceptionDates); c.fail {
 		return
 	}
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {

@@ -17,7 +17,7 @@ type EventListener struct {
 	throttle     time.Duration
 	lastRan      carbon.Carbon
 
-	exceptionDays   []time.Time
+	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 }
 
@@ -80,8 +80,8 @@ func (b eventListenerBuilder3) Throttle(s DurationString) eventListenerBuilder3 
 	return b
 }
 
-func (b eventListenerBuilder3) ExceptionDay(t time.Time) eventListenerBuilder3 {
-	b.eventListener.exceptionDays = append(b.eventListener.exceptionDays, t)
+func (b eventListenerBuilder3) ExceptionDates(t time.Time, tl ...time.Time) eventListenerBuilder3 {
+	b.eventListener.exceptionDates = append(tl, t)
 	return b
 }
 
@@ -118,7 +118,7 @@ func callEventListeners(app *App, msg ws.ChanMsg) {
 		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
 			continue
 		}
-		if c := checkExceptionDays(l.exceptionDays); c.fail {
+		if c := checkExceptionDates(l.exceptionDates); c.fail {
 			continue
 		}
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {

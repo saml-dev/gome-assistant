@@ -22,7 +22,7 @@ type EntityListener struct {
 	delay      time.Duration
 	delayTimer *time.Timer
 
-	exceptionDays   []time.Time
+	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 
 	runOnStartup          bool
@@ -133,8 +133,8 @@ func (b elBuilder3) Throttle(s DurationString) elBuilder3 {
 	return b
 }
 
-func (b elBuilder3) ExceptionDay(t time.Time) elBuilder3 {
-	b.entityListener.exceptionDays = append(b.entityListener.exceptionDays, t)
+func (b elBuilder3) ExceptionDates(t time.Time, tl ...time.Time) elBuilder3 {
+	b.entityListener.exceptionDates = append(tl, t)
 	return b
 }
 
@@ -189,7 +189,7 @@ func callEntityListeners(app *App, msgBytes []byte) {
 		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
 			continue
 		}
-		if c := checkExceptionDays(l.exceptionDays); c.fail {
+		if c := checkExceptionDates(l.exceptionDates); c.fail {
 			continue
 		}
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {

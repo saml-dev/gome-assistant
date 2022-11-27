@@ -78,10 +78,10 @@ sunset := ga.NewDailySchedule().Call(myFunc).Sunset().Build()
 
 Daily schedules have other functions to change the behavior.
 
-| Function                             | Info                                                                                |
-| ------------------------------------ | ----------------------------------------------------------------------------------- |
-| ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.      |
-| ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered. |
+| Function                                  | Info                                                                                                     |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| ExceptionDates(t time.Time, ...time.Time) | Skip the schedule on the given date(s). Functions like a blocklist. Cannot be combined with OnlyOnDates. |
+| OnlyOnDates(t time.Time, ...time.Time)    | Run only on the given date(s). Functions like an allowlist. Cannot be combined with ExceptionDates.      |
 
 #### Schedule Callback function
 
@@ -106,18 +106,18 @@ etl := ga.NewEntityListener().EntityIds("binary_sensor.front_door").Call(myFunc)
 
 Entity listeners have other functions to change the behavior.
 
-| Function                             | Info                                                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| ToState("on")                        | Function only called if new state matches argument.                                               |
-| FromState("on")                      | Function only called if old state matches argument.                                               |
-| Throttle("30s")                      | Minimum time between function calls.                                                              |
-| Duration("30s")                      | Requires ToState(). Sets how long the entity should be in the state before running your function. |
-| OnlyAfter("03:00")                   | Only run your function after a specified time of day.                                             |
-| OnlyBefore("03:00")                  | Only run your function before a specified time of day.                                            |
-| OnlyBetween("03:00", "14:00")        | Only run your function between two specified times of day.                                        |
-| ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.                    |
-| ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered.               |
-| RunOnStartup()                       | Run your callback once during App.Start()                                                         |
+| Function                                | Info                                                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| ToState("on")                           | Function only called if new state matches argument.                                                               |
+| FromState("on")                         | Function only called if old state matches argument.                                                               |
+| Throttle("30s")                         | Minimum time between function calls.                                                                              |
+| Duration("30s")                         | Requires ToState(). Sets how long the entity must be in the state before running your function.                   |
+| OnlyAfter("03:00")                      | Only run your function after a specified time of day.                                                             |
+| OnlyBefore("03:00")                     | Only run your function before a specified time of day.                                                            |
+| OnlyBetween("03:00", "14:00")           | Only run your function between two specified times of day.                                                        |
+| ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day. Functions like a "blocklist".      |
+| ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. Functions like a "blocklist". |
+| RunOnStartup()                          | Run your callback during `App.Start()`.                                                                           |
 
 #### Entity Listener Callback function
 
@@ -143,14 +143,14 @@ evl := ga.NewEntityListener().EntityIds("binary_sensor.front_door").Call(myFunc)
 
 Event listeners have other functions to change the behavior.
 
-| Function                             | Info                                                                                |
-| ------------------------------------ | ----------------------------------------------------------------------------------- |
-| Throttle("30s")                      | Minimum time between function calls.                                                |
-| OnlyAfter("03:00")                   | Only run your function after a specified time of day.                               |
-| OnlyBefore("03:00")                  | Only run your function before a specified time of day.                              |
-| OnlyBetween("03:00", "14:00")        | Only run your function between two specified times of day.                          |
-| ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.      |
-| ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered. |
+| Function                                | Info                                                                                |
+| --------------------------------------- | ----------------------------------------------------------------------------------- |
+| Throttle("30s")                         | Minimum time between function calls.                                                |
+| OnlyAfter("03:00")                      | Only run your function after a specified time of day.                               |
+| OnlyBefore("03:00")                     | Only run your function before a specified time of day.                              |
+| OnlyBetween("03:00", "14:00")           | Only run your function between two specified times of day.                          |
+| ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day.      |
+| ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. |
 
 #### Event Listener Callback function
 
@@ -179,12 +179,12 @@ interval = ga.NewInterval().Call(myFunc).Every("5m").StartingAt("10:00").EndingA
 
 Intervals have other functions to change the behavior.
 
-| Function                             | Info                                                                                |
-| ------------------------------------ | ----------------------------------------------------------------------------------- |
-| StartingAt(TimeString)               | What time the interval begins to run each day.                                      |
-| EndingAt(TimeString)                 | What time the interval stops running each day.                                      |
-| ExceptionDay(time.Time)              | A one time exception on the given date. Time is ignored, applies to whole day.      |
-| ExceptionRange(time.Time, time.Time) | A one time exception between the two date/times. Both date and time are considered. |
+| Function                                | Info                                                                                |
+| --------------------------------------- | ----------------------------------------------------------------------------------- |
+| StartingAt(TimeString)                  | What time the interval begins to run each day.                                      |
+| EndingAt(TimeString)                    | What time the interval stops running each day.                                      |
+| ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day.      |
+| ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. |
 
 #### Interval Callback function
 
