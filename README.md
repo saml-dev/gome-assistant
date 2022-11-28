@@ -146,9 +146,9 @@ Event listeners have other functions to change the behavior.
 | Function                                | Info                                                                                |
 | --------------------------------------- | ----------------------------------------------------------------------------------- |
 | Throttle("30s")                         | Minimum time between function calls.                                                |
-| OnlyAfter("03:00")                      | Only run your function after a specified time of day.                               |
-| OnlyBefore("03:00")                     | Only run your function before a specified time of day.                              |
-| OnlyBetween("03:00", "14:00")           | Only run your function between two specified times of day.                          |
+| OnlyAfter("03:00")                      | Only run after a specified time of day.                                             |
+| OnlyBefore("03:00")                     | Only run before a specified time of day.                                            |
+| OnlyBetween("03:00", "14:00")           | Only run between two specified times of day.                                        |
 | ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day.      |
 | ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. |
 

@@ -210,7 +210,7 @@ func callEntityListeners(app *App, msgBytes []byte) {
 				go l.callback(app.service, app.state, entityData)
 				l.lastRan = carbon.Now()
 			})
-			return
+			continue
 		}
 
 		// run now if no delay set
