@@ -206,6 +206,7 @@ func callEntityListeners(app *App, msgBytes []byte) {
 		}
 
 		if l.delay != 0 {
+			l := l
 			l.delayTimer = time.AfterFunc(l.delay, func() {
 				go l.callback(app.service, app.state, entityData)
 				l.lastRan = carbon.Now()
