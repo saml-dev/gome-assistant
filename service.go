@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/gorilla/websocket"
-	"github.com/saml-dev/gome-assistant/internal/http"
-	"github.com/saml-dev/gome-assistant/internal/services"
+	"saml.dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/internal/services"
 )
 
 type Service struct {

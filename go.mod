@@ -1,4 +1,4 @@
-module github.com/saml-dev/gome-assistant
+module saml.dev/gome-assistant
 
 go 1.19
 

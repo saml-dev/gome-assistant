@@ -11,7 +11,7 @@ Gome-Assistant is a new library, and I'm opening it up early to get some user fe
 ### Installation
 
 ```
-go get github.com/saml-dev/gome-assistant
+go get saml.dev/gome-assistant
 ```
 
 ### Write your automations
@@ -37,7 +37,7 @@ The general flow is
 3. Start app
 
 ```go
-import ga "github.com/saml-dev/gome-assistant"
+import ga "saml.dev/gome-assistant"
 
 // replace with IP and port of your Home Assistant installation
 app := ga.NewApp("0.0.0.0:8123")
@@ -52,7 +52,7 @@ app.RegisterEventListeners(...)
 app.Start()
 ```
 
-A full reference is available on [pkg.go.dev](https://pkg.go.dev/github.com/saml-dev/gome-assistant), but all you need to know to get started are the four types of automations in gome-assistant.
+A full reference is available on [pkg.go.dev](https://pkg.go.dev/saml.dev/gome-assistant), but all you need to know to get started are the four types of automations in gome-assistant.
 
 - [Daily Schedules](#daily-schedule)
 - [Entity Listeners](#entity-listener)

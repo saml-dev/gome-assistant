@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
-	"github.com/saml-dev/gome-assistant/internal"
-	i "github.com/saml-dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/internal"
+	i "saml.dev/gome-assistant/internal"
 )
 
 type conditionCheck struct {

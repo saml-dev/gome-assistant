@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	i "github.com/saml-dev/gome-assistant/internal"
+	i "saml.dev/gome-assistant/internal"
 )
 
 type AuthMessage struct {

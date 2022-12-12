@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
-	"github.com/saml-dev/gome-assistant/internal"
-	ws "github.com/saml-dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal"
+	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type EventListener struct {

@@ -9,10 +9,10 @@ import (
 
 	"github.com/golang-module/carbon"
 	"github.com/gorilla/websocket"
-	"github.com/saml-dev/gome-assistant/internal"
-	"github.com/saml-dev/gome-assistant/internal/http"
-	pq "github.com/saml-dev/gome-assistant/internal/priorityqueue"
-	ws "github.com/saml-dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/internal/http"
+	pq "saml.dev/gome-assistant/internal/priorityqueue"
+	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type App struct {

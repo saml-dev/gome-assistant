@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	ga "github.com/saml-dev/gome-assistant"
+	ga "saml.dev/gome-assistant"
 )
 
 func main() {

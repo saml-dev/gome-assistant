@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gorilla/websocket"
-	ws "github.com/saml-dev/gome-assistant/internal/websocket"
+	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */

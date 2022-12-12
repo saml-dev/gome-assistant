@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/gorilla/websocket"
-	"github.com/saml-dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/internal"
 )
 
 func BuildService[

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/saml-dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/internal/http"
 )
 
 // State is used to retrieve state from Home Assistant.
