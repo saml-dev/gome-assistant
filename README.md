@@ -16,7 +16,7 @@ go get saml.dev/gome-assistant
 
 ### Write your automations
 
-Check out `example/example.go` for an example of the 3 types of automations — schedules, entity listeners, and event listeners.
+Check out [`example/example.go`](./example/example.go) for an example of the 3 types of automations — schedules, entity listeners, and event listeners.
 
 > ℹ️ Instead of copying and pasting, try typing it yourself to see how autocomplete guides you through the setup using a builder pattern.
 
@@ -48,6 +48,7 @@ app := ga.NewApp("0.0.0.0:8123")
 app.RegisterSchedules(...)
 app.RegisterEntityListeners(...)
 app.RegisterEventListeners(...)
+app.RegisterIntervals(...)
 
 app.Start()
 ```
