@@ -82,6 +82,9 @@ func (sb scheduleBuilderCall) At(s string) scheduleBuilderEnd {
 // for full list.
 func (sb scheduleBuilderCall) Sunrise(offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.isSunrise = true
+	if len(offset) > 0 {
+		sb.schedule.sunOffset = offset[0]
+	}
 	return scheduleBuilderEnd(sb)
 }
 
@@ -90,6 +93,9 @@ func (sb scheduleBuilderCall) Sunrise(offset ...DurationString) scheduleBuilderE
 // for full list.
 func (sb scheduleBuilderCall) Sunset(offset ...DurationString) scheduleBuilderEnd {
 	sb.schedule.isSunset = true
+	if len(offset) > 0 {
+		sb.schedule.sunOffset = offset[0]
+	}
 	return scheduleBuilderEnd(sb)
 }
 
