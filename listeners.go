@@ -5,7 +5,6 @@ import (
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal"
-	i "saml.dev/gome-assistant/internal"
 )
 
 type conditionCheck struct {
@@ -17,8 +16,8 @@ func checkWithinTimeRange(startTime, endTime string) conditionCheck {
 	// if betweenStart and betweenEnd both set, first account for midnight
 	// overlap, then check if between those times.
 	if startTime != "" && endTime != "" {
-		parsedStart := i.ParseTime(startTime)
-		parsedEnd := i.ParseTime(endTime)
+		parsedStart := internal.ParseTime(startTime)
+		parsedEnd := internal.ParseTime(endTime)
 
 		// check for midnight overlap
 		if parsedEnd.Lt(parsedStart) { // example turn on night lights when motion from 23:00 to 07:00
@@ -35,9 +34,9 @@ func checkWithinTimeRange(startTime, endTime string) conditionCheck {
 		}
 
 		// otherwise just check individual before/after
-	} else if startTime != "" && i.ParseTime(startTime).IsFuture() {
+	} else if startTime != "" && internal.ParseTime(startTime).IsFuture() {
 		cc.fail = true
-	} else if endTime != "" && i.ParseTime(endTime).IsPast() {
+	} else if endTime != "" && internal.ParseTime(endTime).IsPast() {
 		cc.fail = true
 	}
 	return cc
