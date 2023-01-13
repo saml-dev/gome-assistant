@@ -3,13 +3,18 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"os"
 	"time"
 
 	ga "saml.dev/gome-assistant"
 )
 
 func main() {
-	app := ga.NewApp("0.0.0.0:8123") // Replace with your Home Assistant IP Address
+	app := ga.NewApp(ga.NewAppRequest{
+		IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
+		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
+		HomeZoneEntityId: "zone.home",
+	})
 	defer app.Cleanup()
 
 	pantryDoor := ga.

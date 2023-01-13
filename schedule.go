@@ -157,16 +157,9 @@ func requeueSchedule(a *App, s DailySchedule) {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
 		if s.sunOffset != "0s" {
-			nextSunTime = getSunriseSunsetFromApp(a, s.isSunrise, s.sunOffset)
+			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset)
 		} else {
-			nextSunTime = getSunriseSunsetFromApp(a, s.isSunrise)
-		}
-
-		// this is true when there is a negative offset, so schedule runs before sunset/sunrise and
-		// HA still shows today's sunset as next sunset. Just add 1 day as a default handler
-		// since we can't get tomorrow's sunset from HA at this point.
-		if nextSunTime.IsToday() {
-			nextSunTime = nextSunTime.AddDay()
+			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise)
 		}
 
 		s.nextRunTime = nextSunTime.Carbon2Time()

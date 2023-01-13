@@ -21,6 +21,8 @@ type AuthMessage struct {
 	AccessToken string `json:"access_token"`
 }
 
+// TODO: use a mutex to prevent concurrent writes panic here
+// https://github.com/gorilla/websocket/issues/119
 func WriteMessage[T any](msg T, conn *websocket.Conn, ctx context.Context) error {
 	msgJson, err := json.Marshal(msg)
 	// fmt.Println(string(msgJson))
@@ -44,36 +46,36 @@ func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
 	return msg, nil
 }
 
-func SetupConnection(connString string, authToken string) (*websocket.Conn, context.Context, context.CancelFunc) {
+func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
 
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("ws://%s/api/websocket", connString), nil)
+	conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("ws://%s:%s/api/websocket", ip, port), nil)
 	if err != nil {
 		ctxCancel()
-		log.Fatalf("ERROR: Failed to connect to websocket at ws://%s/api/websocket. Check IP address and port\n", connString)
+		log.Fatalf("ERROR: Failed to connect to websocket at ws://%s:%s/api/websocket. Check IP address and port\n", ip, port)
 	}
 
 	// Read auth_required message
 	_, err = ReadMessage(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		panic("Unknown error creating websocket client")
+		log.Fatalf("Unknown error creating websocket client\n")
 	}
 
 	// Send auth message
 	err = SendAuthMessage(conn, ctx, authToken)
 	if err != nil {
 		ctxCancel()
-		panic("Unknown error creating websocket client")
+		log.Fatalf("Unknown error creating websocket client\n")
 	}
 
 	// Verify auth message was successful
 	err = VerifyAuthResponse(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		panic("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile")
+		log.Fatalf("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
 	}
 
 	return conn, ctx, ctxCancel
@@ -132,7 +134,7 @@ func SubscribeToEventType(eventType string, conn *websocket.Conn, ctx context.Co
 	}
 	err := WriteMessage(e, conn, ctx)
 	if err != nil {
-		panic(fmt.Sprintf("Error writing to websocket: %s", err))
+		log.Fatalf("Error writing to websocket: %s\n", err)
 	}
 	// m, _ := ReadMessage(conn, ctx)
 	// log.Default().Println(string(m))

@@ -2,14 +2,18 @@ package gomeassistant
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
+	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal/http"
 )
 
 // State is used to retrieve state from Home Assistant.
 type State struct {
 	httpClient *http.HttpClient
+	latitude   float64
+	longitude  float64
 }
 
 type EntityState struct {
@@ -19,8 +23,19 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 }
 
-func newState(c *http.HttpClient) *State {
-	return &State{httpClient: c}
+func newState(c *http.HttpClient, homeZoneEntityId string) *State {
+	state := &State{httpClient: c}
+	state.getLatLong(c, homeZoneEntityId)
+	return state
+}
+
+func (s *State) getLatLong(c *http.HttpClient, homeZoneEntityId string) {
+	resp, err := s.Get(homeZoneEntityId)
+	if err != nil {
+		log.Fatalf("Couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'.\n", homeZoneEntityId)
+	}
+	s.latitude = resp.Attributes["latitude"].(float64)
+	s.longitude = resp.Attributes["longitude"].(float64)
 }
 
 func (s *State) Get(entityId string) (EntityState, error) {
@@ -42,8 +57,8 @@ func (s *State) Equals(entityId string, expectedState string) (bool, error) {
 }
 
 func (s *State) BeforeSunrise(offset ...DurationString) bool {
-	sunrise := getSunriseSunsetFromState(s, true, offset...)
-	return sunrise.IsToday()
+	sunrise := getSunriseSunset(s /* sunrise = */, true, carbon.Now(), offset...)
+	return carbon.Now().Lt(sunrise)
 }
 
 func (s *State) AfterSunrise(offset ...DurationString) bool {
@@ -51,8 +66,8 @@ func (s *State) AfterSunrise(offset ...DurationString) bool {
 }
 
 func (s *State) BeforeSunset(offset ...DurationString) bool {
-	sunset := getSunriseSunsetFromState(s, false, offset...)
-	return sunset.IsToday()
+	sunset := getSunriseSunset(s /* sunrise = */, false, carbon.Now(), offset...)
+	return carbon.Now().Lt(sunset)
 }
 
 func (s *State) AfterSunset(offset ...DurationString) bool {

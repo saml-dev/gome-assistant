@@ -15,8 +15,8 @@ type HttpClient struct {
 	token string
 }
 
-func NewHttpClient(url, token string) *HttpClient {
-	url = fmt.Sprintf("http://%s/api", url)
+func NewHttpClient(ip, port, token string) *HttpClient {
+	url := fmt.Sprintf("http://%s:%s/api", ip, port)
 	return &HttpClient{url, token}
 }
 

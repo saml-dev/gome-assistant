@@ -12,5 +12,6 @@ require (
 	github.com/gobuffalo/packd v1.0.2 // indirect
 	github.com/gobuffalo/packr v1.30.1 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
+	github.com/nathan-osman/go-sunrise v1.1.0 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 )
