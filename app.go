@@ -26,9 +26,9 @@ type App struct {
 
 	schedules         pq.PriorityQueue
 	intervals         pq.PriorityQueue
-	entityListeners   map[string][]EntityListener
+	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
-	eventListeners    map[string][]EventListener
+	eventListeners    map[string][]*EventListener
 }
 
 /*
@@ -97,8 +97,8 @@ func NewApp(request NewAppRequest) *App {
 		state:           state,
 		schedules:       pq.New(),
 		intervals:       pq.New(),
-		entityListeners: map[string][]EntityListener{},
-		eventListeners:  map[string][]EventListener{},
+		entityListeners: map[string][]*EntityListener{},
+		eventListeners:  map[string][]*EventListener{},
 	}
 }
 
@@ -147,15 +147,16 @@ func (a *App) RegisterIntervals(intervals ...Interval) {
 
 func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
+		etl := etl
 		if etl.delay != 0 && etl.toState == "" {
 			log.Fatalln("EntityListener error: you have to use ToState() when using Duration()")
 		}
 
 		for _, entity := range etl.entityIds {
 			if elList, ok := a.entityListeners[entity]; ok {
-				a.entityListeners[entity] = append(elList, etl)
+				a.entityListeners[entity] = append(elList, &etl)
 			} else {
-				a.entityListeners[entity] = []EntityListener{etl}
+				a.entityListeners[entity] = []*EntityListener{&etl}
 			}
 		}
 	}
@@ -163,12 +164,13 @@ func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 
 func (a *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
+		evl := evl
 		for _, eventType := range evl.eventTypes {
 			if elList, ok := a.eventListeners[eventType]; ok {
-				a.eventListeners[eventType] = append(elList, evl)
+				a.eventListeners[eventType] = append(elList, &evl)
 			} else {
 				ws.SubscribeToEventType(eventType, a.conn, a.ctx)
-				a.eventListeners[eventType] = []EventListener{evl}
+				a.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
 	}
