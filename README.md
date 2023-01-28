@@ -162,7 +162,7 @@ The function passed to `.Call()` must take
 - `ga.EventData` containing the event data that triggered the listener
 
 ```go
-func myFunc(se *ga.Service, st *ga.State) {
+func myFunc(se *ga.Service, st *ga.State, ed ga.EventData) {
   // ...
 }
 ```
@@ -173,7 +173,7 @@ Intervals are used to run a function on an interval.
 
 ```go
 // run every hour at the 30-minute mark
-interval := ga.NewInterval().Call(myFunc).Every("1h").Build()
+interval := ga.NewInterval().Call(myFunc).Every("1h").StartingAt("00:30").Build()
 // run every 5 minutes between 10am and 5pm
 interval = ga.NewInterval().Call(myFunc).Every("5m").StartingAt("10:00").EndingAt("17:00").Build()
 ```
