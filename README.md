@@ -1,6 +1,6 @@
 # Gome-Assistant
 
-Write your [Home Assistant](https://www.home-assistant.io/) automations with a strongly-typed Golang library!
+Write strongly typed [Home Assistant](https://www.home-assistant.io/) automations in Go!
 
 ## Disclaimer
 
