@@ -9,9 +9,12 @@ import (
 )
 
 func BuildService[
-	T Light |
+	T AlarmControlPanel |
+		Cover |
+		Light |
 		HomeAssistant |
 		Lock |
+		MediaPlayer |
 		Switch |
 		InputBoolean |
 		InputButton |
@@ -19,7 +22,8 @@ func BuildService[
 		InputText |
 		InputNumber |
 		Notify |
-		Number,
+		Number |
+		Scene,
 ](conn *websocket.Conn, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }
