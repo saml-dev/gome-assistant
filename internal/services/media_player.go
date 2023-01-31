@@ -120,7 +120,7 @@ func (mp MediaPlayer) Stop(entityId string) {
 func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
-	req.Service = "media_play"
+	req.Service = "play_media"
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
