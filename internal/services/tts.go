@@ -28,7 +28,7 @@ func (tts TTS) ClearCache() {
 // Say something using text-to-speech on a media player with cloud.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) CloudSay(entityId string, serviceData ...map[string]any) {
+func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "tts"
 	req.Service = "cloud_say"
@@ -36,13 +36,13 @@ func (mp MediaPlayer) CloudSay(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	ws.WriteMessage(req, tts.conn, tts.ctx)
 }
 
 // Say something using text-to-speech on a media player with google_translate.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) GoogleTranslateSay(entityId string, serviceData ...map[string]any) {
+func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "tts"
 	req.Service = "google_translate_say"
@@ -50,5 +50,5 @@ func (mp MediaPlayer) GoogleTranslateSay(entityId string, serviceData ...map[str
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	ws.WriteMessage(req, tts.conn, tts.ctx)
 }
