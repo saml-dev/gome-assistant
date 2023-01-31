@@ -23,7 +23,8 @@ func BuildService[
 		InputNumber |
 		Notify |
 		Number |
-		Scene,
+		Scene |
+		TTS,
 ](conn *websocket.Conn, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }

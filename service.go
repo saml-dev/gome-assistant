@@ -24,6 +24,7 @@ type Service struct {
 	Notify            *services.Notify
 	Number            *services.Number
 	Scene             *services.Scene
+	TTS               *services.TTS
 }
 
 func newService(conn *websocket.Conn, ctx context.Context, httpClient *http.HttpClient) *Service {
@@ -43,5 +44,6 @@ func newService(conn *websocket.Conn, ctx context.Context, httpClient *http.Http
 		Notify:            services.BuildService[services.Notify](conn, ctx),
 		Number:            services.BuildService[services.Number](conn, ctx),
 		Scene:             services.BuildService[services.Scene](conn, ctx),
+		TTS:               services.BuildService[services.TTS](conn, ctx),
 	}
 }
