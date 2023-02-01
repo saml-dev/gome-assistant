@@ -24,7 +24,8 @@ func BuildService[
 		Notify |
 		Number |
 		Scene |
-		TTS,
+		TTS |
+		Vacuum,
 ](conn *websocket.Conn, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }
