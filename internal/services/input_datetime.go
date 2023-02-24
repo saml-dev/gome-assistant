@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputDatetime struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -26,12 +25,12 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
 
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }
 
 func (ib InputDatetime) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_datetime"
 	req.Service = "reload"
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }

@@ -3,13 +3,12 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 	"saml.dev/gome-assistant/types"
 )
 
 type Notify struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -27,5 +26,5 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) {
 	}
 
 	req.ServiceData = serviceData
-	ws.WriteMessage(req, ha.conn, ha.ctx)
+	ha.conn.WriteMessage(req, ha.ctx)
 }

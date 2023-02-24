@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Scene struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -25,7 +24,7 @@ func (s Scene) Apply(serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }
 
 // Create a scene entity. Takes an entityId and an optional
@@ -38,7 +37,7 @@ func (s Scene) Create(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }
 
 // Reload the scenes.
@@ -47,7 +46,7 @@ func (s Scene) Reload() {
 	req.Domain = "scene"
 	req.Service = "reload"
 
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }
 
 // TurnOn a scene entity. Takes an entityId and an optional
@@ -60,5 +59,5 @@ func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }

@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Light struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -26,7 +25,7 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, l.conn, l.ctx)
+	l.conn.WriteMessage(req, l.ctx)
 }
 
 // Toggle a light entity. Takes an entityId and an optional
@@ -39,12 +38,12 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, l.conn, l.ctx)
+	l.conn.WriteMessage(req, l.ctx)
 }
 
 func (l Light) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "light"
 	req.Service = "turn_off"
-	ws.WriteMessage(req, l.conn, l.ctx)
+	l.conn.WriteMessage(req, l.ctx)
 }

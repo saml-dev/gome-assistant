@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Cover struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -22,7 +21,7 @@ func (c Cover) Close(entityId string) {
 	req.Domain = "cover"
 	req.Service = "close_cover"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Close all or specified cover tilt. Takes an entityId.
@@ -31,7 +30,7 @@ func (c Cover) CloseTilt(entityId string) {
 	req.Domain = "cover"
 	req.Service = "close_cover_tilt"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Open all or specified cover. Takes an entityId.
@@ -40,7 +39,7 @@ func (c Cover) Open(entityId string) {
 	req.Domain = "cover"
 	req.Service = "open_cover"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Open all or specified cover tilt. Takes an entityId.
@@ -49,7 +48,7 @@ func (c Cover) OpenTilt(entityId string) {
 	req.Domain = "cover"
 	req.Service = "open_cover_tilt"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Move to specific position all or specified cover. Takes an entityId and an optional
@@ -62,7 +61,7 @@ func (c Cover) SetPosition(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Move to specific position all or specified cover tilt. Takes an entityId and an optional
@@ -75,7 +74,7 @@ func (c Cover) SetTiltPosition(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Stop a cover entity. Takes an entityId.
@@ -84,7 +83,7 @@ func (c Cover) Stop(entityId string) {
 	req.Domain = "cover"
 	req.Service = "stop_cover"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Stop a cover entity tilt. Takes an entityId.
@@ -93,7 +92,7 @@ func (c Cover) StopTilt(entityId string) {
 	req.Domain = "cover"
 	req.Service = "stop_cover_tilt"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Toggle a cover open/closed. Takes an entityId.
@@ -102,7 +101,7 @@ func (c Cover) Toggle(entityId string) {
 	req.Domain = "cover"
 	req.Service = "toggle"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }
 
 // Toggle a cover tilt open/closed. Takes an entityId.
@@ -111,5 +110,5 @@ func (c Cover) ToggleTilt(entityId string) {
 	req.Domain = "cover"
 	req.Service = "toggle_cover_tilt"
 
-	ws.WriteMessage(req, c.conn, c.ctx)
+	c.conn.WriteMessage(req, c.ctx)
 }

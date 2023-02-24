@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gorilla/websocket"
 	"saml.dev/gome-assistant/internal"
+	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 func BuildService[
@@ -26,7 +26,7 @@ func BuildService[
 		Scene |
 		TTS |
 		Vacuum,
-](conn *websocket.Conn, ctx context.Context) *T {
+](conn *ws.WebsocketWriter, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }
 

@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type TTS struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -22,7 +21,7 @@ func (tts TTS) ClearCache() {
 	req.Domain = "tts"
 	req.Service = "clear_cache"
 
-	ws.WriteMessage(req, tts.conn, tts.ctx)
+	tts.conn.WriteMessage(req, tts.ctx)
 }
 
 // Say something using text-to-speech on a media player with cloud.
@@ -36,7 +35,7 @@ func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, tts.conn, tts.ctx)
+	tts.conn.WriteMessage(req, tts.ctx)
 }
 
 // Say something using text-to-speech on a media player with google_translate.
@@ -50,5 +49,5 @@ func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, tts.conn, tts.ctx)
+	tts.conn.WriteMessage(req, tts.ctx)
 }

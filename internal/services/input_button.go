@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputButton struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -21,12 +20,12 @@ func (ib InputButton) Press(entityId string) {
 	req.Domain = "input_button"
 	req.Service = "press"
 
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }
 
 func (ib InputButton) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_button"
 	req.Service = "reload"
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }

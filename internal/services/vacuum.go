@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Vacuum struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -23,7 +22,7 @@ func (v Vacuum) CleanSpot(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "clean_spot"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Locate the vacuum cleaner robot.
@@ -33,7 +32,7 @@ func (v Vacuum) Locate(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "locate"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Pause the cleaning task.
@@ -43,7 +42,7 @@ func (v Vacuum) Pause(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "pause"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Tell the vacuum cleaner to return to its dock.
@@ -53,7 +52,7 @@ func (v Vacuum) ReturnToBase(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "return_to_base"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Send a raw command to the vacuum cleaner. Takes an entityId and an optional
@@ -66,7 +65,7 @@ func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
@@ -80,7 +79,7 @@ func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Start or resume the cleaning task.
@@ -90,7 +89,7 @@ func (v Vacuum) Start(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "start"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Start, pause, or resume the cleaning task.
@@ -100,7 +99,7 @@ func (v Vacuum) StartPause(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "start_pause"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Stop the current cleaning task.
@@ -110,7 +109,7 @@ func (v Vacuum) Stop(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "stop"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Stop the current cleaning task and return to home.
@@ -120,7 +119,7 @@ func (v Vacuum) TurnOff(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "turn_off"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }
 
 // Start a new cleaning task.
@@ -130,5 +129,5 @@ func (v Vacuum) TurnOn(entityId string) {
 	req.Domain = "vacuum"
 	req.Service = "turn_on"
 
-	ws.WriteMessage(req, v.conn, v.ctx)
+	v.conn.WriteMessage(req, v.ctx)
 }

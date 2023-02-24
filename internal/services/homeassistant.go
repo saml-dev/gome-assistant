@@ -3,12 +3,11 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type HomeAssistant struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -22,7 +21,7 @@ func (ha *HomeAssistant) TurnOn(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, ha.conn, ha.ctx)
+	ha.conn.WriteMessage(req, ha.ctx)
 }
 
 // Toggle a Home Assistant entity. Takes an entityId and an optional
@@ -35,7 +34,7 @@ func (ha *HomeAssistant) Toggle(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, ha.conn, ha.ctx)
+	ha.conn.WriteMessage(req, ha.ctx)
 }
 
 func (ha *HomeAssistant) TurnOff(entityId string) {
@@ -43,5 +42,5 @@ func (ha *HomeAssistant) TurnOff(entityId string) {
 	req.Domain = "homeassistant"
 	req.Service = "turn_off"
 
-	ws.WriteMessage(req, ha.conn, ha.ctx)
+	ha.conn.WriteMessage(req, ha.ctx)
 }

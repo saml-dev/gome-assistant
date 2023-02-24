@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type MediaPlayer struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -23,7 +22,7 @@ func (mp MediaPlayer) ClearPlaylist(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "clear_playlist"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Group players together. Only works on platforms with support for player groups.
@@ -37,7 +36,7 @@ func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command for next track.
@@ -47,7 +46,7 @@ func (mp MediaPlayer) Next(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_next_track"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command for pause.
@@ -57,7 +56,7 @@ func (mp MediaPlayer) Pause(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_pause"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command for play.
@@ -67,7 +66,7 @@ func (mp MediaPlayer) Play(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_play"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Toggle media player play/pause state.
@@ -77,7 +76,7 @@ func (mp MediaPlayer) PlayPause(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_play_pause"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command for previous track.
@@ -87,7 +86,7 @@ func (mp MediaPlayer) Previous(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_previous_track"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command to seek in current playing media.
@@ -101,7 +100,7 @@ func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the stop command.
@@ -111,7 +110,7 @@ func (mp MediaPlayer) Stop(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_stop"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command for playing media.
@@ -125,7 +124,7 @@ func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Set repeat mode. Takes an entityId and an optional
@@ -138,7 +137,7 @@ func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command to change sound mode.
@@ -152,7 +151,7 @@ func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Send the media player the command to change input source.
@@ -166,7 +165,7 @@ func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]an
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Set shuffling state.
@@ -180,7 +179,7 @@ func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Toggles a media player power state.
@@ -190,7 +189,7 @@ func (mp MediaPlayer) Toggle(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "toggle"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Turn a media player power off.
@@ -200,7 +199,7 @@ func (mp MediaPlayer) TurnOff(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "turn_off"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Turn a media player power on.
@@ -210,7 +209,7 @@ func (mp MediaPlayer) TurnOn(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "turn_on"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Unjoin the player from a group. Only works on
@@ -221,7 +220,7 @@ func (mp MediaPlayer) Unjoin(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "unjoin"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Turn a media player volume down.
@@ -231,7 +230,7 @@ func (mp MediaPlayer) VolumeDown(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "volume_down"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Mute a media player's volume.
@@ -245,7 +244,7 @@ func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any)
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Set a media player's volume level.
@@ -259,7 +258,7 @@ func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }
 
 // Turn a media player volume up.
@@ -269,5 +268,5 @@ func (mp MediaPlayer) VolumeUp(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "volume_up"
 
-	ws.WriteMessage(req, mp.conn, mp.ctx)
+	mp.conn.WriteMessage(req, mp.ctx)
 }

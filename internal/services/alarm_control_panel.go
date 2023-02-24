@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type AlarmControlPanel struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -27,7 +26,7 @@ func (acp AlarmControlPanel) ArmAway(entityId string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for arm away.
@@ -41,7 +40,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(entityId string, serviceData ..
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for arm home.
@@ -55,7 +54,7 @@ func (acp AlarmControlPanel) ArmHome(entityId string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for arm night.
@@ -69,7 +68,7 @@ func (acp AlarmControlPanel) ArmNight(entityId string, serviceData ...map[string
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for arm vacation.
@@ -83,7 +82,7 @@ func (acp AlarmControlPanel) ArmVacation(entityId string, serviceData ...map[str
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for disarm.
@@ -97,7 +96,7 @@ func (acp AlarmControlPanel) Disarm(entityId string, serviceData ...map[string]a
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for trigger.
@@ -111,5 +110,5 @@ func (acp AlarmControlPanel) Trigger(entityId string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	ws.WriteMessage(req, acp.conn, acp.ctx)
+	acp.conn.WriteMessage(req, acp.ctx)
 }

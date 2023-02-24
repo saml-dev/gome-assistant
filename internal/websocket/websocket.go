@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -21,16 +22,16 @@ type AuthMessage struct {
 	AccessToken string `json:"access_token"`
 }
 
-// TODO: use a mutex to prevent concurrent writes panic here
-// https://github.com/gorilla/websocket/issues/119
-func WriteMessage[T any](msg T, conn *websocket.Conn, ctx context.Context) error {
-	msgJson, err := json.Marshal(msg)
-	// fmt.Println(string(msgJson))
-	if err != nil {
-		return err
-	}
+type WebsocketWriter struct {
+	Conn  *websocket.Conn
+	mutex sync.Mutex
+}
 
-	err = conn.WriteMessage(websocket.TextMessage, msgJson)
+func (w *WebsocketWriter) WriteMessage(msg interface{}, ctx context.Context) error {
+	w.mutex.Lock()
+	defer w.mutex.Unlock()
+
+	err := w.Conn.WriteJSON(msg)
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Conte
 }
 
 func SendAuthMessage(conn *websocket.Conn, ctx context.Context, token string) error {
-	err := WriteMessage(AuthMessage{MsgType: "auth", AccessToken: token}, conn, ctx)
+	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
 		return err
 	}
@@ -116,11 +117,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(id int64, conn *websocket.Conn, ctx context.Context) {
+func SubscribeToStateChangedEvents(id int64, conn *WebsocketWriter, ctx context.Context) {
 	SubscribeToEventType("state_changed", conn, ctx, id)
 }
 
-func SubscribeToEventType(eventType string, conn *websocket.Conn, ctx context.Context, id ...int64) {
+func SubscribeToEventType(eventType string, conn *WebsocketWriter, ctx context.Context, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = i.GetId()
@@ -132,7 +133,7 @@ func SubscribeToEventType(eventType string, conn *websocket.Conn, ctx context.Co
 		Type:      "subscribe_events",
 		EventType: eventType,
 	}
-	err := WriteMessage(e, conn, ctx)
+	err := conn.WriteMessage(e, ctx)
 	if err != nil {
 		log.Fatalf("Error writing to websocket: %s\n", err)
 	}
