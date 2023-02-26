@@ -16,7 +16,7 @@ type Number struct {
 
 /* Public API */
 
-func (ib Number) SetValue(entityId string, value int) {
+func (ib Number) SetValue(entityId string, value float32) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "number"
 	req.Service = "set_value"
