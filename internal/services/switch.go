@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Switch struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -21,7 +20,7 @@ func (s Switch) TurnOn(entityId string) {
 	req.Domain = "switch"
 	req.Service = "turn_on"
 
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }
 
 func (s Switch) Toggle(entityId string) {
@@ -29,12 +28,12 @@ func (s Switch) Toggle(entityId string) {
 	req.Domain = "switch"
 	req.Service = "toggle"
 
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }
 
 func (s Switch) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "switch"
 	req.Service = "turn_off"
-	ws.WriteMessage(req, s.conn, s.ctx)
+	s.conn.WriteMessage(req, s.ctx)
 }

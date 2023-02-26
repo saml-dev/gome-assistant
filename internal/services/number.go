@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Number struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -22,5 +21,5 @@ func (ib Number) SetValue(entityId string, value float32) {
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
 
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }

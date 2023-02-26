@@ -3,9 +3,9 @@ package gomeassistant
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	"saml.dev/gome-assistant/internal/http"
 	"saml.dev/gome-assistant/internal/services"
+	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type Service struct {
@@ -28,7 +28,7 @@ type Service struct {
 	Vacuum            *services.Vacuum
 }
 
-func newService(conn *websocket.Conn, ctx context.Context, httpClient *http.HttpClient) *Service {
+func newService(conn *ws.WebsocketWriter, ctx context.Context, httpClient *http.HttpClient) *Service {
 	return &Service{
 		AlarmControlPanel: services.BuildService[services.AlarmControlPanel](conn, ctx),
 		Cover:             services.BuildService[services.Cover](conn, ctx),

@@ -3,14 +3,13 @@ package services
 import (
 	"context"
 
-	"github.com/gorilla/websocket"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputNumber struct {
-	conn *websocket.Conn
+	conn *ws.WebsocketWriter
 	ctx  context.Context
 }
 
@@ -22,7 +21,7 @@ func (ib InputNumber) Set(entityId string, value float32) {
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
 
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }
 
 func (ib InputNumber) Increment(entityId string) {
@@ -30,7 +29,7 @@ func (ib InputNumber) Increment(entityId string) {
 	req.Domain = "input_number"
 	req.Service = "increment"
 
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }
 
 func (ib InputNumber) Decrement(entityId string) {
@@ -38,12 +37,12 @@ func (ib InputNumber) Decrement(entityId string) {
 	req.Domain = "input_number"
 	req.Service = "decrement"
 
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }
 
 func (ib InputNumber) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_number"
 	req.Service = "reload"
-	ws.WriteMessage(req, ib.conn, ib.ctx)
+	ib.conn.WriteMessage(req, ib.ctx)
 }
