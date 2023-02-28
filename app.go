@@ -273,3 +273,11 @@ func (a *App) Start() {
 		}
 	}
 }
+
+func (a *App) GetService() *Service {
+	return a.service
+}
+
+func (a *App) GetState() *State {
+	return a.state
+}
