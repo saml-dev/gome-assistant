@@ -40,7 +40,7 @@ The general flow is
 import ga "saml.dev/gome-assistant"
 
 // replace with IP and port of your Home Assistant installation
-app := ga.NewApp("0.0.0.0:8123")
+app, err := ga.NewApp("0.0.0.0:8123")
 
 // create automations here (see next sections)
 
