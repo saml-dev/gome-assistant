@@ -3,6 +3,7 @@ package websocket
 import (
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/gorilla/websocket"
 )
@@ -20,7 +21,14 @@ type ChanMsg struct {
 
 func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) {
 	for {
-		bytes, _ := ReadMessage(conn, ctx)
+		bytes, err := ReadMessage(conn, ctx)
+
+		if err != nil {
+			log.Default().Println("Error reading from websocket:", err)
+			close(c)
+			break
+		}
+
 		base := BaseMessage{}
 		json.Unmarshal(bytes, &base)
 		chanMsg := ChanMsg{

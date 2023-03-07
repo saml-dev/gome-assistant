@@ -263,9 +263,12 @@ func (a *App) Start() {
 	// entity listeners and event listeners
 	elChan := make(chan ws.ChanMsg)
 	go ws.ListenWebsocket(a.conn, a.ctx, elChan)
-	var msg ws.ChanMsg
+
 	for {
-		msg = <-elChan
+		msg, ok := <-elChan
+		if !ok {
+			break
+		}
 		if a.entityListenersId == msg.Id {
 			go callEntityListeners(a, msg.Raw)
 		} else {
