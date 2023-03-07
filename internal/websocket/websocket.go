@@ -17,6 +17,10 @@ import (
 	i "saml.dev/gome-assistant/internal"
 )
 
+var (
+	ErrInvalidToken = errors.New("invalid authentication token")
+)
+
 type AuthMessage struct {
 	MsgType     string `json:"type"`
 	AccessToken string `json:"access_token"`
@@ -47,7 +51,7 @@ func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
 	return msg, nil
 }
 
-func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc) {
+func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
 
 	// Init websocket connection
@@ -55,31 +59,35 @@ func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Conte
 	conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("ws://%s:%s/api/websocket", ip, port), nil)
 	if err != nil {
 		ctxCancel()
-		log.Fatalf("ERROR: Failed to connect to websocket at ws://%s:%s/api/websocket. Check IP address and port\n", ip, port)
+		log.Printf("ERROR: Failed to connect to websocket at ws://%s:%s/api/websocket. Check IP address and port\n", ip, port)
+		return nil, nil, nil, err
 	}
 
 	// Read auth_required message
 	_, err = ReadMessage(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		log.Fatalf("Unknown error creating websocket client\n")
+		log.Printf("Unknown error creating websocket client\n")
+		return nil, nil, nil, err
 	}
 
 	// Send auth message
 	err = SendAuthMessage(conn, ctx, authToken)
 	if err != nil {
 		ctxCancel()
-		log.Fatalf("Unknown error creating websocket client\n")
+		log.Printf("Unknown error creating websocket client\n")
+		return nil, nil, nil, err
 	}
 
 	// Verify auth message was successful
 	err = VerifyAuthResponse(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		log.Fatalf("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
+		log.Printf("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
+		return nil, nil, nil, err
 	}
 
-	return conn, ctx, ctxCancel
+	return conn, ctx, ctxCancel, nil
 }
 
 func SendAuthMessage(conn *websocket.Conn, ctx context.Context, token string) error {
@@ -105,7 +113,7 @@ func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
 	json.Unmarshal(msg, &authResp)
 	// log.Println(authResp.MsgType)
 	if authResp.MsgType != "auth_ok" {
-		return errors.New("invalid auth token")
+		return ErrInvalidToken
 	}
 
 	return nil

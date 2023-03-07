@@ -10,11 +10,16 @@ import (
 )
 
 func main() {
-	app := ga.NewApp(ga.NewAppRequest{
+	app, err := ga.NewApp(ga.NewAppRequest{
 		IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
 		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
 		HomeZoneEntityId: "zone.home",
 	})
+
+	if err != nil {
+		log.Fatalln("Error connecting to HASS:", err)
+	}
+
 	defer app.Cleanup()
 
 	pantryDoor := ga.

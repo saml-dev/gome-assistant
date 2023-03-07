@@ -15,6 +15,9 @@ import (
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
+// Returned by NewApp() if authentication fails
+var ErrInvalidToken = ws.ErrInvalidToken
+
 type App struct {
 	ctx       context.Context
 	ctxCancel context.CancelFunc
@@ -77,7 +80,7 @@ type NewAppRequest struct {
 NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
-func NewApp(request NewAppRequest) *App {
+func NewApp(request NewAppRequest) (*App, error) {
 	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
 		log.Fatalln("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest.")
 	}
@@ -85,7 +88,11 @@ func NewApp(request NewAppRequest) *App {
 	if port == "" {
 		port = "8123"
 	}
-	conn, ctx, ctxCancel := ws.SetupConnection(request.IpAddress, port, request.HAAuthToken)
+	conn, ctx, ctxCancel, err := ws.SetupConnection(request.IpAddress, port, request.HAAuthToken)
+
+	if conn == nil {
+		return nil, err
+	}
 
 	httpClient := http.NewHttpClient(request.IpAddress, port, request.HAAuthToken)
 
@@ -105,7 +112,7 @@ func NewApp(request NewAppRequest) *App {
 		intervals:       pq.New(),
 		entityListeners: map[string][]*EntityListener{},
 		eventListeners:  map[string][]*EventListener{},
-	}
+	}, nil
 }
 
 func (a *App) Cleanup() {
