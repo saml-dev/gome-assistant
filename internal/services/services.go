@@ -10,6 +10,7 @@ import (
 
 func BuildService[
 	T AlarmControlPanel |
+		Climate |
 		Cover |
 		Light |
 		HomeAssistant |

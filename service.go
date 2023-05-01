@@ -10,6 +10,7 @@ import (
 
 type Service struct {
 	AlarmControlPanel *services.AlarmControlPanel
+	Climate           *services.Climate
 	Cover             *services.Cover
 	HomeAssistant     *services.HomeAssistant
 	Light             *services.Light
@@ -31,6 +32,7 @@ type Service struct {
 func newService(conn *ws.WebsocketWriter, ctx context.Context, httpClient *http.HttpClient) *Service {
 	return &Service{
 		AlarmControlPanel: services.BuildService[services.AlarmControlPanel](conn, ctx),
+		Climate:           services.BuildService[services.Climate](conn, ctx),
 		Cover:             services.BuildService[services.Cover](conn, ctx),
 		Light:             services.BuildService[services.Light](conn, ctx),
 		HomeAssistant:     services.BuildService[services.HomeAssistant](conn, ctx),
