@@ -2,7 +2,8 @@ package gomeassistant
 
 import (
 	"encoding/json"
-	"log"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -23,19 +24,34 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 }
 
-func newState(c *http.HttpClient, homeZoneEntityId string) *State {
+func newState(c *http.HttpClient, homeZoneEntityId string) (*State, error) {
 	state := &State{httpClient: c}
-	state.getLatLong(c, homeZoneEntityId)
-	return state
+	err := state.getLatLong(c, homeZoneEntityId)
+	if err != nil {
+		return nil, err
+	}
+	return state, nil
 }
 
-func (s *State) getLatLong(c *http.HttpClient, homeZoneEntityId string) {
+func (s *State) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
 	resp, err := s.Get(homeZoneEntityId)
 	if err != nil {
-		log.Fatalf("Couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'.\n", homeZoneEntityId)
+		return errors.New(fmt.Sprintf("couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'.\n", homeZoneEntityId))
 	}
-	s.latitude = resp.Attributes["latitude"].(float64)
-	s.longitude = resp.Attributes["longitude"].(float64)
+
+	if resp.Attributes["latitude"] != nil {
+		s.latitude = resp.Attributes["latitude"].(float64)
+	} else {
+		return errors.New("server returned nil latitude")
+	}
+
+	if resp.Attributes["longitude"] != nil {
+		s.longitude = resp.Attributes["longitude"].(float64)
+	} else {
+		return errors.New("server returned nil longitude")
+	}
+
+	return nil
 }
 
 func (s *State) Get(entityId string) (EntityState, error) {
