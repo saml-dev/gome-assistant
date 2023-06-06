@@ -98,7 +98,10 @@ func NewApp(request NewAppRequest) (*App, error) {
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
 	service := newService(wsWriter, ctx, httpClient)
-	state := newState(httpClient, request.HomeZoneEntityId)
+	state, err := newState(httpClient, request.HomeZoneEntityId)
+	if err != nil {
+		return nil, err
+	}
 
 	return &App{
 		conn:            conn,
