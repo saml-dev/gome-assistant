@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 
 	"saml.dev/gome-assistant/internal"
 	ws "saml.dev/gome-assistant/internal/websocket"
@@ -32,7 +31,7 @@ func BuildService[
 }
 
 type BaseServiceRequest struct {
-	Id          string         `json:"id"`
+	Id          int64          `json:"id"`
 	RequestType string         `json:"type"` // hardcoded "call_service"
 	Domain      string         `json:"domain"`
 	Service     string         `json:"service"`
@@ -45,7 +44,7 @@ type BaseServiceRequest struct {
 func NewBaseServiceRequest(entityId string) BaseServiceRequest {
 	id := internal.GetId()
 	bsr := BaseServiceRequest{
-		Id:          fmt.Sprint(id),
+		Id:          id,
 		RequestType: "call_service",
 	}
 	if entityId != "" {
