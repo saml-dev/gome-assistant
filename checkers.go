@@ -86,6 +86,38 @@ func checkExceptionRanges(eList []timeRange) conditionCheck {
 	return cc
 }
 
+func checkEnabledEntity(s *State, eid, expectedState string, runOnNetworkError bool) conditionCheck {
+	cc := conditionCheck{fail: false}
+	if eid == "" || expectedState == "" {
+		return cc
+	}
+
+	matches, err := s.Equals(eid, expectedState)
+	if err != nil {
+		cc.fail = !runOnNetworkError
+		return cc
+	}
+
+	cc.fail = !matches
+	return cc
+}
+
+func checkDisabledEntity(s *State, eid, expectedState string, runOnNetworkError bool) conditionCheck {
+	cc := conditionCheck{fail: false}
+	if eid == "" || expectedState == "" {
+		return cc
+	}
+
+	matches, err := s.Equals(eid, expectedState)
+	if err != nil {
+		cc.fail = !runOnNetworkError
+		return cc
+	}
+
+	cc.fail = matches
+	return cc
+}
+
 func checkAllowlistDates(eList []time.Time) conditionCheck {
 	if len(eList) == 0 {
 		return conditionCheck{fail: false}
