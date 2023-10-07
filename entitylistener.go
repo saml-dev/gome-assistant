@@ -160,12 +160,12 @@ func (b elBuilder3) RunOnStartup() elBuilder3 {
 Enable this listener only when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
 */
-func (b elBuilder3) EnabledEntity(entityId, state string, runOnNetworkError bool) elBuilder3 {
+func (b elBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
 	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledEntity entityId='%s' state='%s'", entityId, state))
+		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
 	if b.entityListener.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledEntity and DisabledEntity together. Error occurred while setting EnabledEntity on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	b.entityListener.enabledEntity = entityId
 	b.entityListener.enabledEntityState = state
@@ -177,12 +177,12 @@ func (b elBuilder3) EnabledEntity(entityId, state string, runOnNetworkError bool
 Disable this listener when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
 */
-func (b elBuilder3) DisabledEntity(entityId, state string, runOnNetworkError bool) elBuilder3 {
+func (b elBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
 	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledEntity entityId='%s' state='%s'", entityId, state))
+		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
 	if b.entityListener.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledEntity and DisabledEntity together. Error occurred while setting DisabledEntity on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	b.entityListener.disabledEntity = entityId
 	b.entityListener.disabledEntityState = state

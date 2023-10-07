@@ -114,12 +114,12 @@ func (ib intervalBuilderEnd) ExceptionRange(start, end time.Time) intervalBuilde
 Enable this interval only when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
 */
-func (ib intervalBuilderEnd) EnabledEntity(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
+func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
 	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledEntity entityId='%s' state='%s'", entityId, state))
+		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
 	if ib.interval.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledEntity and DisabledEntity together. Error occurred while setting EnabledEntity on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	ib.interval.enabledEntity = entityId
 	ib.interval.enabledEntityState = state
@@ -131,12 +131,12 @@ func (ib intervalBuilderEnd) EnabledEntity(entityId, state string, runOnNetworkE
 Disable this interval when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
 */
-func (ib intervalBuilderEnd) DisabledEntity(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
+func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
 	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledEntity entityId='%s' state='%s'", entityId, state))
+		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
 	if ib.interval.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledEntity and DisabledEntity together. Error occurred while setting DisabledEntity on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	ib.interval.disabledEntity = entityId
 	ib.interval.disabledEntityState = state
