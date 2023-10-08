@@ -115,10 +115,10 @@ Enable this interval only when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
 */
 func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
-	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if ib.interval.enabledEntity != "" {
+	if ib.interval.disabledEntity != "" {
 		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	ib.interval.enabledEntity = entityId
@@ -132,8 +132,8 @@ Disable this interval when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
 */
 func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
-	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
 	if ib.interval.enabledEntity != "" {
 		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))

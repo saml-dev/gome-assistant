@@ -122,10 +122,10 @@ Enable this schedule only when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
 */
 func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
-	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if sb.schedule.enabledEntity != "" {
+	if sb.schedule.disabledEntity != "" {
 		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on a schedule with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	sb.schedule.enabledEntity = entityId
@@ -139,8 +139,8 @@ Disable this schedule when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
 */
 func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
-	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
 	if sb.schedule.enabledEntity != "" {
 		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on a schedule with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))

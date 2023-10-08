@@ -103,10 +103,10 @@ Enable this listener only when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
 */
 func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
-	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
 	}
-	if b.eventListener.enabledEntity != "" {
+	if b.eventListener.disabledEntity != "" {
 		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	b.eventListener.enabledEntity = entityId
@@ -120,8 +120,8 @@ Disable this listener when the current state of {entityId} matches {state}.
 If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
 */
 func (b eventListenerBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
-	if entityId == "" || state == "" {
-		panic(fmt.Sprintf("Either entityId or state is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
 	}
 	if b.eventListener.enabledEntity != "" {
 		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
