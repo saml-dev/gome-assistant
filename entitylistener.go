@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -27,6 +28,13 @@ type EntityListener struct {
 
 	runOnStartup          bool
 	runOnStartupCompleted bool
+
+	enabledEntity            string
+	enabledEntityState       string
+	enabledEntityRunOnError  bool
+	disabledEntity           string
+	disabledEntityState      string
+	disabledEntityRunOnError bool
 }
 
 type EntityListenerCallback func(*Service, *State, EntityData)
@@ -148,6 +156,40 @@ func (b elBuilder3) RunOnStartup() elBuilder3 {
 	return b
 }
 
+/*
+Enable this listener only when the current state of {entityId} matches {state}.
+If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
+*/
+func (b elBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+	}
+	if b.entityListener.disabledEntity != "" {
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	}
+	b.entityListener.enabledEntity = entityId
+	b.entityListener.enabledEntityState = state
+	b.entityListener.enabledEntityRunOnError = runOnNetworkError
+	return b
+}
+
+/*
+Disable this listener when the current state of {entityId} matches {state}.
+If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
+*/
+func (b elBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+	}
+	if b.entityListener.enabledEntity != "" {
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	}
+	b.entityListener.disabledEntity = entityId
+	b.entityListener.disabledEntityState = state
+	b.entityListener.disabledEntityRunOnError = runOnNetworkError
+	return b
+}
+
 func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
@@ -193,6 +235,12 @@ func callEntityListeners(app *App, msgBytes []byte) {
 			continue
 		}
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
+			continue
+		}
+		if c := checkEnabledEntity(app.state, l.enabledEntity, l.enabledEntityState, l.enabledEntityRunOnError); c.fail {
+			continue
+		}
+		if c := checkDisabledEntity(app.state, l.disabledEntity, l.disabledEntityState, l.disabledEntityRunOnError); c.fail {
 			continue
 		}
 

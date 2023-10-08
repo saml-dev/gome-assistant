@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -19,6 +20,13 @@ type EventListener struct {
 
 	exceptionDates  []time.Time
 	exceptionRanges []timeRange
+
+	enabledEntity            string
+	enabledEntityState       string
+	enabledEntityRunOnError  bool
+	disabledEntity           string
+	disabledEntityState      string
+	disabledEntityRunOnError bool
 }
 
 type EventListenerCallback func(*Service, *State, EventData)
@@ -90,6 +98,40 @@ func (b eventListenerBuilder3) ExceptionRange(start, end time.Time) eventListene
 	return b
 }
 
+/*
+Enable this listener only when the current state of {entityId} matches {state}.
+If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
+*/
+func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+	}
+	if b.eventListener.disabledEntity != "" {
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	}
+	b.eventListener.enabledEntity = entityId
+	b.eventListener.enabledEntityState = state
+	b.eventListener.enabledEntityRunOnError = runOnNetworkError
+	return b
+}
+
+/*
+Disable this listener when the current state of {entityId} matches {state}.
+If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
+*/
+func (b eventListenerBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
+	if entityId == "" {
+		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+	}
+	if b.eventListener.enabledEntity != "" {
+		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	}
+	b.eventListener.disabledEntity = entityId
+	b.eventListener.disabledEntityState = state
+	b.eventListener.disabledEntityRunOnError = runOnNetworkError
+	return b
+}
+
 func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
@@ -122,6 +164,12 @@ func callEventListeners(app *App, msg ws.ChanMsg) {
 			continue
 		}
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
+			continue
+		}
+		if c := checkEnabledEntity(app.state, l.enabledEntity, l.enabledEntityState, l.enabledEntityRunOnError); c.fail {
+			continue
+		}
+		if c := checkDisabledEntity(app.state, l.disabledEntity, l.disabledEntityState, l.disabledEntityRunOnError); c.fail {
 			continue
 		}
 
