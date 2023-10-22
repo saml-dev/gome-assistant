@@ -10,6 +10,15 @@ import (
 	"saml.dev/gome-assistant/internal/http"
 )
 
+type StateInterface interface {
+	AfterSunrise() bool
+	BeforeSunrise() bool
+	AfterSunset() bool
+	BeforeSunset() bool
+	Get() (EntityState, error)
+	Equals() (bool, error)
+}
+
 // State is used to retrieve state from Home Assistant.
 type State struct {
 	httpClient *http.HttpClient

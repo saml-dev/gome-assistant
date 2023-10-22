@@ -21,12 +21,8 @@ type EventListener struct {
 	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 
-	enabledEntity            string
-	enabledEntityState       string
-	enabledEntityRunOnError  bool
-	disabledEntity           string
-	disabledEntityState      string
-	disabledEntityRunOnError bool
+	enabledEntities  []internal.EnabledDisabledInfo
+	disabledEntities []internal.EnabledDisabledInfo
 }
 
 type EventListenerCallback func(*Service, *State, EventData)

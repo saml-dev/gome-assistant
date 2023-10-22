@@ -29,12 +29,8 @@ type EntityListener struct {
 	runOnStartup          bool
 	runOnStartupCompleted bool
 
-	enabledEntity            string
-	enabledEntityState       string
-	enabledEntityRunOnError  bool
-	disabledEntity           string
-	disabledEntityState      string
-	disabledEntityRunOnError bool
+	enabledEntities  []internal.EnabledDisabledInfo
+	disabledEntities []internal.EnabledDisabledInfo
 }
 
 type EntityListenerCallback func(*Service, *State, EntityData)

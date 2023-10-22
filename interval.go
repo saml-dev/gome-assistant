@@ -19,12 +19,8 @@ type Interval struct {
 	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 
-	enabledEntity            string
-	enabledEntityState       string
-	enabledEntityRunOnError  bool
-	disabledEntity           string
-	disabledEntityState      string
-	disabledEntityRunOnError bool
+	enabledEntities  []internal.EnabledDisabledInfo
+	disabledEntities []internal.EnabledDisabledInfo
 }
 
 func (i Interval) Hash() string {

@@ -86,35 +86,60 @@ func checkExceptionRanges(eList []timeRange) conditionCheck {
 	return cc
 }
 
-func checkEnabledEntity(s *State, eid, expectedState string, runOnNetworkError bool) conditionCheck {
+func checkEnabledEntity(s *State, infos []internal.EnabledDisabledInfo) conditionCheck {
 	cc := conditionCheck{fail: false}
-	if eid == "" || expectedState == "" {
+	if len(infos) == 0 {
 		return cc
 	}
 
-	matches, err := s.Equals(eid, expectedState)
-	if err != nil {
-		cc.fail = !runOnNetworkError
-		return cc
-	}
+	for _, edi := range infos {
+		matches, err := s.Equals(edi.Entity, edi.State)
 
-	cc.fail = !matches
+		if err != nil {
+			if edi.RunOnError {
+				// keep checking
+				continue
+			} else {
+				// don't run this automation
+				cc.fail = true
+				break
+			}
+		}
+
+		if !matches {
+			cc.fail = true
+			break
+		}
+	}
 	return cc
 }
 
-func checkDisabledEntity(s *State, eid, expectedState string, runOnNetworkError bool) conditionCheck {
+func checkDisabledEntity(s *State, infos []internal.EnabledDisabledInfo) conditionCheck {
 	cc := conditionCheck{fail: false}
-	if eid == "" || expectedState == "" {
+	if len(infos) == 0 {
 		return cc
 	}
 
-	matches, err := s.Equals(eid, expectedState)
-	if err != nil {
-		cc.fail = !runOnNetworkError
-		return cc
+	for _, edi := range infos {
+		matches, err := s.Equals(edi.Entity, edi.State)
+
+		if err != nil {
+			if edi.RunOnError {
+				// keep checking
+				continue
+			} else {
+				// don't run this automation
+				cc.fail = true
+				break
+			}
+		}
+
+		if matches {
+			cc.fail = true
+			break
+		}
 	}
 
-	cc.fail = matches
 	return cc
 }
 
