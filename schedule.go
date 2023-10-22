@@ -121,9 +121,6 @@ func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if len(sb.schedule.disabledEntities) != 0 {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on a schedule with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
-	}
 	i := internal.EnabledDisabledInfo{
 		Entity:     entityId,
 		State:      state,
@@ -140,9 +137,6 @@ If there is a network error while retrieving state, the schedule runs if {runOnN
 func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
-	}
-	if len(sb.schedule.enabledEntities) != 0 {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on a schedule with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
 	}
 	i := internal.EnabledDisabledInfo{
 		Entity:     entityId,

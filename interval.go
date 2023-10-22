@@ -114,12 +114,12 @@ func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if ib.interval.disabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	i := internal.EnabledDisabledInfo{
+		Entity:     entityId,
+		State:      state,
+		RunOnError: runOnNetworkError,
 	}
-	ib.interval.enabledEntity = entityId
-	ib.interval.enabledEntityState = state
-	ib.interval.enabledEntityRunOnError = runOnNetworkError
+	ib.interval.enabledEntities = append(ib.interval.enabledEntities, i)
 	return ib
 }
 
@@ -131,12 +131,12 @@ func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if ib.interval.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on an entity listener with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	i := internal.EnabledDisabledInfo{
+		Entity:     entityId,
+		State:      state,
+		RunOnError: runOnNetworkError,
 	}
-	ib.interval.disabledEntity = entityId
-	ib.interval.disabledEntityState = state
-	ib.interval.disabledEntityRunOnError = runOnNetworkError
+	ib.interval.disabledEntities = append(ib.interval.disabledEntities, i)
 	return ib
 }
 
@@ -180,10 +180,10 @@ func (i Interval) maybeRunCallback(a *App) {
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
 		return
 	}
-	if c := checkEnabledEntity(a.state, i.enabledEntity, i.enabledEntityState, i.enabledEntityRunOnError); c.fail {
+	if c := checkEnabledEntity(a.state, i.enabledEntities); c.fail {
 		return
 	}
-	if c := checkDisabledEntity(a.state, i.disabledEntity, i.disabledEntityState, i.disabledEntityRunOnError); c.fail {
+	if c := checkDisabledEntity(a.state, i.disabledEntities); c.fail {
 		return
 	}
 	go i.callback(a.service, a.state)
