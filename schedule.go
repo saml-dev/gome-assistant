@@ -9,7 +9,7 @@ import (
 	"saml.dev/gome-assistant/internal"
 )
 
-type ScheduleCallback func(*Service, *State)
+type ScheduleCallback func(*Service, State)
 
 type DailySchedule struct {
 	// 0-23

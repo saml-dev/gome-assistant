@@ -33,7 +33,7 @@ type EntityListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EntityListenerCallback func(*Service, *State, EntityData)
+type EntityListenerCallback func(*Service, State, EntityData)
 
 type EntityData struct {
 	TriggerEntityId string

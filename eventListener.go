@@ -25,7 +25,7 @@ type EventListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(*Service, *State, EventData)
+type EventListenerCallback func(*Service, State, EventData)
 
 type EventData struct {
 	Type         string

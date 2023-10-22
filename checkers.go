@@ -86,7 +86,7 @@ func checkExceptionRanges(eList []timeRange) conditionCheck {
 	return cc
 }
 
-func checkEnabledEntity(s *State, infos []internal.EnabledDisabledInfo) conditionCheck {
+func checkEnabledEntity(s State, infos []internal.EnabledDisabledInfo) conditionCheck {
 	cc := conditionCheck{fail: false}
 	if len(infos) == 0 {
 		return cc
@@ -114,7 +114,7 @@ func checkEnabledEntity(s *State, infos []internal.EnabledDisabledInfo) conditio
 	return cc
 }
 
-func checkDisabledEntity(s *State, infos []internal.EnabledDisabledInfo) conditionCheck {
+func checkDisabledEntity(s State, infos []internal.EnabledDisabledInfo) conditionCheck {
 	cc := conditionCheck{fail: false}
 	if len(infos) == 0 {
 		return cc

@@ -7,7 +7,7 @@ import (
 	"saml.dev/gome-assistant/internal"
 )
 
-type IntervalCallback func(*Service, *State)
+type IntervalCallback func(*Service, State)
 
 type Interval struct {
 	frequency   time.Duration

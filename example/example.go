@@ -54,7 +54,7 @@ func main() {
 
 }
 
-func pantryLights(service *ga.Service, state *ga.State, sensor ga.EntityData) {
+func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
 	l := "light.pantry"
 	if sensor.ToState == "on" {
 		service.HomeAssistant.TurnOn(l)
@@ -63,7 +63,7 @@ func pantryLights(service *ga.Service, state *ga.State, sensor ga.EntityData) {
 	}
 }
 
-func onEvent(service *ga.Service, state *ga.State, data ga.EventData) {
+func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
 	// Since the structure of the event changes depending
 	// on the event type, you can Unmarshal the raw json
 	// into a Go type. If a type for your event doesn't
@@ -74,7 +74,7 @@ func onEvent(service *ga.Service, state *ga.State, data ga.EventData) {
 	log.Default().Println(ev)
 }
 
-func lightsOut(service *ga.Service, state *ga.State) {
+func lightsOut(service *ga.Service, state ga.State) {
 	// always turn off outside lights
 	service.Light.TurnOff("light.outside_lights")
 	s, err := state.Get("binary_sensor.living_room_motion")
@@ -89,7 +89,7 @@ func lightsOut(service *ga.Service, state *ga.State) {
 	}
 }
 
-func sunriseSched(service *ga.Service, state *ga.State) {
+func sunriseSched(service *ga.Service, state ga.State) {
 	service.Light.TurnOn("light.living_room_lamps")
 	service.Light.TurnOff("light.christmas_lights")
 }
