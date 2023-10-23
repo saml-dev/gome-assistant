@@ -21,15 +21,11 @@ type EventListener struct {
 	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 
-	enabledEntity            string
-	enabledEntityState       string
-	enabledEntityRunOnError  bool
-	disabledEntity           string
-	disabledEntityState      string
-	disabledEntityRunOnError bool
+	enabledEntities  []internal.EnabledDisabledInfo
+	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(*Service, *State, EventData)
+type EventListenerCallback func(*Service, State, EventData)
 
 type EventData struct {
 	Type         string
@@ -106,12 +102,12 @@ func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkE
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
 	}
-	if b.eventListener.disabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	i := internal.EnabledDisabledInfo{
+		Entity:     entityId,
+		State:      state,
+		RunOnError: runOnNetworkError,
 	}
-	b.eventListener.enabledEntity = entityId
-	b.eventListener.enabledEntityState = state
-	b.eventListener.enabledEntityRunOnError = runOnNetworkError
+	b.eventListener.enabledEntities = append(b.eventListener.enabledEntities, i)
 	return b
 }
 
@@ -123,12 +119,12 @@ func (b eventListenerBuilder3) DisabledWhen(entityId, state string, runOnNetwork
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
 	}
-	if b.eventListener.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	i := internal.EnabledDisabledInfo{
+		Entity:     entityId,
+		State:      state,
+		RunOnError: runOnNetworkError,
 	}
-	b.eventListener.disabledEntity = entityId
-	b.eventListener.disabledEntityState = state
-	b.eventListener.disabledEntityRunOnError = runOnNetworkError
+	b.eventListener.disabledEntities = append(b.eventListener.disabledEntities, i)
 	return b
 }
 
@@ -166,10 +162,10 @@ func callEventListeners(app *App, msg ws.ChanMsg) {
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
 			continue
 		}
-		if c := checkEnabledEntity(app.state, l.enabledEntity, l.enabledEntityState, l.enabledEntityRunOnError); c.fail {
+		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
 			continue
 		}
-		if c := checkDisabledEntity(app.state, l.disabledEntity, l.disabledEntityState, l.disabledEntityRunOnError); c.fail {
+		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
 			continue
 		}
 

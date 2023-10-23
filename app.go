@@ -29,7 +29,7 @@ type App struct {
 	httpClient *http.HttpClient
 
 	service *Service
-	state   *State
+	state   *StateImpl
 
 	schedules         pq.PriorityQueue
 	intervals         pq.PriorityQueue
@@ -192,7 +192,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 	}
 }
 
-func getSunriseSunset(s *State, sunrise bool, dateToUse carbon.Carbon, offset ...DurationString) carbon.Carbon {
+func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offset ...DurationString) carbon.Carbon {
 	date := dateToUse.Carbon2Time()
 	rise, set := sunriseLib.SunriseSunset(s.latitude, s.longitude, date.Year(), date.Month(), date.Day())
 	rise, set = rise.Local(), set.Local()
@@ -291,6 +291,6 @@ func (a *App) GetService() *Service {
 	return a.service
 }
 
-func (a *App) GetState() *State {
+func (a *App) GetState() State {
 	return a.state
 }

@@ -10,8 +10,17 @@ import (
 	"saml.dev/gome-assistant/internal/http"
 )
 
+type State interface {
+	AfterSunrise(...DurationString) bool
+	BeforeSunrise(...DurationString) bool
+	AfterSunset(...DurationString) bool
+	BeforeSunset(...DurationString) bool
+	Get(entityId string) (EntityState, error)
+	Equals(entityId, state string) (bool, error)
+}
+
 // State is used to retrieve state from Home Assistant.
-type State struct {
+type StateImpl struct {
 	httpClient *http.HttpClient
 	latitude   float64
 	longitude  float64
@@ -24,8 +33,8 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 }
 
-func newState(c *http.HttpClient, homeZoneEntityId string) (*State, error) {
-	state := &State{httpClient: c}
+func newState(c *http.HttpClient, homeZoneEntityId string) (*StateImpl, error) {
+	state := &StateImpl{httpClient: c}
 	err := state.getLatLong(c, homeZoneEntityId)
 	if err != nil {
 		return nil, err
@@ -33,7 +42,7 @@ func newState(c *http.HttpClient, homeZoneEntityId string) (*State, error) {
 	return state, nil
 }
 
-func (s *State) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
+func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
 	resp, err := s.Get(homeZoneEntityId)
 	if err != nil {
 		return fmt.Errorf("couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'", homeZoneEntityId)
@@ -54,7 +63,7 @@ func (s *State) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
 	return nil
 }
 
-func (s *State) Get(entityId string) (EntityState, error) {
+func (s *StateImpl) Get(entityId string) (EntityState, error) {
 	resp, err := s.httpClient.GetState(entityId)
 	if err != nil {
 		return EntityState{}, err
@@ -64,7 +73,7 @@ func (s *State) Get(entityId string) (EntityState, error) {
 	return es, nil
 }
 
-func (s *State) Equals(entityId string, expectedState string) (bool, error) {
+func (s *StateImpl) Equals(entityId string, expectedState string) (bool, error) {
 	currentState, err := s.Get(entityId)
 	if err != nil {
 		return false, err
@@ -72,20 +81,20 @@ func (s *State) Equals(entityId string, expectedState string) (bool, error) {
 	return currentState.State == expectedState, nil
 }
 
-func (s *State) BeforeSunrise(offset ...DurationString) bool {
+func (s *StateImpl) BeforeSunrise(offset ...DurationString) bool {
 	sunrise := getSunriseSunset(s /* sunrise = */, true, carbon.Now(), offset...)
 	return carbon.Now().Lt(sunrise)
 }
 
-func (s *State) AfterSunrise(offset ...DurationString) bool {
+func (s *StateImpl) AfterSunrise(offset ...DurationString) bool {
 	return !s.BeforeSunrise(offset...)
 }
 
-func (s *State) BeforeSunset(offset ...DurationString) bool {
+func (s *StateImpl) BeforeSunset(offset ...DurationString) bool {
 	sunset := getSunriseSunset(s /* sunrise = */, false, carbon.Now(), offset...)
 	return carbon.Now().Lt(sunset)
 }
 
-func (s *State) AfterSunset(offset ...DurationString) bool {
+func (s *StateImpl) AfterSunset(offset ...DurationString) bool {
 	return !s.BeforeSunset(offset...)
 }

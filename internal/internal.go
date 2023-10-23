@@ -10,6 +10,12 @@ import (
 	"github.com/golang-module/carbon"
 )
 
+type EnabledDisabledInfo struct {
+	Entity     string
+	State      string
+	RunOnError bool
+}
+
 var id int64 = 0
 
 func GetId() int64 {

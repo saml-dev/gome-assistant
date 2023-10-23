@@ -9,7 +9,7 @@ import (
 	"saml.dev/gome-assistant/internal"
 )
 
-type ScheduleCallback func(*Service, *State)
+type ScheduleCallback func(*Service, State)
 
 type DailySchedule struct {
 	// 0-23
@@ -27,12 +27,8 @@ type DailySchedule struct {
 	exceptionDates []time.Time
 	allowlistDates []time.Time
 
-	enabledEntity            string
-	enabledEntityState       string
-	enabledEntityRunOnError  bool
-	disabledEntity           string
-	disabledEntityState      string
-	disabledEntityRunOnError bool
+	enabledEntities  []internal.EnabledDisabledInfo
+	disabledEntities []internal.EnabledDisabledInfo
 }
 
 func (s DailySchedule) Hash() string {
@@ -125,12 +121,12 @@ func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if sb.schedule.disabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting EnabledWhen on a schedule with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	i := internal.EnabledDisabledInfo{
+		Entity:     entityId,
+		State:      state,
+		RunOnError: runOnNetworkError,
 	}
-	sb.schedule.enabledEntity = entityId
-	sb.schedule.enabledEntityState = state
-	sb.schedule.enabledEntityRunOnError = runOnNetworkError
+	sb.schedule.enabledEntities = append(sb.schedule.enabledEntities, i)
 	return sb
 }
 
@@ -142,12 +138,12 @@ func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 	if entityId == "" {
 		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
 	}
-	if sb.schedule.enabledEntity != "" {
-		panic(fmt.Sprintf("You can't use EnabledWhen and DisabledWhen together. Error occurred while setting DisabledWhen on a schedule with params entityId=%s state=%s runOnNetworkError=%t", entityId, state, runOnNetworkError))
+	i := internal.EnabledDisabledInfo{
+		Entity:     entityId,
+		State:      state,
+		RunOnError: runOnNetworkError,
 	}
-	sb.schedule.disabledEntity = entityId
-	sb.schedule.disabledEntityState = state
-	sb.schedule.disabledEntityRunOnError = runOnNetworkError
+	sb.schedule.disabledEntities = append(sb.schedule.disabledEntities, i)
 	return sb
 }
 
@@ -186,10 +182,10 @@ func (s DailySchedule) maybeRunCallback(a *App) {
 	if c := checkAllowlistDates(s.allowlistDates); c.fail {
 		return
 	}
-	if c := checkEnabledEntity(a.state, s.enabledEntity, s.enabledEntityState, s.enabledEntityRunOnError); c.fail {
+	if c := checkEnabledEntity(a.state, s.enabledEntities); c.fail {
 		return
 	}
-	if c := checkDisabledEntity(a.state, s.disabledEntity, s.disabledEntityState, s.disabledEntityRunOnError); c.fail {
+	if c := checkDisabledEntity(a.state, s.disabledEntities); c.fail {
 		return
 	}
 	go s.callback(a.service, a.state)
