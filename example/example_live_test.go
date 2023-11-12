@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	"log/slog"
@@ -74,7 +74,6 @@ func (s *MySuite) TestLightService() {
 	s.app.GetService().Light.Toggle(entityId)
 
 	time.Sleep(1 * time.Second) // wait for state to update
-	// <-time.After(1 * time.Second)
 
 	newState, err := s.app.GetState().Get(entityId)
 	if err != nil {
