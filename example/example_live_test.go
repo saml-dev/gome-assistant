@@ -80,7 +80,7 @@ func (s *MySuite) TestLightService() {
 		slog.Error("Error getting entity state:", err)
 	}
 	slog.Info("New state of entity:", "state", newState.State)
-	assert.Equal(s.T(), initialState.State, newState.State)
+	assert.NotEqual(s.T(), initialState.State, newState.State)
 }
 
 // Run the test suite
