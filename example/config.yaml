@@ -1,0 +1,7 @@
+app:
+  ip_address: 192.168.0.204
+  port: 8123
+  home_zone_entity_id: zone.home
+
+entities:
+  light_entity_id: light.office_bed_lamp
