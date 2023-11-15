@@ -1,4 +1,4 @@
-package main
+package example
 
 import (
 	"encoding/json"
@@ -15,7 +15,6 @@ func main() {
 		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
 		HomeZoneEntityId: "zone.home",
 	})
-
 	if err != nil {
 		log.Fatalln("Error connecting to HASS:", err)
 	}
@@ -51,7 +50,6 @@ func main() {
 	app.RegisterEventListeners(zwaveEventListener)
 
 	app.Start()
-
 }
 
 func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
