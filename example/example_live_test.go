@@ -85,7 +85,7 @@ func (s *MySuite) TestLightService() {
 			newState := getEntityState(s, entityId)
 			assert.NotEqual(c, initState, newState)
 			assert.True(c, s.suiteCtx["entityCallbackInvoked"].(bool))
-		}, 10*time.Second, 1*time.Second, "State of light entity did not change or callback was invoked")
+		}, 10*time.Second, 1*time.Second, "State of light entity did not change or callback was not invoked")
 	} else {
 		s.T().Skip("No light entity id provided")
 	}
