@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-cz/devslog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v3"
@@ -33,7 +34,19 @@ type (
 	}
 )
 
+func setupLogging() {
+	opts := &devslog.Options{
+		HandlerOptions: &slog.HandlerOptions{
+			Level: slog.LevelDebug,
+		},
+	}
+	slog.SetDefault(slog.New(devslog.NewHandler(os.Stdout, opts)))
+}
+
 func (s *MySuite) SetupSuite() {
+	setupLogging()
+	slog.Debug("Setting up test suite...")
+
 	s.suiteCtx = make(map[string]any)
 
 	configFile, err := os.ReadFile("./config.yaml")
@@ -44,16 +57,16 @@ func (s *MySuite) SetupSuite() {
 	// either env var or config file can be used to set HA auth. token
 	s.config.Hass.HAAuthToken = os.Getenv("HA_AUTH_TOKEN")
 	if err := yaml.Unmarshal(configFile, s.config); err != nil {
-		slog.Error("Error unmarshalling config file:", err)
+		slog.Error("Error unmarshalling config file", err)
 	}
 
 	s.app, err = ga.NewApp(ga.NewAppRequest{
-		HAAuthToken:      s.config.Hass.HAAuthToken,
+		// HAAuthToken:      s.config.Hass.HAAuthToken,
 		IpAddress:        s.config.Hass.IpAddress,
 		HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
 	})
 	if err != nil {
-		slog.Error("Failed to createw new app:", err)
+		slog.Error("Failed to createw new app", err)
 		s.T().FailNow()
 	}
 
@@ -93,17 +106,17 @@ func (s *MySuite) TestLightService() {
 
 // Test if event has been captured after light entity state changed
 func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
-	slog.Info("Entity callback called.", "entity id:", e.TriggerEntityId, "from state:", e.FromState, "to state:", e.ToState)
+	slog.Info("Entity callback called.", "entity id", e.TriggerEntityId, "from state", e.FromState, "to state", e.ToState)
 	s.suiteCtx["entityCallbackInvoked"] = true
 }
 
 func getEntityState(s *MySuite, entityId string) string {
 	state, err := s.app.GetState().Get(entityId)
 	if err != nil {
-		slog.Error("Error getting entity state:", err)
+		slog.Error("Error getting entity state", err)
 		s.T().FailNow()
 	}
-	slog.Info("State of entity:", "state", state.State)
+	slog.Info("State of entity", "state", state.State)
 	return state.State
 }
 

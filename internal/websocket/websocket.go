@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -17,9 +17,7 @@ import (
 	i "saml.dev/gome-assistant/internal"
 )
 
-var (
-	ErrInvalidToken = errors.New("invalid authentication token")
-)
+var ErrInvalidToken = errors.New("invalid authentication token")
 
 type AuthMessage struct {
 	MsgType     string `json:"type"`
@@ -59,7 +57,7 @@ func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Conte
 	conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("ws://%s:%s/api/websocket", ip, port), nil)
 	if err != nil {
 		ctxCancel()
-		log.Printf("ERROR: Failed to connect to websocket at ws://%s:%s/api/websocket. Check IP address and port\n", ip, port)
+		slog.Error("Failed to connect to websocket at ws://%s:%s/api/websocket. Check IP address and port\n", ip, port)
 		return nil, nil, nil, err
 	}
 
@@ -67,7 +65,7 @@ func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Conte
 	_, err = ReadMessage(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		log.Printf("Unknown error creating websocket client\n")
+		slog.Error("Unknown error creating websocket client\n")
 		return nil, nil, nil, err
 	}
 
@@ -75,7 +73,7 @@ func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Conte
 	err = SendAuthMessage(conn, ctx, authToken)
 	if err != nil {
 		ctxCancel()
-		log.Printf("Unknown error creating websocket client\n")
+		slog.Error("Unknown error creating websocket client\n")
 		return nil, nil, nil, err
 	}
 
@@ -83,7 +81,7 @@ func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Conte
 	err = VerifyAuthResponse(conn, ctx)
 	if err != nil {
 		ctxCancel()
-		log.Printf("ERROR: Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
+		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
 		return nil, nil, nil, err
 	}
 
@@ -143,7 +141,7 @@ func SubscribeToEventType(eventType string, conn *WebsocketWriter, ctx context.C
 	}
 	err := conn.WriteMessage(e, ctx)
 	if err != nil {
-		log.Fatalf("Error writing to websocket: %s\n", err)
+		slog.Error("Error writing to websocket: %s\n", err)
 	}
 	// m, _ := ReadMessage(conn, ctx)
 	// log.Default().Println(string(m))

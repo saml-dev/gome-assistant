@@ -3,6 +3,7 @@ module example
 go 1.21.0
 
 require (
+	github.com/golang-cz/devslog v0.0.8
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 	saml.dev/gome-assistant v0.2.0

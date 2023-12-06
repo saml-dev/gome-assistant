@@ -3,7 +3,7 @@ package gomeassistant
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -82,7 +82,7 @@ you can use to register schedules and listeners.
 */
 func NewApp(request NewAppRequest) (*App, error) {
 	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
-		log.Fatalln("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest.")
+		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest.")
 	}
 	port := request.Port
 	if port == "" {
@@ -149,7 +149,7 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 func (a *App) RegisterIntervals(intervals ...Interval) {
 	for _, i := range intervals {
 		if i.frequency == 0 {
-			log.Fatalf("A schedule must use either set frequency via Every().\n")
+			slog.Error("A schedule must use either set frequency via Every().\n")
 		}
 
 		i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
@@ -165,7 +165,7 @@ func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
 		etl := etl
 		if etl.delay != 0 && etl.toState == "" {
-			log.Fatalln("EntityListener error: you have to use ToState() when using Duration()")
+			slog.Error("EntityListener error: you have to use ToState() when using Duration()")
 		}
 
 		for _, entity := range etl.entityIds {
@@ -211,7 +211,7 @@ func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offse
 	if len(offset) == 1 {
 		t, err = time.ParseDuration(string(offset[0]))
 		if err != nil {
-			log.Fatalf(fmt.Sprintf("Could not parse offset passed to %s: \"%s\"\n", printString, offset[0]))
+			slog.Error(fmt.Sprintf("Could not parse offset passed to %s: \"%s\"\n", printString, offset[0]))
 		}
 	}
 
@@ -234,9 +234,9 @@ func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.
 }
 
 func (a *App) Start() {
-	log.Default().Println("Starting", a.schedules.Len(), "schedules")
-	log.Default().Println("Starting", len(a.entityListeners), "entity listeners")
-	log.Default().Println("Starting", len(a.eventListeners), "event listeners")
+	slog.Info("Starting", "schedules", a.schedules.Len())
+	slog.Info("Starting", "entity listeners", len(a.entityListeners))
+	slog.Info("Starting", "event listeners", len(a.eventListeners))
 
 	go runSchedules(a)
 	go runIntervals(a)
@@ -254,7 +254,7 @@ func (a *App) Start() {
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
 				entityState, err := a.state.Get(eid)
 				if err != nil {
-					log.Default().Println("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
+					slog.Warn("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
 				}
 
 				etl.runOnStartupCompleted = true
