@@ -168,7 +168,7 @@ func runSchedules(a *App) {
 			sched = popSchedule(a)
 		}
 
-		slog.Info("Next schedule", "new run time", sched.nextRunTime)
+		slog.Info("Next schedule", "next run time", sched.nextRunTime)
 		time.Sleep(time.Until(sched.nextRunTime))
 		sched.maybeRunCallback(a)
 		requeueSchedule(a, sched)

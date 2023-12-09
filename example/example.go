@@ -2,7 +2,7 @@ package example
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"os"
 	"time"
 
@@ -16,7 +16,7 @@ func main() {
 		HomeZoneEntityId: "zone.home",
 	})
 	if err != nil {
-		log.Fatalln("Error connecting to HASS:", err)
+		slog.Error("Error connecting to HASS:", err)
 	}
 
 	defer app.Cleanup()
@@ -69,7 +69,7 @@ func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
 	// the eventTypes.go file :)
 	ev := ga.EventZWaveJSValueNotification{}
 	json.Unmarshal(data.RawEventJSON, &ev)
-	log.Default().Println(ev)
+	slog.Info("On event invoked", "event", ev)
 }
 
 func lightsOut(service *ga.Service, state ga.State) {
@@ -77,7 +77,7 @@ func lightsOut(service *ga.Service, state ga.State) {
 	service.Light.TurnOff("light.outside_lights")
 	s, err := state.Get("binary_sensor.living_room_motion")
 	if err != nil {
-		log.Default().Println("couldnt get living room motion state, doing nothing")
+		slog.Warn("couldnt get living room motion state, doing nothing")
 		return
 	}
 

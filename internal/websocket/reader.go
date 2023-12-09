@@ -3,8 +3,7 @@ package websocket
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/gorilla/websocket"
 )
@@ -25,9 +24,8 @@ type ChanMsg struct {
 func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) {
 	for {
 		bytes, err := ReadMessage(conn, ctx)
-
 		if err != nil {
-			log.Default().Println("Error reading from websocket:", err)
+			slog.Error("Error reading from websocket:", err)
 			close(c)
 			break
 		}
@@ -38,7 +36,7 @@ func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) 
 		}
 		json.Unmarshal(bytes, &base)
 		if !base.Success {
-			fmt.Println("WARNING: received unsuccessful response:", string(bytes))
+			slog.Warn("Received unsuccessful response", "response", string(bytes))
 		}
 		chanMsg := ChanMsg{
 			Type:    base.Type,

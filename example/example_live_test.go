@@ -48,7 +48,6 @@ func setupLogging() {
 func (s *MySuite) SetupSuite() {
 	setupLogging()
 	slog.Debug("Setting up test suite...")
-
 	s.suiteCtx = make(map[string]any)
 
 	configFile, err := os.ReadFile("./config.yaml")
