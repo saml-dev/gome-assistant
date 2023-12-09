@@ -37,8 +37,10 @@ type (
 func setupLogging() {
 	opts := &devslog.Options{
 		HandlerOptions: &slog.HandlerOptions{
-			Level: slog.LevelDebug,
+			Level:     slog.LevelDebug,
+			AddSource: true,
 		},
+		NewLineAfterLog: true,
 	}
 	slog.SetDefault(slog.New(devslog.NewHandler(os.Stdout, opts)))
 }
@@ -61,7 +63,7 @@ func (s *MySuite) SetupSuite() {
 	}
 
 	s.app, err = ga.NewApp(ga.NewAppRequest{
-		// HAAuthToken:      s.config.Hass.HAAuthToken,
+		HAAuthToken:      s.config.Hass.HAAuthToken,
 		IpAddress:        s.config.Hass.IpAddress,
 		HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
 	})
@@ -70,13 +72,21 @@ func (s *MySuite) SetupSuite() {
 		s.T().FailNow()
 	}
 
+	// Register all automations
 	entityId := s.config.Entities.LightEntityId
 	if entityId != "" {
 		s.suiteCtx["entityCallbackInvoked"] = false
 		etl := ga.NewEntityListener().EntityIds(entityId).Call(s.entityCallback).Build()
 		s.app.RegisterEntityListeners(etl)
-		go s.app.Start()
 	}
+
+	s.suiteCtx["dailyScheduleCallbackInvoked"] = false
+	runTime := time.Now().Add(1 * time.Minute).Format("15:04")
+	dailySchedule := ga.NewDailySchedule().Call(s.dailyScheduleCallback).At(runTime).Build()
+	s.app.RegisterSchedules(dailySchedule)
+
+	// start GA app
+	go s.app.Start()
 }
 
 func (s *MySuite) TearDownSuite() {
@@ -104,10 +114,23 @@ func (s *MySuite) TestLightService() {
 	}
 }
 
-// Test if event has been captured after light entity state changed
+// Basic test of daily schedule and callback
+func (s *MySuite) TestSchedule() {
+	assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
+		assert.True(c, s.suiteCtx["dailyScheduleCallbackInvoked"].(bool))
+	}, 2*time.Minute, 1*time.Second, "Daily schedule callback was not invoked")
+}
+
+// Capture event after light entity state has changed
 func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
 	slog.Info("Entity callback called.", "entity id", e.TriggerEntityId, "from state", e.FromState, "to state", e.ToState)
 	s.suiteCtx["entityCallbackInvoked"] = true
+}
+
+// Capture planned daily schedule
+func (s *MySuite) dailyScheduleCallback(se *ga.Service, st ga.State) {
+	slog.Info("Daily schedule callback called.")
+	s.suiteCtx["dailyScheduleCallbackInvoked"] = true
 }
 
 func getEntityState(s *MySuite, entityId string) string {
