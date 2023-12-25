@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -17,6 +18,8 @@ import (
 
 // Returned by NewApp() if authentication fails
 var ErrInvalidToken = ws.ErrInvalidToken
+
+var ErrInvalidArgs = errors.New("invalid arguments provided")
 
 type App struct {
 	ctx       context.Context
@@ -82,7 +85,8 @@ you can use to register schedules and listeners.
 */
 func NewApp(request NewAppRequest) (*App, error) {
 	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
-		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest.")
+		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
+		return nil, ErrInvalidArgs
 	}
 	port := request.Port
 	if port == "" {
@@ -149,7 +153,8 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 func (a *App) RegisterIntervals(intervals ...Interval) {
 	for _, i := range intervals {
 		if i.frequency == 0 {
-			slog.Error("A schedule must use either set frequency via Every().\n")
+			slog.Error("A schedule must use either set frequency via Every()")
+			panic(ErrInvalidArgs)
 		}
 
 		i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
@@ -166,6 +171,7 @@ func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 		etl := etl
 		if etl.delay != 0 && etl.toState == "" {
 			slog.Error("EntityListener error: you have to use ToState() when using Duration()")
+			panic(ErrInvalidArgs)
 		}
 
 		for _, entity := range etl.entityIds {
@@ -211,7 +217,9 @@ func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offse
 	if len(offset) == 1 {
 		t, err = time.ParseDuration(string(offset[0]))
 		if err != nil {
-			slog.Error(fmt.Sprintf("Could not parse offset passed to %s: \"%s\"\n", printString, offset[0]))
+			parsingErr := fmt.Errorf("could not parse offset passed to %s: \"%s\": %w", printString, offset[0], err)
+			slog.Error(parsingErr.Error())
+			panic(parsingErr)
 		}
 	}
 

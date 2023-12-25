@@ -17,6 +17,7 @@ func main() {
 	})
 	if err != nil {
 		slog.Error("Error connecting to HASS:", err)
+		os.Exit(1)
 	}
 
 	defer app.Cleanup()

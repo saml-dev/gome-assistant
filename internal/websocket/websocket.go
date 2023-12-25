@@ -141,7 +141,9 @@ func SubscribeToEventType(eventType string, conn *WebsocketWriter, ctx context.C
 	}
 	err := conn.WriteMessage(e, ctx)
 	if err != nil {
-		slog.Error("Error writing to websocket: %s\n", err)
+		wrappedErr := fmt.Errorf("error writing to websocket: %w", err)
+		slog.Error(wrappedErr.Error())
+		panic(wrappedErr)
 	}
 	// m, _ := ReadMessage(conn, ctx)
 	// log.Default().Println(string(m))
