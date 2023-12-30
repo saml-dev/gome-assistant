@@ -25,7 +25,8 @@ func BuildService[
 		Number |
 		Scene |
 		TTS |
-		Vacuum,
+		Vacuum |
+		ZWaveJS,
 ](conn *ws.WebsocketWriter, ctx context.Context) *T {
 	return &T{conn: conn, ctx: ctx}
 }
