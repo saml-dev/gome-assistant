@@ -1,6 +1,6 @@
 module saml.dev/gome-assistant
 
-go 1.19
+go 1.21
 
 require (
 	github.com/golang-module/carbon v1.7.1

@@ -2,7 +2,7 @@ package gomeassistant
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -168,7 +168,7 @@ func runSchedules(a *App) {
 			sched = popSchedule(a)
 		}
 
-		log.Println("Next schedule:", sched.nextRunTime)
+		slog.Info("Next schedule", "start_time", sched.nextRunTime)
 		time.Sleep(time.Until(sched.nextRunTime))
 		sched.maybeRunCallback(a)
 		requeueSchedule(a, sched)

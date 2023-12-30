@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-cz/devslog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v3"
@@ -33,7 +34,20 @@ type (
 	}
 )
 
+func setupLogging() {
+	opts := &devslog.Options{
+		HandlerOptions: &slog.HandlerOptions{
+			Level:     slog.LevelDebug,
+			AddSource: true,
+		},
+		NewLineAfterLog: true,
+	}
+	slog.SetDefault(slog.New(devslog.NewHandler(os.Stdout, opts)))
+}
+
 func (s *MySuite) SetupSuite() {
+	setupLogging()
+	slog.Debug("Setting up test suite...")
 	s.suiteCtx = make(map[string]any)
 
 	configFile, err := os.ReadFile("./config.yaml")
@@ -44,7 +58,7 @@ func (s *MySuite) SetupSuite() {
 	// either env var or config file can be used to set HA auth. token
 	s.config.Hass.HAAuthToken = os.Getenv("HA_AUTH_TOKEN")
 	if err := yaml.Unmarshal(configFile, s.config); err != nil {
-		slog.Error("Error unmarshalling config file:", err)
+		slog.Error("Error unmarshalling config file", err)
 	}
 
 	s.app, err = ga.NewApp(ga.NewAppRequest{
@@ -53,17 +67,25 @@ func (s *MySuite) SetupSuite() {
 		HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
 	})
 	if err != nil {
-		slog.Error("Failed to createw new app:", err)
+		slog.Error("Failed to createw new app", err)
 		s.T().FailNow()
 	}
 
+	// Register all automations
 	entityId := s.config.Entities.LightEntityId
 	if entityId != "" {
 		s.suiteCtx["entityCallbackInvoked"] = false
 		etl := ga.NewEntityListener().EntityIds(entityId).Call(s.entityCallback).Build()
 		s.app.RegisterEntityListeners(etl)
-		go s.app.Start()
 	}
+
+	s.suiteCtx["dailyScheduleCallbackInvoked"] = false
+	runTime := time.Now().Add(1 * time.Minute).Format("15:04")
+	dailySchedule := ga.NewDailySchedule().Call(s.dailyScheduleCallback).At(runTime).Build()
+	s.app.RegisterSchedules(dailySchedule)
+
+	// start GA app
+	go s.app.Start()
 }
 
 func (s *MySuite) TearDownSuite() {
@@ -91,19 +113,32 @@ func (s *MySuite) TestLightService() {
 	}
 }
 
-// Test if event has been captured after light entity state changed
+// Basic test of daily schedule and callback
+func (s *MySuite) TestSchedule() {
+	assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
+		assert.True(c, s.suiteCtx["dailyScheduleCallbackInvoked"].(bool))
+	}, 2*time.Minute, 1*time.Second, "Daily schedule callback was not invoked")
+}
+
+// Capture event after light entity state has changed
 func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
-	slog.Info("Entity callback called.", "entity id:", e.TriggerEntityId, "from state:", e.FromState, "to state:", e.ToState)
+	slog.Info("Entity callback called.", "entity id", e.TriggerEntityId, "from state", e.FromState, "to state", e.ToState)
 	s.suiteCtx["entityCallbackInvoked"] = true
+}
+
+// Capture planned daily schedule
+func (s *MySuite) dailyScheduleCallback(se *ga.Service, st ga.State) {
+	slog.Info("Daily schedule callback called.")
+	s.suiteCtx["dailyScheduleCallbackInvoked"] = true
 }
 
 func getEntityState(s *MySuite, entityId string) string {
 	state, err := s.app.GetState().Get(entityId)
 	if err != nil {
-		slog.Error("Error getting entity state:", err)
+		slog.Error("Error getting entity state", err)
 		s.T().FailNow()
 	}
-	slog.Info("State of entity:", "state", state.State)
+	slog.Info("State of entity", "state", state.State)
 	return state.State
 }
 
