@@ -50,14 +50,24 @@ func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
 }
 
 func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
+	uri := fmt.Sprintf("ws:///%s:%s/api/websocket", ip, port)
+	return ConnectionFromUri(uri, authToken)
+}
+
+func SetupSecureConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
+	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
+	return ConnectionFromUri(uri, authToken)
+}
+
+func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
 
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.DialContext(ctx, fmt.Sprintf("ws://%s:%s/api/websocket", ip, port), nil)
+	conn, _, err := dialer.DialContext(ctx, uri, nil)
 	if err != nil {
 		ctxCancel()
-		slog.Error("Failed to connect to websocket at ws://%s:%s/api/websocket. Check IP address and port\n", ip, port)
+		slog.Error("Failed to connect to websocket. Check URI\n", "uri", uri)
 		return nil, nil, nil, err
 	}
 

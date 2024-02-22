@@ -16,8 +16,24 @@ type HttpClient struct {
 }
 
 func NewHttpClient(ip, port, token string) *HttpClient {
-	url := fmt.Sprintf("http://%s:%s/api", ip, port)
-	return &HttpClient{url, token}
+	return ClientFromUri(
+		fmt.Sprintf("http://%s:%s/api", ip, port),
+		token,
+	)
+}
+
+func NewHttpsClient(ip, port, token string) *HttpClient {
+	return ClientFromUri(
+		fmt.Sprintf("https://%s:%s/api", ip, port),
+		token,
+	)
+}
+
+func ClientFromUri(uri, token string) *HttpClient {
+	return &HttpClient{
+		uri,
+		token,
+	}
 }
 
 func (c *HttpClient) GetState(entityId string) ([]byte, error) {

@@ -77,6 +77,12 @@ type NewAppRequest struct {
 	// Used to pull latitude/longitude from Home Assistant
 	// to calculate sunset/sunrise times.
 	HomeZoneEntityId string
+
+	// Optional
+	// Whether to use secure connections for http and websockets.
+	// Setting this to `true` will use `https://` instead of `https://`
+	// and `wss://` instead of `ws://`.
+	Secure bool
 }
 
 /*
@@ -92,13 +98,31 @@ func NewApp(request NewAppRequest) (*App, error) {
 	if port == "" {
 		port = "8123"
 	}
-	conn, ctx, ctxCancel, err := ws.SetupConnection(request.IpAddress, port, request.HAAuthToken)
+
+	var (
+		conn      *websocket.Conn
+		ctx       context.Context
+		ctxCancel context.CancelFunc
+		err       error
+	)
+
+	if request.Secure {
+		conn, ctx, ctxCancel, err = ws.SetupSecureConnection(request.IpAddress, port, request.HAAuthToken)
+	} else {
+		conn, ctx, ctxCancel, err = ws.SetupConnection(request.IpAddress, port, request.HAAuthToken)
+	}
 
 	if conn == nil {
 		return nil, err
 	}
 
-	httpClient := http.NewHttpClient(request.IpAddress, port, request.HAAuthToken)
+	var httpClient *http.HttpClient
+
+	if request.Secure {
+		httpClient = http.NewHttpsClient(request.IpAddress, port, request.HAAuthToken)
+	} else {
+		httpClient = http.NewHttpClient(request.IpAddress, port, request.HAAuthToken)
+	}
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
 	service := newService(wsWriter, ctx, httpClient)
