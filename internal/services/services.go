@@ -24,6 +24,7 @@ func BuildService[
 		Notify |
 		Number |
 		Scene |
+		Script |
 		TTS |
 		Vacuum |
 		ZWaveJS,

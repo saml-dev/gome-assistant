@@ -25,6 +25,7 @@ type Service struct {
 	Notify            *services.Notify
 	Number            *services.Number
 	Scene             *services.Scene
+	Script            *services.Script
 	TTS               *services.TTS
 	Vacuum            *services.Vacuum
 	ZWaveJS           *services.ZWaveJS
@@ -48,6 +49,7 @@ func newService(conn *ws.WebsocketWriter, ctx context.Context, httpClient *http.
 		Notify:            services.BuildService[services.Notify](conn, ctx),
 		Number:            services.BuildService[services.Number](conn, ctx),
 		Scene:             services.BuildService[services.Scene](conn, ctx),
+		Script:            services.BuildService[services.Script](conn, ctx),
 		TTS:               services.BuildService[services.TTS](conn, ctx),
 		Vacuum:            services.BuildService[services.Vacuum](conn, ctx),
 		ZWaveJS:           services.BuildService[services.ZWaveJS](conn, ctx),
