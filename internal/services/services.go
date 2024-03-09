@@ -21,6 +21,7 @@ func BuildService[
 		InputDatetime |
 		InputText |
 		InputNumber |
+		Event |
 		Notify |
 		Number |
 		Scene |
