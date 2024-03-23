@@ -50,7 +50,7 @@ func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
 }
 
 func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
-	uri := fmt.Sprintf("ws:///%s:%s/api/websocket", ip, port)
+	uri := fmt.Sprintf("ws://%s:%s/api/websocket", ip, port)
 	return ConnectionFromUri(uri, authToken)
 }
 
