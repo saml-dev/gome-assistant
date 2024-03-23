@@ -57,6 +57,78 @@ type timeRange struct {
 	end   time.Time
 }
 
+type NewAppConfig struct {
+	// RESTBaseURI is the base URI for REST requests; for example,
+	//  * `http://homeassistant.local:8123/api` from outside of the
+	//    HA appliance (without encryption)
+	//  * `https://homeassistant.local:8123/api` from outside of the
+	//    HA appliance (with encryption)
+	//  * `http://supervisor/core/api` from an add-on running within
+	//    the appliance and connecting via the proxy
+	RESTBaseURI string
+
+	// WebsocketURI is the base URI for websocket connections; for
+	// example,
+	//  * `ws://homeassistant.local:8123/api/websocket` from outside
+	//    of the HA appliance (without encryption)
+	//  * `wss://homeassistant.local:8123/api/websocket` from outside
+	//    of the HA appliance (with encryption)
+	//  * `ws://supervisor/core/api/websocket` from an add-on running
+	//    within the appliance and connecting via the proxy
+	WebsocketURI string
+
+	// Auth token generated in Home Assistant. Used to connect to the
+	// Websocket API.
+	HAAuthToken string
+
+	// Required
+	// EntityId of the zone representing your home e.g. "zone.home".
+	// Used to pull latitude/longitude from Home Assistant
+	// to calculate sunset/sunrise times.
+	HomeZoneEntityId string
+}
+
+/*
+NewAppFromConfig establishes the websocket connection and returns an
+object you can use to register schedules and listeners, based on the
+URIs that it should connect to.
+*/
+func NewAppFromConfig(config NewAppConfig) (*App, error) {
+	if config.RESTBaseURI == "" || config.WebsocketURI == "" ||
+		config.HAAuthToken == "" || config.HomeZoneEntityId == "" {
+		slog.Error("RESTBaseURI, WebsocketURI, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
+		return nil, ErrInvalidArgs
+	}
+
+	conn, ctx, ctxCancel, err := ws.ConnectionFromUri(config.WebsocketURI, config.HAAuthToken)
+	if err != nil {
+		return nil, err
+	}
+
+	httpClient := http.ClientFromUri(config.RESTBaseURI, config.HAAuthToken)
+
+	wsWriter := &ws.WebsocketWriter{Conn: conn}
+	service := newService(wsWriter, ctx, httpClient)
+	state, err := newState(httpClient, config.HomeZoneEntityId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &App{
+		conn:            conn,
+		wsWriter:        wsWriter,
+		ctx:             ctx,
+		ctxCancel:       ctxCancel,
+		httpClient:      httpClient,
+		service:         service,
+		state:           state,
+		schedules:       pq.New(),
+		intervals:       pq.New(),
+		entityListeners: map[string][]*EntityListener{},
+		eventListeners:  map[string][]*EventListener{},
+	}, nil
+}
+
 type NewAppRequest struct {
 	// Required
 	// IpAddress of your Home Assistant instance i.e. "localhost"
@@ -99,51 +171,20 @@ func NewApp(request NewAppRequest) (*App, error) {
 		port = "8123"
 	}
 
-	var (
-		conn      *websocket.Conn
-		ctx       context.Context
-		ctxCancel context.CancelFunc
-		err       error
-	)
+	config := NewAppConfig{
+		HAAuthToken:      request.HAAuthToken,
+		HomeZoneEntityId: request.HomeZoneEntityId,
+	}
 
 	if request.Secure {
-		conn, ctx, ctxCancel, err = ws.SetupSecureConnection(request.IpAddress, port, request.HAAuthToken)
+		config.WebsocketURI = fmt.Sprintf("wss://%s:%s/api/websocket", request.IpAddress, port)
+		config.RESTBaseURI = fmt.Sprintf("https://%s:%s/api", request.IpAddress, port)
 	} else {
-		conn, ctx, ctxCancel, err = ws.SetupConnection(request.IpAddress, port, request.HAAuthToken)
+		config.WebsocketURI = fmt.Sprintf("ws://%s:%s/api/websocket", request.IpAddress, port)
+		config.RESTBaseURI = fmt.Sprintf("http://%s:%s/api", request.IpAddress, port)
 	}
 
-	if conn == nil {
-		return nil, err
-	}
-
-	var httpClient *http.HttpClient
-
-	if request.Secure {
-		httpClient = http.NewHttpsClient(request.IpAddress, port, request.HAAuthToken)
-	} else {
-		httpClient = http.NewHttpClient(request.IpAddress, port, request.HAAuthToken)
-	}
-
-	wsWriter := &ws.WebsocketWriter{Conn: conn}
-	service := newService(wsWriter, ctx, httpClient)
-	state, err := newState(httpClient, request.HomeZoneEntityId)
-	if err != nil {
-		return nil, err
-	}
-
-	return &App{
-		conn:            conn,
-		wsWriter:        wsWriter,
-		ctx:             ctx,
-		ctxCancel:       ctxCancel,
-		httpClient:      httpClient,
-		service:         service,
-		state:           state,
-		schedules:       pq.New(),
-		intervals:       pq.New(),
-		entityListeners: map[string][]*EntityListener{},
-		eventListeners:  map[string][]*EventListener{},
-	}, nil
+	return NewAppFromConfig(config)
 }
 
 func (a *App) Cleanup() {
