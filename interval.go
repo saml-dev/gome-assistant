@@ -152,16 +152,9 @@ func runIntervals(a *App) {
 
 	for {
 		i := popInterval(a)
-
-		// run callback for all intervals before now in case they overlap
-		for i.nextRunTime.Before(time.Now()) {
-			i.maybeRunCallback(a)
-			requeueInterval(a, i)
-
-			i = popInterval(a)
+		if i.nextRunTime.After(time.Now()) {
+			time.Sleep(time.Until(i.nextRunTime))
 		}
-
-		time.Sleep(time.Until(i.nextRunTime))
 		i.maybeRunCallback(a)
 		requeueInterval(a, i)
 	}
