@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 
 	"saml.dev/gome-assistant/internal"
@@ -23,28 +24,28 @@ type Interval struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-func (i Interval) Hash() string {
+func (i *Interval) Hash() string {
 	return fmt.Sprint(i.startTime, i.endTime, i.frequency, i.callback, i.exceptionDates, i.exceptionRanges)
 }
 
 // Call
 type intervalBuilder struct {
-	interval Interval
+	interval *Interval
 }
 
 // Every
 type intervalBuilderCall struct {
-	interval Interval
+	interval *Interval
 }
 
 // Offset, ExceptionDates, ExceptionRange
 type intervalBuilderEnd struct {
-	interval Interval
+	interval *Interval
 }
 
 func NewInterval() intervalBuilder {
 	return intervalBuilder{
-		Interval{
+		&Interval{
 			frequency: 0,
 			startTime: "00:00",
 			endTime:   "00:00",
@@ -52,7 +53,7 @@ func NewInterval() intervalBuilder {
 	}
 }
 
-func (i Interval) String() string {
+func (i *Interval) String() string {
 	return fmt.Sprintf("Interval{ call %q every %s%s%s }",
 		internal.GetFunctionName(i.callback),
 		i.frequency,
@@ -140,23 +141,25 @@ func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 	return ib
 }
 
-func (sb intervalBuilderEnd) Build() Interval {
+func (sb intervalBuilderEnd) Build() *Interval {
 	return sb.interval
 }
 
-func (a *App) runIntervals() {
-	if a.intervals.Len() == 0 {
-		return
+func (i *Interval) initializeNextRunTime(a *App) {
+	if i.frequency == 0 {
+		slog.Error("A schedule must use either set frequency via Every()")
+		panic(ErrInvalidArgs)
 	}
 
-	for {
-		i := popInterval(a)
-		if i.nextRunTime.After(time.Now()) {
-			time.Sleep(time.Until(i.nextRunTime))
-		}
-		i.maybeRunCallback(a)
-		requeueInterval(a, i)
+	i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
+	now := time.Now()
+	for i.nextRunTime.Before(now) {
+		i.nextRunTime = i.nextRunTime.Add(i.frequency)
 	}
+}
+
+func (i *Interval) getNextRunTime() time.Time {
+	return i.nextRunTime
 }
 
 func (i Interval) shouldRun(a *App) bool {
@@ -181,20 +184,10 @@ func (i Interval) shouldRun(a *App) bool {
 	return true
 }
 
-func (i Interval) maybeRunCallback(a *App) {
-	if !i.shouldRun(a) {
-		return
-	}
-	go i.callback(a.service, a.state)
+func (i *Interval) run(a *App) {
+	i.callback(a.service, a.state)
 }
 
-func popInterval(a *App) Interval {
-	i, _ := a.intervals.Pop()
-	return i.(Interval)
-}
-
-func requeueInterval(a *App, i Interval) {
+func (i *Interval) updateNextRunTime(a *App) {
 	i.nextRunTime = i.nextRunTime.Add(i.frequency)
-
-	a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
 }

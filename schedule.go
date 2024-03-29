@@ -2,7 +2,6 @@ package gomeassistant
 
 import (
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -31,25 +30,25 @@ type DailySchedule struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-func (s DailySchedule) Hash() string {
+func (s *DailySchedule) Hash() string {
 	return fmt.Sprint(s.hour, s.minute, s.callback)
 }
 
 type scheduleBuilder struct {
-	schedule DailySchedule
+	schedule *DailySchedule
 }
 
 type scheduleBuilderCall struct {
-	schedule DailySchedule
+	schedule *DailySchedule
 }
 
 type scheduleBuilderEnd struct {
-	schedule DailySchedule
+	schedule *DailySchedule
 }
 
 func NewDailySchedule() scheduleBuilder {
 	return scheduleBuilder{
-		DailySchedule{
+		&DailySchedule{
 			hour:      0,
 			minute:    0,
 			sunOffset: "0s",
@@ -57,7 +56,7 @@ func NewDailySchedule() scheduleBuilder {
 	}
 }
 
-func (s DailySchedule) String() string {
+func (s *DailySchedule) String() string {
 	return fmt.Sprintf("Schedule{ call %q daily at %s }",
 		internal.GetFunctionName(s.callback),
 		stringHourMinute(s.hour, s.minute),
@@ -147,28 +146,33 @@ func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 	return sb
 }
 
-func (sb scheduleBuilderEnd) Build() DailySchedule {
+func (sb scheduleBuilderEnd) Build() *DailySchedule {
 	return sb.schedule
 }
 
-// app.Start() functions
-func (a *App) runSchedules() {
-	if a.schedules.Len() == 0 {
+func (s *DailySchedule) initializeNextRunTime(a *App) {
+	// realStartTime already set for sunset/sunrise
+	if s.isSunrise || s.isSunset {
+		s.nextRunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset).Carbon2Time()
 		return
 	}
 
-	for {
-		sched := popSchedule(a)
-		if sched.nextRunTime.After(time.Now()) {
-			slog.Info("Next schedule", "start_time", sched.nextRunTime)
-			time.Sleep(time.Until(sched.nextRunTime))
-		}
-		sched.maybeRunCallback(a)
-		requeueSchedule(a, sched)
+	now := carbon.Now()
+	startTime := carbon.Now().SetTimeMilli(s.hour, s.minute, 0, 0)
+
+	// advance first scheduled time by frequency until it is in the future
+	if startTime.Lt(now) {
+		startTime = startTime.AddDay()
 	}
+
+	s.nextRunTime = startTime.Carbon2Time()
 }
 
-func (s DailySchedule) shouldRun(a *App) bool {
+func (s *DailySchedule) getNextRunTime() time.Time {
+	return s.nextRunTime
+}
+
+func (s *DailySchedule) shouldRun(a *App) bool {
 	if c := checkExceptionDates(s.exceptionDates); c.fail {
 		return false
 	}
@@ -184,19 +188,11 @@ func (s DailySchedule) shouldRun(a *App) bool {
 	return true
 }
 
-func (s DailySchedule) maybeRunCallback(a *App) {
-	if !s.shouldRun(a) {
-		return
-	}
-	go s.callback(a.service, a.state)
+func (s *DailySchedule) run(a *App) {
+	s.callback(a.service, a.state)
 }
 
-func popSchedule(a *App) DailySchedule {
-	_sched, _ := a.schedules.Pop()
-	return _sched.(DailySchedule)
-}
-
-func requeueSchedule(a *App, s DailySchedule) {
+func (s *DailySchedule) updateNextRunTime(a *App) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
@@ -210,6 +206,4 @@ func requeueSchedule(a *App, s DailySchedule) {
 	} else {
 		s.nextRunTime = carbon.Time2Carbon(s.nextRunTime).AddDay().Carbon2Time()
 	}
-
-	a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
 }

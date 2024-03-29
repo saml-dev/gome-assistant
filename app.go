@@ -32,8 +32,7 @@ type App struct {
 	service *Service
 	state   *StateImpl
 
-	schedules         pq.PriorityQueue
-	intervals         pq.PriorityQueue
+	scheduledActions  pq.PriorityQueue
 	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
 	eventListeners    map[string][]*EventListener
@@ -113,15 +112,14 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	}
 
 	return &App{
-		conn:            conn,
-		wsWriter:        wsWriter,
-		httpClient:      httpClient,
-		service:         service,
-		state:           state,
-		schedules:       pq.New(),
-		intervals:       pq.New(),
-		entityListeners: map[string][]*EntityListener{},
-		eventListeners:  map[string][]*EventListener{},
+		conn:             conn,
+		wsWriter:         wsWriter,
+		httpClient:       httpClient,
+		service:          service,
+		state:            state,
+		scheduledActions: pq.New(),
+		entityListeners:  map[string][]*EntityListener{},
+		eventListeners:   map[string][]*EventListener{},
 	}, nil
 }
 
@@ -186,41 +184,30 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 func (a *App) Cleanup() {
 }
 
-func (a *App) RegisterSchedules(schedules ...DailySchedule) {
+type scheduledAction interface {
+	String() string
+	Hash() string
+	initializeNextRunTime(a *App)
+	shouldRun(a *App) bool
+	run(a *App)
+	updateNextRunTime(a *App)
+	getNextRunTime() time.Time
+}
+
+func (a *App) RegisterScheduledAction(action scheduledAction) {
+	action.initializeNextRunTime(a)
+	a.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
+}
+
+func (a *App) RegisterSchedules(schedules ...*DailySchedule) {
 	for _, s := range schedules {
-		// realStartTime already set for sunset/sunrise
-		if s.isSunrise || s.isSunset {
-			s.nextRunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset).Carbon2Time()
-			a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
-			continue
-		}
-
-		now := carbon.Now()
-		startTime := carbon.Now().SetTimeMilli(s.hour, s.minute, 0, 0)
-
-		// advance first scheduled time by frequency until it is in the future
-		if startTime.Lt(now) {
-			startTime = startTime.AddDay()
-		}
-
-		s.nextRunTime = startTime.Carbon2Time()
-		a.schedules.Insert(s, float64(startTime.Carbon2Time().Unix()))
+		a.RegisterScheduledAction(s)
 	}
 }
 
-func (a *App) RegisterIntervals(intervals ...Interval) {
+func (a *App) RegisterIntervals(intervals ...*Interval) {
 	for _, i := range intervals {
-		if i.frequency == 0 {
-			slog.Error("A schedule must use either set frequency via Every()")
-			panic(ErrInvalidArgs)
-		}
-
-		i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
-		now := time.Now()
-		for i.nextRunTime.Before(now) {
-			i.nextRunTime = i.nextRunTime.Add(i.frequency)
-		}
-		a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
+		a.RegisterScheduledAction(i)
 	}
 }
 
@@ -299,13 +286,14 @@ func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.
 	return sunriseOrSunset
 }
 
-func (a *App) Start() {
-	slog.Info("Starting", "schedules", a.schedules.Len())
+// Start the app. When `ctx` expires, the app closes the connection
+// and returns.
+func (a *App) Start(ctx context.Context) {
+	slog.Info("Starting", "scheduled actions", a.scheduledActions.Len())
 	slog.Info("Starting", "entity listeners", len(a.entityListeners))
 	slog.Info("Starting", "event listeners", len(a.eventListeners))
 
-	go a.runSchedules()
-	go a.runIntervals()
+	go a.runScheduledActions(ctx)
 
 	// subscribe to state_changed events
 	id := internal.GetId()
@@ -359,4 +347,45 @@ func (a *App) GetService() *Service {
 
 func (a *App) GetState() State {
 	return a.state
+}
+
+func (a *App) runScheduledActions(ctx context.Context) {
+	if a.scheduledActions.Len() == 0 {
+		return
+	}
+
+	// Create a new, but stopped, timer:
+	timer := time.NewTimer(1 * time.Hour)
+	if !timer.Stop() {
+		<-timer.C
+	}
+
+	for {
+		action := a.popScheduledAction()
+		if action.getNextRunTime().After(time.Now()) {
+			timer.Reset(time.Until(action.getNextRunTime()))
+
+			select {
+			case <-timer.C:
+			case <-ctx.Done():
+				return
+			}
+		}
+
+		if action.shouldRun(a) {
+			go action.run(a)
+		}
+
+		a.requeueScheduledAction(action)
+	}
+}
+
+func (a *App) popScheduledAction() scheduledAction {
+	action, _ := a.scheduledActions.Pop()
+	return action.(scheduledAction)
+}
+
+func (a *App) requeueScheduledAction(action scheduledAction) {
+	action.updateNextRunTime(a)
+	a.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
 }
