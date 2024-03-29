@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	"saml.dev/gome-assistant/internal"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
@@ -29,8 +27,8 @@ func BuildService[
 		TTS |
 		Vacuum |
 		ZWaveJS,
-](ctx context.Context, conn *ws.WebsocketWriter) *T {
-	return &T{conn: conn, ctx: ctx}
+](conn *ws.WebsocketWriter) *T {
+	return &T{conn: conn}
 }
 
 type BaseServiceRequest struct {

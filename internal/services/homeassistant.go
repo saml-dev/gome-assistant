@@ -1,14 +1,11 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type HomeAssistant struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 // TurnOn a Home Assistant entity. Takes an entityId and an optional

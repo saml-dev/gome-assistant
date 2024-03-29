@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 	"saml.dev/gome-assistant/types"
 )
@@ -11,7 +9,6 @@ import (
 
 type Climate struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */

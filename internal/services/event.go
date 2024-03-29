@@ -1,15 +1,12 @@
 package services
 
 import (
-	"context"
-
 	"saml.dev/gome-assistant/internal"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type Event struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 // Fire an event
