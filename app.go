@@ -108,7 +108,7 @@ func NewAppFromConfig(config NewAppConfig) (*App, error) {
 	httpClient := http.ClientFromUri(config.RESTBaseURI, config.HAAuthToken)
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
-	service := newService(ctx, wsWriter, httpClient)
+	service := newService(wsWriter, httpClient)
 	state, err := newState(httpClient, config.HomeZoneEntityId)
 	if err != nil {
 		return nil, err
