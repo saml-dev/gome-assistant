@@ -100,8 +100,10 @@ func NewAppFromConfig(config NewAppConfig) (*App, error) {
 		return nil, ErrInvalidArgs
 	}
 
-	conn, ctx, ctxCancel, err := ws.ConnectionFromUri(config.WebsocketURI, config.HAAuthToken)
+	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
+	conn, err := ws.ConnectionFromUri(ctx, config.WebsocketURI, config.HAAuthToken)
 	if err != nil {
+		ctxCancel()
 		return nil, err
 	}
 

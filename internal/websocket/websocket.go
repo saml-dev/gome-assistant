@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	i "saml.dev/gome-assistant/internal"
@@ -49,53 +48,47 @@ func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 	return msg, nil
 }
 
-func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
+func SetupConnection(ctx context.Context, ip, port, authToken string) (*websocket.Conn, error) {
 	uri := fmt.Sprintf("ws://%s:%s/api/websocket", ip, port)
-	return ConnectionFromUri(uri, authToken)
+	return ConnectionFromUri(ctx, uri, authToken)
 }
 
-func SetupSecureConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
+func SetupSecureConnection(ctx context.Context, ip, port, authToken string) (*websocket.Conn, error) {
 	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
-	return ConnectionFromUri(uri, authToken)
+	return ConnectionFromUri(ctx, uri, authToken)
 }
 
-func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
-
+func ConnectionFromUri(ctx context.Context, uri, authToken string) (*websocket.Conn, error) {
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
 	conn, _, err := dialer.DialContext(ctx, uri, nil)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Failed to connect to websocket. Check URI\n", "uri", uri)
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Read auth_required message
 	_, err = ReadMessage(conn)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Send auth message
 	err = SendAuthMessage(conn, authToken)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Verify auth message was successful
 	err = VerifyAuthResponse(conn)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
-		return nil, nil, nil, err
+		return nil, err
 	}
 
-	return conn, ctx, ctxCancel, nil
+	return conn, nil
 }
 
 func SendAuthMessage(conn *websocket.Conn, token string) error {
