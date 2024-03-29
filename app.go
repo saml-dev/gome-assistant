@@ -22,9 +22,7 @@ var ErrInvalidToken = ws.ErrInvalidToken
 var ErrInvalidArgs = errors.New("invalid arguments provided")
 
 type App struct {
-	ctx       context.Context
-	ctxCancel context.CancelFunc
-	conn      *websocket.Conn
+	conn *websocket.Conn
 
 	// Wraps the ws connection with added mutex locking
 	wsWriter *ws.WebsocketWriter
@@ -88,22 +86,20 @@ type NewAppConfig struct {
 	HomeZoneEntityId string
 }
 
-/*
-NewAppFromConfig establishes the websocket connection and returns an
-object you can use to register schedules and listeners, based on the
-URIs that it should connect to.
-*/
-func NewAppFromConfig(config NewAppConfig) (*App, error) {
+// NewAppFromConfig establishes the websocket connection and returns
+// an object you can use to register schedules and listeners, based on
+// the URIs that it should connect to. `ctx` is used only to limit the
+// time spent connecting; it cannot be used after that to cancel the
+// app.
+func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	if config.RESTBaseURI == "" || config.WebsocketURI == "" ||
 		config.HAAuthToken == "" || config.HomeZoneEntityId == "" {
 		slog.Error("RESTBaseURI, WebsocketURI, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
 		return nil, ErrInvalidArgs
 	}
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
 	conn, err := ws.ConnectionFromUri(ctx, config.WebsocketURI, config.HAAuthToken)
 	if err != nil {
-		ctxCancel()
 		return nil, err
 	}
 
@@ -119,8 +115,6 @@ func NewAppFromConfig(config NewAppConfig) (*App, error) {
 	return &App{
 		conn:            conn,
 		wsWriter:        wsWriter,
-		ctx:             ctx,
-		ctxCancel:       ctxCancel,
 		httpClient:      httpClient,
 		service:         service,
 		state:           state,
@@ -159,11 +153,11 @@ type NewAppRequest struct {
 	Secure bool
 }
 
-/*
-NewApp establishes the websocket connection and returns an object
-you can use to register schedules and listeners.
-*/
-func NewApp(request NewAppRequest) (*App, error) {
+// NewApp establishes the websocket connection and returns an object
+// you can use to register schedules and listeners. `ctx` is used only
+// to limit the time spent connecting; it cannot be used after that to
+// cancel the app.
+func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
 		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
 		return nil, ErrInvalidArgs
@@ -186,13 +180,10 @@ func NewApp(request NewAppRequest) (*App, error) {
 		config.RESTBaseURI = fmt.Sprintf("http://%s:%s/api", request.IpAddress, port)
 	}
 
-	return NewAppFromConfig(config)
+	return NewAppFromConfig(ctx, config)
 }
 
 func (a *App) Cleanup() {
-	if a.ctxCancel != nil {
-		a.ctxCancel()
-	}
 }
 
 func (a *App) RegisterSchedules(schedules ...DailySchedule) {
