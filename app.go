@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/golang-module/carbon"
 	"github.com/gorilla/websocket"
 	sunriseLib "github.com/nathan-osman/go-sunrise"
+	"golang.org/x/sync/errgroup"
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
 	pq "saml.dev/gome-assistant/internal/priorityqueue"
@@ -36,17 +38,19 @@ type App struct {
 	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
 	eventListeners    map[string][]*EventListener
+
+	// If `App.Start()` has been called, `cancel()` cancels the
+	// context being used, which causes the app to shut down cleanly.
+	cancel context.CancelFunc
+
+	closeOnce sync.Once
 }
 
-/*
-DurationString represents a duration, such as "2s" or "24h".
-See https://pkg.go.dev/time#ParseDuration for all valid time units.
-*/
+// DurationString represents a duration, such as "2s" or "24h". See
+// https://pkg.go.dev/time#ParseDuration for all valid time units.
 type DurationString string
 
-/*
-TimeString is a 24-hr format time "HH:MM" such as "07:30".
-*/
+// TimeString is a 24-hr format time "HH:MM" such as "07:30".
 type TimeString string
 
 type timeRange struct {
@@ -120,6 +124,7 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 		scheduledActions: pq.New(),
 		entityListeners:  map[string][]*EntityListener{},
 		eventListeners:   map[string][]*EventListener{},
+		cancel:           func() {},
 	}, nil
 }
 
@@ -154,7 +159,8 @@ type NewAppRequest struct {
 // NewApp establishes the websocket connection and returns an object
 // you can use to register schedules and listeners. `ctx` is used only
 // to limit the time spent connecting; it cannot be used after that to
-// cancel the app.
+// cancel the app. If this function returns successfully, then
+// `App.Close()` must eventually be called to release resources.
 func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
 		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
@@ -179,9 +185,6 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	}
 
 	return NewAppFromConfig(ctx, config)
-}
-
-func (a *App) Cleanup() {
 }
 
 type scheduledAction interface {
@@ -289,11 +292,20 @@ func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.
 // Start the app. When `ctx` expires, the app closes the connection
 // and returns.
 func (a *App) Start(ctx context.Context) {
+	ctx, cancel := context.WithCancel(ctx)
+	a.cancel = cancel
+	defer cancel()
+
+	eg, ctx := errgroup.WithContext(ctx)
+
 	slog.Info("Starting", "scheduled actions", a.scheduledActions.Len())
 	slog.Info("Starting", "entity listeners", len(a.entityListeners))
 	slog.Info("Starting", "event listeners", len(a.eventListeners))
 
-	go a.runScheduledActions(ctx)
+	eg.Go(func() error {
+		a.runScheduledActions(ctx)
+		return nil
+	})
 
 	// subscribe to state_changed events
 	id := internal.GetId()
@@ -312,13 +324,17 @@ func (a *App) Start(ctx context.Context) {
 				}
 
 				etl.runOnStartupCompleted = true
-				go etl.callback(a.service, a.state, EntityData{
-					TriggerEntityId: eid,
-					FromState:       entityState.State,
-					FromAttributes:  entityState.Attributes,
-					ToState:         entityState.State,
-					ToAttributes:    entityState.Attributes,
-					LastChanged:     entityState.LastChanged,
+				etl := etl
+				eg.Go(func() error {
+					etl.callback(a.service, a.state, EntityData{
+						TriggerEntityId: eid,
+						FromState:       entityState.State,
+						FromAttributes:  entityState.Attributes,
+						ToState:         entityState.State,
+						ToAttributes:    entityState.Attributes,
+						LastChanged:     entityState.LastChanged,
+					})
+					return nil
 				})
 			}
 		}
@@ -326,19 +342,49 @@ func (a *App) Start(ctx context.Context) {
 
 	// entity listeners and event listeners
 	elChan := make(chan ws.ChanMsg)
-	go ws.ListenWebsocket(a.conn, elChan)
+	eg.Go(func() error {
+		ws.ListenWebsocket(a.conn, elChan)
+		cancel()
+		return nil
+	})
 
-	for {
-		msg, ok := <-elChan
-		if !ok {
-			break
+	eg.Go(func() error {
+		for {
+			msg, ok := <-elChan
+			if !ok {
+				break
+			}
+			if a.entityListenersId == msg.Id {
+				go callEntityListeners(a, msg.Raw)
+			} else {
+				go callEventListeners(a, msg)
+			}
 		}
-		if a.entityListenersId == msg.Id {
-			go callEntityListeners(a, msg.Raw)
-		} else {
-			go callEventListeners(a, msg)
-		}
-	}
+		return nil
+	})
+
+	eg.Go(func() error {
+		<-ctx.Done()
+		a.Close()
+		return nil
+	})
+
+	eg.Wait()
+}
+
+// Close closes the connection and releases any resources. It may be
+// called more than once; only the first call does anything.
+func (a *App) Close() {
+	a.closeOnce.Do(func() {
+		a.close()
+	})
+}
+
+// close closes the connection and releases resources. It must be
+// called exactly once.
+func (a *App) close() {
+	a.cancel()
+	a.conn.Close()
 }
 
 func (a *App) GetService() *Service {
