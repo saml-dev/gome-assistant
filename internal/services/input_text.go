@@ -23,12 +23,12 @@ func (ib InputText) Set(entityId string, value string) {
 		"value": value,
 	}
 
-	ib.conn.WriteMessage(req, ib.ctx)
+	ib.conn.WriteMessage(ib.ctx, req)
 }
 
 func (ib InputText) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_text"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+	ib.conn.WriteMessage(ib.ctx, req)
 }

@@ -108,7 +108,7 @@ func NewAppFromConfig(config NewAppConfig) (*App, error) {
 	httpClient := http.ClientFromUri(config.RESTBaseURI, config.HAAuthToken)
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
-	service := newService(wsWriter, ctx, httpClient)
+	service := newService(ctx, wsWriter, httpClient)
 	state, err := newState(httpClient, config.HomeZoneEntityId)
 	if err != nil {
 		return nil, err
@@ -256,7 +256,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 			if elList, ok := a.eventListeners[eventType]; ok {
 				a.eventListeners[eventType] = append(elList, &evl)
 			} else {
-				ws.SubscribeToEventType(eventType, a.wsWriter, a.ctx)
+				ws.SubscribeToEventType(a.ctx, eventType, a.wsWriter)
 				a.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
@@ -316,7 +316,7 @@ func (a *App) Start() {
 
 	// subscribe to state_changed events
 	id := internal.GetId()
-	ws.SubscribeToStateChangedEvents(id, a.wsWriter, a.ctx)
+	ws.SubscribeToStateChangedEvents(a.ctx, id, a.wsWriter)
 	a.entityListenersId = id
 
 	// entity listeners runOnStartup
@@ -345,7 +345,7 @@ func (a *App) Start() {
 
 	// entity listeners and event listeners
 	elChan := make(chan ws.ChanMsg)
-	go ws.ListenWebsocket(a.conn, a.ctx, elChan)
+	go ws.ListenWebsocket(a.ctx, a.conn, elChan)
 
 	for {
 		msg, ok := <-elChan

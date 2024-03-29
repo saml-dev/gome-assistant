@@ -20,7 +20,7 @@ func (s Switch) TurnOn(entityId string) {
 	req.Domain = "switch"
 	req.Service = "turn_on"
 
-	s.conn.WriteMessage(req, s.ctx)
+	s.conn.WriteMessage(s.ctx, req)
 }
 
 func (s Switch) Toggle(entityId string) {
@@ -28,12 +28,12 @@ func (s Switch) Toggle(entityId string) {
 	req.Domain = "switch"
 	req.Service = "toggle"
 
-	s.conn.WriteMessage(req, s.ctx)
+	s.conn.WriteMessage(s.ctx, req)
 }
 
 func (s Switch) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "switch"
 	req.Service = "turn_off"
-	s.conn.WriteMessage(req, s.ctx)
+	s.conn.WriteMessage(s.ctx, req)
 }

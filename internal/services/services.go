@@ -29,7 +29,7 @@ func BuildService[
 		TTS |
 		Vacuum |
 		ZWaveJS,
-](conn *ws.WebsocketWriter, ctx context.Context) *T {
+](ctx context.Context, conn *ws.WebsocketWriter) *T {
 	return &T{conn: conn, ctx: ctx}
 }
 

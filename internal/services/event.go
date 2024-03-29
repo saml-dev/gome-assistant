@@ -35,5 +35,5 @@ func (e Event) Fire(eventType string, eventData ...map[string]any) {
 		req.EventData = eventData[0]
 	}
 
-	e.conn.WriteMessage(req, e.ctx)
+	e.conn.WriteMessage(e.ctx, req)
 }

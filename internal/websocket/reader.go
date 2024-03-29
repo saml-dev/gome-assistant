@@ -21,9 +21,9 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
-func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) {
+func ListenWebsocket(ctx context.Context, conn *websocket.Conn, c chan ChanMsg) {
 	for {
-		bytes, err := ReadMessage(conn, ctx)
+		bytes, err := ReadMessage(ctx, conn)
 		if err != nil {
 			slog.Error("Error reading from websocket:", err)
 			close(c)
