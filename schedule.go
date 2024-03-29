@@ -152,7 +152,7 @@ func (sb scheduleBuilderEnd) Build() DailySchedule {
 }
 
 // app.Start() functions
-func runSchedules(a *App) {
+func (a *App) runSchedules() {
 	if a.schedules.Len() == 0 {
 		return
 	}

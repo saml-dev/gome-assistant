@@ -144,8 +144,7 @@ func (sb intervalBuilderEnd) Build() Interval {
 	return sb.interval
 }
 
-// app.Start() functions
-func runIntervals(a *App) {
+func (a *App) runIntervals() {
 	if a.intervals.Len() == 0 {
 		return
 	}
