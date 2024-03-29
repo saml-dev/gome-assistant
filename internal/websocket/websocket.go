@@ -29,7 +29,7 @@ type WebsocketWriter struct {
 	mutex sync.Mutex
 }
 
-func (w *WebsocketWriter) WriteMessage(ctx context.Context, msg interface{}) error {
+func (w *WebsocketWriter) WriteMessage(msg interface{}) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 
@@ -41,7 +41,7 @@ func (w *WebsocketWriter) WriteMessage(ctx context.Context, msg interface{}) err
 	return nil
 }
 
-func ReadMessage(ctx context.Context, conn *websocket.Conn) ([]byte, error) {
+func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 	_, msg, err := conn.ReadMessage()
 	if err != nil {
 		return []byte{}, err
@@ -72,7 +72,7 @@ func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context,
 	}
 
 	// Read auth_required message
-	_, err = ReadMessage(ctx, conn)
+	_, err = ReadMessage(conn)
 	if err != nil {
 		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
@@ -80,7 +80,7 @@ func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context,
 	}
 
 	// Send auth message
-	err = SendAuthMessage(ctx, conn, authToken)
+	err = SendAuthMessage(conn, authToken)
 	if err != nil {
 		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
@@ -88,7 +88,7 @@ func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context,
 	}
 
 	// Verify auth message was successful
-	err = VerifyAuthResponse(ctx, conn)
+	err = VerifyAuthResponse(conn)
 	if err != nil {
 		ctxCancel()
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
@@ -98,7 +98,7 @@ func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context,
 	return conn, ctx, ctxCancel, nil
 }
 
-func SendAuthMessage(ctx context.Context, conn *websocket.Conn, token string) error {
+func SendAuthMessage(conn *websocket.Conn, token string) error {
 	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
 		return err
@@ -111,8 +111,8 @@ type authResponse struct {
 	Message string `json:"message"`
 }
 
-func VerifyAuthResponse(ctx context.Context, conn *websocket.Conn) error {
-	msg, err := ReadMessage(ctx, conn)
+func VerifyAuthResponse(conn *websocket.Conn) error {
+	msg, err := ReadMessage(conn)
 	if err != nil {
 		return err
 	}
@@ -133,11 +133,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *WebsocketWriter) {
-	SubscribeToEventType(ctx, "state_changed", conn, id)
+func SubscribeToStateChangedEvents(id int64, conn *WebsocketWriter) {
+	SubscribeToEventType("state_changed", conn, id)
 }
 
-func SubscribeToEventType(ctx context.Context, eventType string, conn *WebsocketWriter, id ...int64) {
+func SubscribeToEventType(eventType string, conn *WebsocketWriter, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = i.GetId()
@@ -149,7 +149,7 @@ func SubscribeToEventType(ctx context.Context, eventType string, conn *Websocket
 		Type:      "subscribe_events",
 		EventType: eventType,
 	}
-	err := conn.WriteMessage(ctx, e)
+	err := conn.WriteMessage(e)
 	if err != nil {
 		wrappedErr := fmt.Errorf("error writing to websocket: %w", err)
 		slog.Error(wrappedErr.Error())

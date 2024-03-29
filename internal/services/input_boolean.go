@@ -20,7 +20,7 @@ func (ib InputBoolean) TurnOn(entityId string) {
 	req.Domain = "input_boolean"
 	req.Service = "turn_on"
 
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }
 
 func (ib InputBoolean) Toggle(entityId string) {
@@ -28,19 +28,19 @@ func (ib InputBoolean) Toggle(entityId string) {
 	req.Domain = "input_boolean"
 	req.Service = "toggle"
 
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }
 
 func (ib InputBoolean) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "input_boolean"
 	req.Service = "turn_off"
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }
 
 func (ib InputBoolean) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_boolean"
 	req.Service = "reload"
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }

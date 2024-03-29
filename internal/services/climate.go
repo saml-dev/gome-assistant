@@ -22,7 +22,7 @@ func (c Climate) SetFanMode(entityId string, fanMode string) {
 	req.Service = "set_fan_mode"
 	req.ServiceData = map[string]any{"fan_mode": fanMode}
 
-	c.conn.WriteMessage(c.ctx, req)
+	c.conn.WriteMessage(req)
 }
 
 func (c Climate) SetTemperature(entityId string, serviceData types.SetTemperatureRequest) {
@@ -31,5 +31,5 @@ func (c Climate) SetTemperature(entityId string, serviceData types.SetTemperatur
 	req.Service = "set_temperature"
 	req.ServiceData = serviceData.ToJSON()
 
-	c.conn.WriteMessage(c.ctx, req)
+	c.conn.WriteMessage(req)
 }

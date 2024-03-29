@@ -25,5 +25,5 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(entityId string, parameter int, valu
 		"value":     value,
 	}
 
-	zw.conn.WriteMessage(zw.ctx, req)
+	zw.conn.WriteMessage(req)
 }

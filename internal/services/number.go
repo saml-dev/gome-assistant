@@ -21,5 +21,5 @@ func (ib Number) SetValue(entityId string, value float32) {
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
 
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }

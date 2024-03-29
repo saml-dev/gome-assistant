@@ -25,7 +25,7 @@ func (l Lock) Lock(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(l.ctx, req)
+	l.conn.WriteMessage(req)
 }
 
 // Unlock a lock entity. Takes an entityId and an optional
@@ -38,5 +38,5 @@ func (l Lock) Unlock(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(l.ctx, req)
+	l.conn.WriteMessage(req)
 }

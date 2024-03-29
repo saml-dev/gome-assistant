@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 
@@ -21,9 +20,9 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
-func ListenWebsocket(ctx context.Context, conn *websocket.Conn, c chan ChanMsg) {
+func ListenWebsocket(conn *websocket.Conn, c chan ChanMsg) {
 	for {
-		bytes, err := ReadMessage(ctx, conn)
+		bytes, err := ReadMessage(conn)
 		if err != nil {
 			slog.Error("Error reading from websocket:", err)
 			close(c)

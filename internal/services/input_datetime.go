@@ -25,12 +25,12 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
 
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }
 
 func (ib InputDatetime) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_datetime"
 	req.Service = "reload"
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }

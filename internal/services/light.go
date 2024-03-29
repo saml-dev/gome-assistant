@@ -25,7 +25,7 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(l.ctx, req)
+	l.conn.WriteMessage(req)
 }
 
 // Toggle a light entity. Takes an entityId and an optional
@@ -38,12 +38,12 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(l.ctx, req)
+	l.conn.WriteMessage(req)
 }
 
 func (l Light) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "light"
 	req.Service = "turn_off"
-	l.conn.WriteMessage(l.ctx, req)
+	l.conn.WriteMessage(req)
 }

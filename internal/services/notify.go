@@ -26,5 +26,5 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) {
 	}
 
 	req.ServiceData = serviceData
-	ha.conn.WriteMessage(ha.ctx, req)
+	ha.conn.WriteMessage(req)
 }

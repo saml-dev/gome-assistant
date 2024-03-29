@@ -20,12 +20,12 @@ func (ib InputButton) Press(entityId string) {
 	req.Domain = "input_button"
 	req.Service = "press"
 
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }
 
 func (ib InputButton) Reload() {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_button"
 	req.Service = "reload"
-	ib.conn.WriteMessage(ib.ctx, req)
+	ib.conn.WriteMessage(req)
 }
