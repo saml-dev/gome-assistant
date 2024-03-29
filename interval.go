@@ -159,23 +159,30 @@ func (a *App) runIntervals() {
 	}
 }
 
-func (i Interval) maybeRunCallback(a *App) {
+func (i Interval) shouldRun(a *App) bool {
 	if c := checkStartEndTime(i.startTime /* isStart = */, true); c.fail {
-		return
+		return false
 	}
 	if c := checkStartEndTime(i.endTime /* isStart = */, false); c.fail {
-		return
+		return false
 	}
 	if c := checkExceptionDates(i.exceptionDates); c.fail {
-		return
+		return false
 	}
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
-		return
+		return false
 	}
 	if c := checkEnabledEntity(a.state, i.enabledEntities); c.fail {
-		return
+		return false
 	}
 	if c := checkDisabledEntity(a.state, i.disabledEntities); c.fail {
+		return false
+	}
+	return true
+}
+
+func (i Interval) maybeRunCallback(a *App) {
+	if !i.shouldRun(a) {
 		return
 	}
 	go i.callback(a.service, a.state)
