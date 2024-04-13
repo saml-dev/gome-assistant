@@ -25,8 +25,34 @@ type AuthMessage struct {
 }
 
 type Conn struct {
-	conn  *websocket.Conn
-	mutex sync.Mutex
+	writeMutex sync.Mutex
+	conn       *websocket.Conn
+
+	subscribeMutex sync.RWMutex
+	// lastID is the last message ID that has already been used.
+	lastID      int64
+	subscribers map[int64]Subscriber
+}
+
+// Subscriber is called synchronously when a message with the
+// subscribed `id` is received.
+type Subscriber func(msg ChanMsg)
+
+type Subscription struct {
+	conn *Conn
+	id   int64
+}
+
+func (subscription Subscription) ID() int64 {
+	return subscription.id
+}
+
+func (subscription *Subscription) Cancel() {
+	if subscription.id == 0 {
+		return
+	}
+	subscription.conn.unsubscribe(subscription.id)
+	subscription.id = 0
 }
 
 func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Conn, error) {
@@ -38,7 +64,10 @@ func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Conn, e
 		return nil, err
 	}
 
-	conn := &Conn{conn: wsConn}
+	conn := &Conn{
+		conn:        wsConn,
+		subscribers: make(map[int64]Subscriber),
+	}
 
 	// Read auth_required message
 	if _, err := conn.readMessage(); err != nil {
@@ -74,8 +103,8 @@ func NewSecureConn(ctx context.Context, ip, port, authToken string) (*Conn, erro
 }
 
 func (conn *Conn) WriteMessage(msg interface{}) error {
-	conn.mutex.Lock()
-	defer conn.mutex.Unlock()
+	conn.writeMutex.Lock()
+	defer conn.writeMutex.Unlock()
 
 	err := conn.conn.WriteJSON(msg)
 	if err != nil {
