@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type TTS struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 /* Public API */

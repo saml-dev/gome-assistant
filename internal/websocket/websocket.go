@@ -25,16 +25,16 @@ type AuthMessage struct {
 	AccessToken string `json:"access_token"`
 }
 
-type WebsocketWriter struct {
+type WebsocketConn struct {
 	Conn  *websocket.Conn
 	mutex sync.Mutex
 }
 
-func (w *WebsocketWriter) WriteMessage(msg any) error {
-	w.mutex.Lock()
-	defer w.mutex.Unlock()
+func (conn *WebsocketConn) WriteMessage(msg any) error {
+	conn.mutex.Lock()
+	defer conn.mutex.Unlock()
 
-	return w.Conn.WriteJSON(msg)
+	return conn.Conn.WriteJSON(msg)
 }
 
 func ReadMessage(conn *websocket.Conn) ([]byte, error) {
@@ -127,11 +127,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *WebsocketWriter) {
+func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *WebsocketConn) {
 	SubscribeToEventType(ctx, "state_changed", conn, id)
 }
 
-func SubscribeToEventType(ctx context.Context, eventType string, conn *WebsocketWriter, id ...int64) {
+func SubscribeToEventType(ctx context.Context, eventType string, conn *WebsocketConn, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = internal.GetId()

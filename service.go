@@ -31,7 +31,7 @@ type Service struct {
 	ZWaveJS           *services.ZWaveJS
 }
 
-func newService(conn *ws.WebsocketWriter) *Service {
+func newService(conn *ws.WebsocketConn) *Service {
 	return &Service{
 		AdaptiveLighting:  services.BuildService[services.AdaptiveLighting](conn),
 		AlarmControlPanel: services.BuildService[services.AlarmControlPanel](conn),

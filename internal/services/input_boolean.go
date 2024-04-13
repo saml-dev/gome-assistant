@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type InputBoolean struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 /* Public API */

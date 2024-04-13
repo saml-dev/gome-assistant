@@ -6,7 +6,7 @@ import (
 )
 
 type Event struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 // Fire an event

@@ -5,7 +5,7 @@ import (
 )
 
 type Number struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 func (ib Number) SetValue(entityId string, value float32) error {

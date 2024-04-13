@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type AdaptiveLighting struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 /* Public API */
