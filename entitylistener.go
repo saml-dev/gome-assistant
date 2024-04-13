@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type EntityListener struct {
@@ -191,7 +192,8 @@ func (b elBuilder3) Build() EntityListener {
 }
 
 /* Functions */
-func callEntityListeners(app *App, msgBytes []byte) {
+func (app *App) callEntityListeners(chanMsg websocket.ChanMsg) {
+	msgBytes := chanMsg.Raw
 	msg := stateChangedMsg{}
 	json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data

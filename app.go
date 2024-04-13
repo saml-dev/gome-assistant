@@ -230,12 +230,11 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
 		evl := evl
 		for _, eventType := range evl.eventTypes {
-			if elList, ok := a.eventListeners[eventType]; ok {
-				a.eventListeners[eventType] = append(elList, &evl)
-			} else {
+			elList, ok := a.eventListeners[eventType]
+			if !ok {
 				a.wsConn.SubscribeToEventType(eventType)
-				a.eventListeners[eventType] = []*EventListener{&evl}
 			}
+			a.eventListeners[eventType] = append(elList, &evl)
 		}
 	}
 }
@@ -304,7 +303,7 @@ func (a *App) Start(ctx context.Context) error {
 	// subscribe to state_changed events
 	stateChangedSubscription, err := a.wsConn.WatchStateChangedEvents(
 		func(msg websocket.ChanMsg) {
-			go callEntityListeners(a, msg.Raw)
+			go a.callEntityListeners(msg)
 		},
 	)
 	if err != nil {
@@ -355,7 +354,7 @@ func (a *App) Start(ctx context.Context) error {
 			if !ok {
 				break
 			}
-			go callEventListeners(a, msg)
+			go a.callEventListeners(msg)
 		}
 		return nil
 	})
