@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Light struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

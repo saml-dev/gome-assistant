@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Number struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

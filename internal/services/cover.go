@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Cover struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

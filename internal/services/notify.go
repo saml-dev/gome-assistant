@@ -6,7 +6,7 @@ import (
 )
 
 type Notify struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 // Send a notification. Takes a types.NotifyRequest.

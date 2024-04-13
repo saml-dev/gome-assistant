@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Switch struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

@@ -5,7 +5,7 @@ import (
 )
 
 type HomeAssistant struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 // TurnOn a Home Assistant entity. Takes an entityId and an optional

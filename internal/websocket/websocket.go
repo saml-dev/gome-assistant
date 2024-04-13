@@ -24,12 +24,12 @@ type AuthMessage struct {
 	AccessToken string `json:"access_token"`
 }
 
-type WebsocketConn struct {
+type Conn struct {
 	conn  *websocket.Conn
 	mutex sync.Mutex
 }
 
-func NewConnFromURI(ctx context.Context, uri string, authToken string) (*WebsocketConn, error) {
+func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Conn, error) {
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
 	conn, _, err := dialer.DialContext(ctx, uri, nil)
@@ -59,20 +59,20 @@ func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Websock
 		return nil, err
 	}
 
-	return &WebsocketConn{conn: conn}, nil
+	return &Conn{conn: conn}, nil
 }
 
-func NewConn(ctx context.Context, ip, port, authToken string) (*WebsocketConn, error) {
+func NewConn(ctx context.Context, ip, port, authToken string) (*Conn, error) {
 	uri := fmt.Sprintf("ws://%s:%s/api/websocket", ip, port)
 	return NewConnFromURI(ctx, uri, authToken)
 }
 
-func NewSecureConn(ctx context.Context, ip, port, authToken string) (*WebsocketConn, error) {
+func NewSecureConn(ctx context.Context, ip, port, authToken string) (*Conn, error) {
 	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
 	return NewConnFromURI(ctx, uri, authToken)
 }
 
-func (conn *WebsocketConn) WriteMessage(msg interface{}) error {
+func (conn *Conn) WriteMessage(msg interface{}) error {
 	conn.mutex.Lock()
 	defer conn.mutex.Unlock()
 
@@ -92,7 +92,7 @@ func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 	return msg, nil
 }
 
-func (conn *WebsocketConn) Close() error {
+func (conn *Conn) Close() error {
 	return conn.conn.Close()
 }
 
@@ -131,11 +131,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(id int64, conn *WebsocketConn) {
+func SubscribeToStateChangedEvents(id int64, conn *Conn) {
 	SubscribeToEventType("state_changed", conn, id)
 }
 
-func SubscribeToEventType(eventType string, conn *WebsocketConn, id ...int64) {
+func SubscribeToEventType(eventType string, conn *Conn, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = internal.GetId()

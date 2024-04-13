@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Scene struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

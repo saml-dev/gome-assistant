@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type AlarmControlPanel struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

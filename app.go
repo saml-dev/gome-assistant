@@ -24,7 +24,7 @@ var ErrInvalidArgs = errors.New("invalid arguments provided")
 
 type App struct {
 	// Wraps the ws connection with added mutex locking
-	wsConn *ws.WebsocketConn
+	wsConn *ws.Conn
 
 	httpClient *http.HttpClient
 

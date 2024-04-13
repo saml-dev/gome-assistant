@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type InputText struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

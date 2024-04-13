@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Script struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */

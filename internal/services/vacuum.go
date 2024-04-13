@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Vacuum struct {
-	conn *ws.WebsocketConn
+	conn *ws.Conn
 }
 
 /* Public API */
