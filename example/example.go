@@ -1,6 +1,7 @@
-package example
+package main
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"os"
@@ -10,17 +11,21 @@ import (
 )
 
 func main() {
-	app, err := ga.NewApp(ga.NewAppRequest{
-		IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
-		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
-		HomeZoneEntityId: "zone.home",
-	})
+	ctx := context.Background()
+	app, err := ga.NewApp(
+		ctx,
+		ga.NewAppRequest{
+			IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
+			HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
+			HomeZoneEntityId: "zone.home",
+		},
+	)
 	if err != nil {
 		slog.Error("Error connecting to HASS:", err)
 		os.Exit(1)
 	}
 
-	defer app.Cleanup()
+	defer app.Close()
 
 	pantryDoor := ga.
 		NewEntityListener().
@@ -50,7 +55,7 @@ func main() {
 	app.RegisterSchedules(_11pmSched, _30minsBeforeSunrise)
 	app.RegisterEventListeners(zwaveEventListener)
 
-	app.Start()
+	app.Start(ctx)
 }
 
 func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {

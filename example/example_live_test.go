@@ -1,6 +1,7 @@
-package example
+package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"testing"
@@ -45,7 +46,7 @@ func setupLogging() {
 	slog.SetDefault(slog.New(devslog.NewHandler(os.Stdout, opts)))
 }
 
-func (s *MySuite) SetupSuite() {
+func (s *MySuite) SetupSuite(ctx context.Context) {
 	setupLogging()
 	slog.Debug("Setting up test suite...")
 	s.suiteCtx = make(map[string]any)
@@ -61,11 +62,14 @@ func (s *MySuite) SetupSuite() {
 		slog.Error("Error unmarshalling config file", err)
 	}
 
-	s.app, err = ga.NewApp(ga.NewAppRequest{
-		HAAuthToken:      s.config.Hass.HAAuthToken,
-		IpAddress:        s.config.Hass.IpAddress,
-		HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
-	})
+	s.app, err = ga.NewApp(
+		ctx,
+		ga.NewAppRequest{
+			HAAuthToken:      s.config.Hass.HAAuthToken,
+			IpAddress:        s.config.Hass.IpAddress,
+			HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
+		},
+	)
 	if err != nil {
 		slog.Error("Failed to createw new app", err)
 		s.T().FailNow()
@@ -85,12 +89,12 @@ func (s *MySuite) SetupSuite() {
 	s.app.RegisterSchedules(dailySchedule)
 
 	// start GA app
-	go s.app.Start()
+	go s.app.Start(ctx)
 }
 
 func (s *MySuite) TearDownSuite() {
 	if s.app != nil {
-		s.app.Cleanup()
+		s.app.Close()
 		s.app = nil
 	}
 }
