@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
-	"github.com/gorilla/websocket"
 	sunriseLib "github.com/nathan-osman/go-sunrise"
 
 	"saml.dev/gome-assistant/internal"
@@ -30,7 +29,6 @@ type scheduledAction interface {
 type App struct {
 	ctx       context.Context
 	ctxCancel context.CancelFunc
-	conn      *websocket.Conn
 
 	// Wraps the ws connection with added mutex locking
 	wsConn *ws.WebsocketConn
@@ -179,7 +177,6 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 
 	ctx, cancel := context.WithCancel(ctx)
 	return &App{
-		conn:            conn,
 		wsConn:          wsConn,
 		ctx:             ctx,
 		ctxCancel:       cancel,
