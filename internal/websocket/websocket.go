@@ -45,9 +45,9 @@ func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 	return msg, nil
 }
 
-func ConnectionFromUri(
+func NewConn(
 	ctx context.Context, baseURL *url.URL, authToken string,
-) (*websocket.Conn, error) {
+) (*WebsocketConn, error) {
 	// Shallow copy the URL to avoid modifying the original
 	urlWebsockets := *baseURL
 	urlWebsockets.Path = "/api/websocket"
@@ -87,7 +87,9 @@ func ConnectionFromUri(
 		return nil, err
 	}
 
-	return conn, nil
+	return &WebsocketConn{
+		Conn: conn,
+	}, nil
 }
 
 func (conn *WebsocketConn) Close() error {

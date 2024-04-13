@@ -153,17 +153,13 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	connCtx, connCancel := context.WithTimeout(ctx, time.Second*3)
 	defer connCancel()
 
-	conn, err := ws.ConnectionFromUri(connCtx, baseURL, request.HAAuthToken)
+	wsConn, err := ws.NewConn(connCtx, baseURL, request.HAAuthToken)
 	if err != nil {
-		return nil, err
-	}
-	if conn == nil {
 		return nil, err
 	}
 
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
-	wsConn := &ws.WebsocketConn{Conn: conn}
 	service := newService(wsConn)
 	state, err := newState(httpClient, request.HomeZoneEntityId)
 	if err != nil {
