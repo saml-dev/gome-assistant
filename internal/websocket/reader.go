@@ -78,6 +78,10 @@ func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscrip
 	return subscription, nil
 }
 
+func (conn *Conn) WatchStateChangedEvents(subscriber Subscriber) (Subscription, error) {
+	return conn.WatchEvents("state_changed", subscriber)
+}
+
 // Start reads JSON-formatted messages from `conn`, partly
 // deserializes them, and processes them. If the message ID is
 // currently subscribed to, invoke the subscriber for the message.

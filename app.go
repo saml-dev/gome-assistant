@@ -12,7 +12,6 @@ import (
 	sunriseLib "github.com/nathan-osman/go-sunrise"
 	"golang.org/x/sync/errgroup"
 
-	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
 	"saml.dev/gome-assistant/internal/priorityqueue"
 	"saml.dev/gome-assistant/internal/websocket"
@@ -32,10 +31,9 @@ type App struct {
 	service *Service
 	state   *StateImpl
 
-	scheduledActions  priorityqueue.PriorityQueue
-	entityListeners   map[string][]*EntityListener
-	entityListenersId int64
-	eventListeners    map[string][]*EventListener
+	scheduledActions priorityqueue.PriorityQueue
+	entityListeners  map[string][]*EntityListener
+	eventListeners   map[string][]*EventListener
 
 	// If `App.Start()` has been called, `cancel()` cancels the
 	// context being used, which causes the app to shut down cleanly.
@@ -287,7 +285,7 @@ func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.
 
 // Start the app. When `ctx` expires, the app closes the connection
 // and returns.
-func (a *App) Start(ctx context.Context) {
+func (a *App) Start(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	a.cancel = cancel
 	defer cancel()
@@ -304,9 +302,16 @@ func (a *App) Start(ctx context.Context) {
 	})
 
 	// subscribe to state_changed events
-	id := internal.GetId()
-	a.wsConn.SubscribeToStateChangedEvents(id)
-	a.entityListenersId = id
+	stateChangedSubscription, err := a.wsConn.WatchStateChangedEvents(
+		func(msg websocket.ChanMsg) {
+			go callEntityListeners(a, msg.Raw)
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("subscribing to 'state_changed' events: %w", err)
+	}
+
+	defer stateChangedSubscription.Cancel()
 
 	// entity listeners runOnStartup
 	for eid, etls := range a.entityListeners {
@@ -350,11 +355,7 @@ func (a *App) Start(ctx context.Context) {
 			if !ok {
 				break
 			}
-			if a.entityListenersId == msg.Id {
-				go callEntityListeners(a, msg.Raw)
-			} else {
-				go callEventListeners(a, msg)
-			}
+			go callEventListeners(a, msg)
 		}
 		return nil
 	})
@@ -366,6 +367,8 @@ func (a *App) Start(ctx context.Context) {
 	})
 
 	eg.Wait()
+
+	return nil
 }
 
 // Close closes the connection and releases any resources. It may be

@@ -51,6 +51,9 @@ func (subscription *Subscription) Cancel() {
 	if subscription.id == 0 {
 		return
 	}
+
+	// FIXME: this should also unsubscribe at the server.
+
 	subscription.conn.unsubscribe(subscription.id)
 	subscription.id = 0
 }
@@ -159,10 +162,6 @@ type SubEvent struct {
 	Id        int64  `json:"id"`
 	Type      string `json:"type"`
 	EventType string `json:"event_type"`
-}
-
-func (conn *Conn) SubscribeToStateChangedEvents(id int64) {
-	conn.SubscribeToEventType("state_changed", id)
 }
 
 func (conn *Conn) SubscribeToEventType(eventType string, id ...int64) {
