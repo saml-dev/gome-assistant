@@ -29,11 +29,11 @@ type WebsocketConn struct {
 	mutex sync.Mutex
 }
 
-func (w *WebsocketConn) WriteMessage(msg interface{}) error {
-	w.mutex.Lock()
-	defer w.mutex.Unlock()
+func (conn *WebsocketConn) WriteMessage(msg interface{}) error {
+	conn.mutex.Lock()
+	defer conn.mutex.Unlock()
 
-	err := w.Conn.WriteJSON(msg)
+	err := conn.Conn.WriteJSON(msg)
 	if err != nil {
 		return err
 	}
