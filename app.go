@@ -350,7 +350,7 @@ func (a *App) Start() {
 
 	// entity listeners and event listeners
 	elChan := make(chan ws.ChanMsg)
-	go ws.ListenWebsocket(a.conn, elChan)
+	go a.wsConn.ListenWebsocket(elChan)
 
 	for {
 		msg, ok := <-elChan
