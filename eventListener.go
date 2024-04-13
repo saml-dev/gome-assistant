@@ -85,23 +85,35 @@ func (b eventListenerBuilder3) Throttle(s DurationString) eventListenerBuilder3 
 	return b
 }
 
-func (b eventListenerBuilder3) ExceptionDates(t time.Time, tl ...time.Time) eventListenerBuilder3 {
+func (b eventListenerBuilder3) ExceptionDates(
+	t time.Time, tl ...time.Time,
+) eventListenerBuilder3 {
 	b.eventListener.exceptionDates = append(tl, t)
 	return b
 }
 
 func (b eventListenerBuilder3) ExceptionRange(start, end time.Time) eventListenerBuilder3 {
-	b.eventListener.exceptionRanges = append(b.eventListener.exceptionRanges, timeRange{start, end})
+	b.eventListener.exceptionRanges = append(
+		b.eventListener.exceptionRanges,
+		timeRange{start, end},
+	)
 	return b
 }
 
-/*
-Enable this listener only when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
-*/
-func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
+// Enable this listener only when the current state of {entityId}
+// matches {state}. If there is a network error while retrieving
+// state, the listener runs if {runOnNetworkError} is true.
+func (b eventListenerBuilder3) EnabledWhen(
+	entityId, state string, runOnNetworkError bool,
+) eventListenerBuilder3 {
 	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+		panic(
+			fmt.Sprintf(
+				"entityId is empty in eventListener EnabledWhen "+
+					"entityId='%s' state='%s' runOnNetworkError='%t'",
+				entityId, state, runOnNetworkError,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
 		Entity:     entityId,
@@ -112,13 +124,20 @@ func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkE
 	return b
 }
 
-/*
-Disable this listener when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
-*/
-func (b eventListenerBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
+// Disable this listener when the current state of {entityId} matches
+// {state}. If there is a network error while retrieving state, the
+// listener runs if {runOnNetworkError} is true.
+func (b eventListenerBuilder3) DisabledWhen(
+	entityId, state string, runOnNetworkError bool,
+) eventListenerBuilder3 {
 	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+		panic(
+			fmt.Sprintf(
+				"entityId is empty in eventListener EnabledWhen "+
+					"entityId='%s' state='%s' runOnNetworkError='%t'",
+				entityId, state, runOnNetworkError,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
 		Entity:     entityId,

@@ -107,11 +107,16 @@ func (s *MySuite) TestLightService() {
 		initState := getEntityState(s, entityId)
 		s.app.GetService().Light.Toggle(entityId)
 
-		assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
-			newState := getEntityState(s, entityId)
-			assert.NotEqual(c, initState, newState)
-			assert.True(c, s.suiteCtx["entityCallbackInvoked"].(bool))
-		}, 10*time.Second, 1*time.Second, "State of light entity did not change or callback was not invoked")
+		assert.EventuallyWithT(
+			s.T(),
+			func(c *assert.CollectT) {
+				newState := getEntityState(s, entityId)
+				assert.NotEqual(c, initState, newState)
+				assert.True(c, s.suiteCtx["entityCallbackInvoked"].(bool))
+			},
+			10*time.Second, 1*time.Second,
+			"State of light entity did not change or callback was not invoked",
+		)
 	} else {
 		s.T().Skip("No light entity id provided")
 	}
@@ -126,7 +131,12 @@ func (s *MySuite) TestSchedule() {
 
 // Capture event after light entity state has changed
 func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
-	slog.Info("Entity callback called.", "entity id", e.TriggerEntityId, "from state", e.FromState, "to state", e.ToState)
+	slog.Info(
+		"Entity callback called.",
+		"entity id", e.TriggerEntityId,
+		"from state", e.FromState,
+		"to state", e.ToState,
+	)
 	s.suiteCtx["entityCallbackInvoked"] = true
 }
 

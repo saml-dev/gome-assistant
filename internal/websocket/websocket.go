@@ -88,7 +88,10 @@ func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Conn, e
 	// Verify auth message was successful
 	err = conn.verifyAuthResponse()
 	if err != nil {
-		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
+		slog.Error(
+			"Auth token is invalid. Please double check it " +
+				"or create a new token in your Home Assistant profile\n",
+		)
 		return nil, err
 	}
 

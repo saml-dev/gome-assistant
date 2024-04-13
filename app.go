@@ -93,7 +93,10 @@ type NewAppConfig struct {
 func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	if config.RESTBaseURI == "" || config.WebsocketURI == "" ||
 		config.HAAuthToken == "" || config.HomeZoneEntityId == "" {
-		slog.Error("RESTBaseURI, WebsocketURI, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
+		slog.Error(
+			"RESTBaseURI, WebsocketURI, HAAuthToken, and HomeZoneEntityId " +
+				"are all required arguments in NewAppRequest",
+		)
 		return nil, ErrInvalidArgs
 	}
 
@@ -157,7 +160,10 @@ type NewAppRequest struct {
 // `App.Close()` must eventually be called to release resources.
 func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
-		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
+		slog.Error(
+			"IpAddress, HAAuthToken, and HomeZoneEntityId " +
+				"are all required arguments in NewAppRequest",
+		)
 		return nil, ErrInvalidArgs
 	}
 	port := request.Port
@@ -250,9 +256,13 @@ func (app *App) RegisterEventListeners(evls ...EventListener) {
 	}
 }
 
-func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offset ...DurationString) carbon.Carbon {
+func getSunriseSunset(
+	s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offset ...DurationString,
+) carbon.Carbon {
 	date := dateToUse.Carbon2Time()
-	rise, set := sunriseLib.SunriseSunset(s.latitude, s.longitude, date.Year(), date.Month(), date.Day())
+	rise, set := sunriseLib.SunriseSunset(
+		s.latitude, s.longitude, date.Year(), date.Month(), date.Day(),
+	)
 	rise, set = rise.Local(), set.Local()
 
 	val := set
@@ -269,7 +279,10 @@ func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offse
 	if len(offset) == 1 {
 		t, err = time.ParseDuration(string(offset[0]))
 		if err != nil {
-			parsingErr := fmt.Errorf("could not parse offset passed to %s: \"%s\": %w", printString, offset[0], err)
+			parsingErr := fmt.Errorf(
+				"could not parse offset passed to %s: \"%s\": %w",
+				printString, offset[0], err,
+			)
 			slog.Error(parsingErr.Error())
 			panic(parsingErr)
 		}
@@ -331,7 +344,10 @@ func (app *App) Start(ctx context.Context) error {
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
 				entityState, err := app.state.Get(eid)
 				if err != nil {
-					slog.Warn("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
+					slog.Warn(
+						"Failed to get entity state \"", eid,
+						"\" during startup, skipping RunOnStartup",
+					)
 				}
 
 				etl.runOnStartupCompleted = true

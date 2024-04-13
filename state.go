@@ -45,7 +45,11 @@ func newState(c *http.HttpClient, homeZoneEntityId string) (*StateImpl, error) {
 func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
 	resp, err := s.Get(homeZoneEntityId)
 	if err != nil {
-		return fmt.Errorf("couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'", homeZoneEntityId)
+		return fmt.Errorf(
+			"couldn't get latitude/longitude from home assistant entity '%s'. "+
+				"Did you type it correctly? It should be a zone like 'zone.home'",
+			homeZoneEntityId,
+		)
 	}
 
 	if resp.Attributes["latitude"] != nil {

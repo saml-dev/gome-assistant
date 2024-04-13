@@ -20,7 +20,8 @@ func checkWithinTimeRange(startTime, endTime string) conditionCheck {
 		parsedEnd := internal.ParseTime(endTime)
 
 		// check for midnight overlap
-		if parsedEnd.Lt(parsedStart) { // example turn on night lights when motion from 23:00 to 07:00
+		if parsedEnd.Lt(parsedStart) {
+			// example turn on night lights when motion from 23:00 to 07:00
 			if parsedEnd.IsPast() { // such as at 15:00, 22:00
 				parsedEnd = parsedEnd.AddDay()
 			} else {

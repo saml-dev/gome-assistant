@@ -112,13 +112,19 @@ func (sb scheduleBuilderEnd) OnlyOnDates(t time.Time, tl ...time.Time) scheduleB
 	return sb
 }
 
-/*
-Enable this schedule only when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
-*/
-func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
+// Enable this schedule only when the current state of {entityId}
+// matches {state}. If there is a network error while retrieving
+// state, the schedule runs if {runOnNetworkError} is true.
+func (sb scheduleBuilderEnd) EnabledWhen(
+	entityId, state string, runOnNetworkError bool,
+) scheduleBuilderEnd {
 	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+		panic(
+			fmt.Sprintf(
+				"entityId is empty in EnabledWhen entityId='%s' state='%s'",
+				entityId, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
 		Entity:     entityId,
@@ -129,13 +135,19 @@ func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 	return sb
 }
 
-/*
-Disable this schedule when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
-*/
-func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
+// Disable this schedule when the current state of {entityId} matches
+// {state}. If there is a network error while retrieving state, the
+// schedule runs if {runOnNetworkError} is true.
+func (sb scheduleBuilderEnd) DisabledWhen(
+	entityId, state string, runOnNetworkError bool,
+) scheduleBuilderEnd {
 	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+		panic(
+			fmt.Sprintf(
+				"entityId is empty in EnabledWhen entityId='%s' state='%s'",
+				entityId, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
 		Entity:     entityId,
