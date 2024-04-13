@@ -1,12 +1,12 @@
 package services
 
 import (
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 	"saml.dev/gome-assistant/types"
 )
 
 type Notify struct {
-	conn *ws.Conn
+	conn *websocket.Conn
 }
 
 // Send a notification. Takes a types.NotifyRequest.

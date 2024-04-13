@@ -2,11 +2,11 @@ package services
 
 import (
 	"saml.dev/gome-assistant/internal"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type Event struct {
-	conn *ws.Conn
+	conn *websocket.Conn
 }
 
 // Fire an event

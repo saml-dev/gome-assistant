@@ -1,13 +1,13 @@
 package services
 
 import (
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Scene struct {
-	conn *ws.Conn
+	conn *websocket.Conn
 }
 
 /* Public API */

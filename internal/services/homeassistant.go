@@ -1,11 +1,11 @@
 package services
 
 import (
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type HomeAssistant struct {
-	conn *ws.Conn
+	conn *websocket.Conn
 }
 
 // TurnOn a Home Assistant entity. Takes an entityId and an optional
