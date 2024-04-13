@@ -184,31 +184,31 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 type scheduledAction interface {
 	String() string
 	Hash() string
-	initializeNextRunTime(a *App)
-	shouldRun(a *App) bool
-	run(a *App)
-	updateNextRunTime(a *App)
+	initializeNextRunTime(app *App)
+	shouldRun(app *App) bool
+	run(app *App)
+	updateNextRunTime(app *App)
 	getNextRunTime() time.Time
 }
 
-func (a *App) RegisterScheduledAction(action scheduledAction) {
-	action.initializeNextRunTime(a)
-	a.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
+func (app *App) RegisterScheduledAction(action scheduledAction) {
+	action.initializeNextRunTime(app)
+	app.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
 }
 
-func (a *App) RegisterSchedules(schedules ...*DailySchedule) {
+func (app *App) RegisterSchedules(schedules ...*DailySchedule) {
 	for _, s := range schedules {
-		a.RegisterScheduledAction(s)
+		app.RegisterScheduledAction(s)
 	}
 }
 
-func (a *App) RegisterIntervals(intervals ...*Interval) {
+func (app *App) RegisterIntervals(intervals ...*Interval) {
 	for _, i := range intervals {
-		a.RegisterScheduledAction(i)
+		app.RegisterScheduledAction(i)
 	}
 }
 
-func (a *App) RegisterEntityListeners(etls ...EntityListener) {
+func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
 		etl := etl
 		if etl.delay != 0 && etl.toState == "" {
@@ -217,27 +217,27 @@ func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 		}
 
 		for _, entity := range etl.entityIds {
-			if elList, ok := a.entityListeners[entity]; ok {
-				a.entityListeners[entity] = append(elList, &etl)
+			if elList, ok := app.entityListeners[entity]; ok {
+				app.entityListeners[entity] = append(elList, &etl)
 			} else {
-				a.entityListeners[entity] = []*EntityListener{&etl}
+				app.entityListeners[entity] = []*EntityListener{&etl}
 			}
 		}
 	}
 }
 
-func (a *App) RegisterEventListeners(evls ...EventListener) {
+func (app *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
 		evl := evl
 		for _, eventType := range evl.eventTypes {
-			elList, ok := a.eventListeners[eventType]
+			elList, ok := app.eventListeners[eventType]
 			if !ok {
 				// FIXME: keep track of subscriptions so that they can
 				// be unsubscribed from.
-				_, err := a.wsConn.WatchEvents(
+				_, err := app.wsConn.WatchEvents(
 					eventType,
 					func(msg websocket.ChanMsg) {
-						go a.callEventListeners(msg)
+						go app.callEventListeners(msg)
 					},
 				)
 				if err != nil {
@@ -245,7 +245,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 					panic(err)
 				}
 			}
-			a.eventListeners[eventType] = append(elList, &evl)
+			app.eventListeners[eventType] = append(elList, &evl)
 		}
 	}
 }
@@ -283,38 +283,38 @@ func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offse
 	return setOrRiseToday
 }
 
-func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.Carbon {
-	sunriseOrSunset := getSunriseSunset(a.state, sunrise, carbon.Now(), offset...)
+func getNextSunRiseOrSet(app *App, sunrise bool, offset ...DurationString) carbon.Carbon {
+	sunriseOrSunset := getSunriseSunset(app.state, sunrise, carbon.Now(), offset...)
 	if sunriseOrSunset.Lt(carbon.Now()) {
 		// if we're past today's sunset or sunrise (accounting for offset) then get tomorrows
 		// as that's the next time the schedule will run
-		sunriseOrSunset = getSunriseSunset(a.state, sunrise, carbon.Tomorrow(), offset...)
+		sunriseOrSunset = getSunriseSunset(app.state, sunrise, carbon.Tomorrow(), offset...)
 	}
 	return sunriseOrSunset
 }
 
 // Start the app. When `ctx` expires, the app closes the connection
 // and returns.
-func (a *App) Start(ctx context.Context) error {
+func (app *App) Start(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
-	a.cancel = cancel
+	app.cancel = cancel
 	defer cancel()
 
 	eg, ctx := errgroup.WithContext(ctx)
 
-	slog.Info("Starting", "scheduled actions", a.scheduledActions.Len())
-	slog.Info("Starting", "entity listeners", len(a.entityListeners))
-	slog.Info("Starting", "event listeners", len(a.eventListeners))
+	slog.Info("Starting", "scheduled actions", app.scheduledActions.Len())
+	slog.Info("Starting", "entity listeners", len(app.entityListeners))
+	slog.Info("Starting", "event listeners", len(app.eventListeners))
 
 	eg.Go(func() error {
-		a.runScheduledActions(ctx)
+		app.runScheduledActions(ctx)
 		return nil
 	})
 
 	// subscribe to state_changed events
-	stateChangedSubscription, err := a.wsConn.WatchStateChangedEvents(
+	stateChangedSubscription, err := app.wsConn.WatchStateChangedEvents(
 		func(msg websocket.ChanMsg) {
-			go a.callEntityListeners(msg)
+			go app.callEntityListeners(msg)
 		},
 	)
 	if err != nil {
@@ -324,12 +324,12 @@ func (a *App) Start(ctx context.Context) error {
 	defer stateChangedSubscription.Cancel()
 
 	// entity listeners runOnStartup
-	for eid, etls := range a.entityListeners {
+	for eid, etls := range app.entityListeners {
 		for _, etl := range etls {
 			// ensure each ETL only runs once, even if
 			// it listens to multiple entities
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
-				entityState, err := a.state.Get(eid)
+				entityState, err := app.state.Get(eid)
 				if err != nil {
 					slog.Warn("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
 				}
@@ -337,7 +337,7 @@ func (a *App) Start(ctx context.Context) error {
 				etl.runOnStartupCompleted = true
 				etl := etl
 				eg.Go(func() error {
-					etl.callback(a.service, a.state, EntityData{
+					etl.callback(app.service, app.state, EntityData{
 						TriggerEntityId: eid,
 						FromState:       entityState.State,
 						FromAttributes:  entityState.Attributes,
@@ -353,14 +353,14 @@ func (a *App) Start(ctx context.Context) error {
 
 	// entity listeners and event listeners
 	eg.Go(func() error {
-		a.wsConn.Start()
+		app.wsConn.Start()
 		cancel()
 		return nil
 	})
 
 	eg.Go(func() error {
 		<-ctx.Done()
-		a.Close()
+		app.Close()
 		return nil
 	})
 
@@ -371,29 +371,29 @@ func (a *App) Start(ctx context.Context) error {
 
 // Close closes the connection and releases any resources. It may be
 // called more than once; only the first call does anything.
-func (a *App) Close() {
-	a.closeOnce.Do(func() {
-		a.close()
+func (app *App) Close() {
+	app.closeOnce.Do(func() {
+		app.close()
 	})
 }
 
 // close closes the connection and releases resources. It must be
 // called exactly once.
-func (a *App) close() {
-	a.cancel()
-	a.wsConn.Close()
+func (app *App) close() {
+	app.cancel()
+	app.wsConn.Close()
 }
 
-func (a *App) GetService() *Service {
-	return a.service
+func (app *App) GetService() *Service {
+	return app.service
 }
 
-func (a *App) GetState() State {
-	return a.state
+func (app *App) GetState() State {
+	return app.state
 }
 
-func (a *App) runScheduledActions(ctx context.Context) {
-	if a.scheduledActions.Len() == 0 {
+func (app *App) runScheduledActions(ctx context.Context) {
+	if app.scheduledActions.Len() == 0 {
 		return
 	}
 
@@ -404,7 +404,7 @@ func (a *App) runScheduledActions(ctx context.Context) {
 	}
 
 	for {
-		action := a.popScheduledAction()
+		action := app.popScheduledAction()
 		if action.getNextRunTime().After(time.Now()) {
 			timer.Reset(time.Until(action.getNextRunTime()))
 
@@ -415,20 +415,20 @@ func (a *App) runScheduledActions(ctx context.Context) {
 			}
 		}
 
-		if action.shouldRun(a) {
-			go action.run(a)
+		if action.shouldRun(app) {
+			go action.run(app)
 		}
 
-		a.requeueScheduledAction(action)
+		app.requeueScheduledAction(action)
 	}
 }
 
-func (a *App) popScheduledAction() scheduledAction {
-	action, _ := a.scheduledActions.Pop()
+func (app *App) popScheduledAction() scheduledAction {
+	action, _ := app.scheduledActions.Pop()
 	return action.(scheduledAction)
 }
 
-func (a *App) requeueScheduledAction(action scheduledAction) {
-	action.updateNextRunTime(a)
-	a.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
+func (app *App) requeueScheduledAction(action scheduledAction) {
+	action.updateNextRunTime(app)
+	app.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
 }

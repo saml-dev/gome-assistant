@@ -150,10 +150,10 @@ func (sb scheduleBuilderEnd) Build() *DailySchedule {
 	return sb.schedule
 }
 
-func (s *DailySchedule) initializeNextRunTime(a *App) {
+func (s *DailySchedule) initializeNextRunTime(app *App) {
 	// realStartTime already set for sunset/sunrise
 	if s.isSunrise || s.isSunset {
-		s.nextRunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset).Carbon2Time()
+		s.nextRunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset).Carbon2Time()
 		return
 	}
 
@@ -172,34 +172,34 @@ func (s *DailySchedule) getNextRunTime() time.Time {
 	return s.nextRunTime
 }
 
-func (s *DailySchedule) shouldRun(a *App) bool {
+func (s *DailySchedule) shouldRun(app *App) bool {
 	if c := checkExceptionDates(s.exceptionDates); c.fail {
 		return false
 	}
 	if c := checkAllowlistDates(s.allowlistDates); c.fail {
 		return false
 	}
-	if c := checkEnabledEntity(a.state, s.enabledEntities); c.fail {
+	if c := checkEnabledEntity(app.state, s.enabledEntities); c.fail {
 		return false
 	}
-	if c := checkDisabledEntity(a.state, s.disabledEntities); c.fail {
+	if c := checkDisabledEntity(app.state, s.disabledEntities); c.fail {
 		return false
 	}
 	return true
 }
 
-func (s *DailySchedule) run(a *App) {
-	s.callback(a.service, a.state)
+func (s *DailySchedule) run(app *App) {
+	s.callback(app.service, app.state)
 }
 
-func (s *DailySchedule) updateNextRunTime(a *App) {
+func (s *DailySchedule) updateNextRunTime(app *App) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
 		if s.sunOffset != "0s" {
-			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset)
+			nextSunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset)
 		} else {
-			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise)
+			nextSunTime = getNextSunRiseOrSet(app, s.isSunrise)
 		}
 
 		s.nextRunTime = nextSunTime.Carbon2Time()

@@ -145,7 +145,7 @@ func (sb intervalBuilderEnd) Build() *Interval {
 	return sb.interval
 }
 
-func (i *Interval) initializeNextRunTime(a *App) {
+func (i *Interval) initializeNextRunTime(app *App) {
 	if i.frequency == 0 {
 		slog.Error("A schedule must use either set frequency via Every()")
 		panic(ErrInvalidArgs)
@@ -162,7 +162,7 @@ func (i *Interval) getNextRunTime() time.Time {
 	return i.nextRunTime
 }
 
-func (i Interval) shouldRun(a *App) bool {
+func (i Interval) shouldRun(app *App) bool {
 	if c := checkStartEndTime(i.startTime /* isStart = */, true); c.fail {
 		return false
 	}
@@ -175,19 +175,19 @@ func (i Interval) shouldRun(a *App) bool {
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
 		return false
 	}
-	if c := checkEnabledEntity(a.state, i.enabledEntities); c.fail {
+	if c := checkEnabledEntity(app.state, i.enabledEntities); c.fail {
 		return false
 	}
-	if c := checkDisabledEntity(a.state, i.disabledEntities); c.fail {
+	if c := checkDisabledEntity(app.state, i.disabledEntities); c.fail {
 		return false
 	}
 	return true
 }
 
-func (i *Interval) run(a *App) {
-	i.callback(a.service, a.state)
+func (i *Interval) run(app *App) {
+	i.callback(app.service, app.state)
 }
 
-func (i *Interval) updateNextRunTime(a *App) {
+func (i *Interval) updateNextRunTime(app *App) {
 	i.nextRunTime = i.nextRunTime.Add(i.frequency)
 }
