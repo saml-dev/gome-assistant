@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Timer struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 /* Public API */

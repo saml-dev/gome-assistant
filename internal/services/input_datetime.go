@@ -10,7 +10,7 @@ import (
 /* Structs */
 
 type InputDatetime struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 /* Public API */

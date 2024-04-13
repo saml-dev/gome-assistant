@@ -7,7 +7,7 @@ import (
 /* Structs */
 
 type Lock struct {
-	conn *ws.WebsocketWriter
+	conn *ws.WebsocketConn
 }
 
 /* Public API */

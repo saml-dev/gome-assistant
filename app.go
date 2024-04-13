@@ -33,7 +33,7 @@ type App struct {
 	conn      *websocket.Conn
 
 	// Wraps the ws connection with added mutex locking
-	wsWriter *ws.WebsocketWriter
+	wsConn *ws.WebsocketConn
 
 	httpClient *http.HttpClient
 
@@ -165,8 +165,8 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
-	wsWriter := &ws.WebsocketWriter{Conn: conn}
-	service := newService(wsWriter)
+	wsConn := &ws.WebsocketConn{Conn: conn}
+	service := newService(wsConn)
 	state, err := newState(httpClient, request.HomeZoneEntityId)
 	if err != nil {
 		return nil, err
@@ -180,7 +180,7 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	return &App{
 		conn:            conn,
-		wsWriter:        wsWriter,
+		wsConn:          wsConn,
 		ctx:             ctx,
 		ctxCancel:       cancel,
 		httpClient:      httpClient,
@@ -262,7 +262,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 			if elList, ok := a.eventListeners[eventType]; ok {
 				a.eventListeners[eventType] = append(elList, &evl)
 			} else {
-				ws.SubscribeToEventType(a.ctx, eventType, a.wsWriter)
+				ws.SubscribeToEventType(a.ctx, eventType, a.wsConn)
 				a.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
@@ -321,7 +321,7 @@ func (a *App) Start() {
 
 	// subscribe to state_changed events
 	id := internal.GetId()
-	ws.SubscribeToStateChangedEvents(a.ctx, id, a.wsWriter)
+	ws.SubscribeToStateChangedEvents(a.ctx, id, a.wsConn)
 	a.entityListenersId = id
 
 	// entity listeners runOnStartup
