@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
-	"github.com/gorilla/websocket"
 	sunriseLib "github.com/nathan-osman/go-sunrise"
 	"golang.org/x/sync/errgroup"
 	"saml.dev/gome-assistant/internal"
@@ -24,8 +23,6 @@ var ErrInvalidToken = ws.ErrInvalidToken
 var ErrInvalidArgs = errors.New("invalid arguments provided")
 
 type App struct {
-	conn *websocket.Conn
-
 	// Wraps the ws connection with added mutex locking
 	wsConn *ws.WebsocketConn
 
@@ -116,7 +113,6 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	}
 
 	return &App{
-		conn:             conn,
 		wsConn:           wsWriter,
 		httpClient:       httpClient,
 		service:          service,
