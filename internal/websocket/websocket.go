@@ -32,34 +32,35 @@ type Conn struct {
 func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Conn, error) {
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.DialContext(ctx, uri, nil)
+	wsConn, _, err := dialer.DialContext(ctx, uri, nil)
 	if err != nil {
 		slog.Error("Failed to connect to websocket. Check URI\n", "uri", uri)
 		return nil, err
 	}
 
+	conn := &Conn{conn: wsConn}
+
 	// Read auth_required message
-	_, err = ReadMessage(conn)
-	if err != nil {
+	if _, err := conn.readMessage(); err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
 	}
 
 	// Send auth message
-	err = SendAuthMessage(conn, authToken)
+	err = conn.sendAuthMessage(authToken)
 	if err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
 	}
 
 	// Verify auth message was successful
-	err = VerifyAuthResponse(conn)
+	err = conn.verifyAuthResponse()
 	if err != nil {
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
 		return nil, err
 	}
 
-	return &Conn{conn: conn}, nil
+	return conn, nil
 }
 
 func NewConn(ctx context.Context, ip, port, authToken string) (*Conn, error) {
@@ -84,8 +85,8 @@ func (conn *Conn) WriteMessage(msg interface{}) error {
 	return nil
 }
 
-func ReadMessage(conn *websocket.Conn) ([]byte, error) {
-	_, msg, err := conn.ReadMessage()
+func (conn *Conn) readMessage() ([]byte, error) {
+	_, msg, err := conn.conn.ReadMessage()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -96,8 +97,8 @@ func (conn *Conn) Close() error {
 	return conn.conn.Close()
 }
 
-func SendAuthMessage(conn *websocket.Conn, token string) error {
-	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
+func (conn *Conn) sendAuthMessage(token string) error {
+	err := conn.conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
 		return err
 	}
@@ -109,8 +110,8 @@ type authResponse struct {
 	Message string `json:"message"`
 }
 
-func VerifyAuthResponse(conn *websocket.Conn) error {
-	msg, err := ReadMessage(conn)
+func (conn *Conn) verifyAuthResponse() error {
+	msg, err := conn.readMessage()
 	if err != nil {
 		return err
 	}
