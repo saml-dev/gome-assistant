@@ -84,15 +84,13 @@ func (conn *Conn) WatchStateChangedEvents(subscriber Subscriber) (Subscription, 
 
 // Start reads JSON-formatted messages from `conn`, partly
 // deserializes them, and processes them. If the message ID is
-// currently subscribed to, invoke the subscriber for the message.
-// Otherwise, send them to `c`. If there is an error reading from
-// `conn`, close `c` and return.
-func (conn *Conn) Start(c chan<- ChanMsg) {
+// currently subscribed to, invoke the subscriber for the message. If
+// there is an error reading from `conn`, log it and return.
+func (conn *Conn) Start() {
 	for {
 		bytes, err := conn.readMessage()
 		if err != nil {
 			slog.Error("Error reading from websocket:", err)
-			close(c)
 			return
 		}
 
@@ -113,8 +111,6 @@ func (conn *Conn) Start(c chan<- ChanMsg) {
 
 		if subscriber, ok := conn.getSubscriber(chanMsg.Id); ok {
 			subscriber(chanMsg)
-		} else {
-			c <- chanMsg
 		}
 	}
 }

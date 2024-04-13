@@ -232,7 +232,18 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 		for _, eventType := range evl.eventTypes {
 			elList, ok := a.eventListeners[eventType]
 			if !ok {
-				a.wsConn.SubscribeToEventType(eventType)
+				// FIXME: keep track of subscriptions so that they can
+				// be unsubscribed from.
+				_, err := a.wsConn.WatchEvents(
+					eventType,
+					func(msg websocket.ChanMsg) {
+						go a.callEventListeners(msg)
+					},
+				)
+				if err != nil {
+					// FIXME: better error handling
+					panic(err)
+				}
 			}
 			a.eventListeners[eventType] = append(elList, &evl)
 		}
@@ -341,21 +352,9 @@ func (a *App) Start(ctx context.Context) error {
 	}
 
 	// entity listeners and event listeners
-	elChan := make(chan websocket.ChanMsg)
 	eg.Go(func() error {
-		a.wsConn.Start(elChan)
+		a.wsConn.Start()
 		cancel()
-		return nil
-	})
-
-	eg.Go(func() error {
-		for {
-			msg, ok := <-elChan
-			if !ok {
-				break
-			}
-			go a.callEventListeners(msg)
-		}
 		return nil
 	})
 
