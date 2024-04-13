@@ -343,7 +343,7 @@ func (a *App) Start(ctx context.Context) {
 	// entity listeners and event listeners
 	elChan := make(chan ws.ChanMsg)
 	eg.Go(func() error {
-		ws.ListenWebsocket(a.conn, elChan)
+		a.wsConn.ListenWebsocket(elChan)
 		cancel()
 		return nil
 	})
