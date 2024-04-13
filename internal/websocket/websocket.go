@@ -90,6 +90,10 @@ func ConnectionFromUri(
 	return conn, nil
 }
 
+func (conn *WebsocketConn) Close() error {
+	return conn.Conn.Close()
+}
+
 func SendAuthMessage(ctx context.Context, conn *websocket.Conn, token string) error {
 	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
