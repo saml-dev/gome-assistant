@@ -98,14 +98,13 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 		return nil, ErrInvalidArgs
 	}
 
-	conn, err := ws.ConnectionFromUri(ctx, config.WebsocketURI, config.HAAuthToken)
+	wsWriter, err := ws.NewConnFromURI(ctx, config.WebsocketURI, config.HAAuthToken)
 	if err != nil {
 		return nil, err
 	}
 
 	httpClient := http.ClientFromUri(config.RESTBaseURI, config.HAAuthToken)
 
-	wsWriter := &ws.WebsocketConn{Conn: conn}
 	service := newService(wsWriter, httpClient)
 	state, err := newState(httpClient, config.HomeZoneEntityId)
 	if err != nil {

@@ -29,37 +29,7 @@ type WebsocketConn struct {
 	mutex sync.Mutex
 }
 
-func (conn *WebsocketConn) WriteMessage(msg interface{}) error {
-	conn.mutex.Lock()
-	defer conn.mutex.Unlock()
-
-	err := conn.Conn.WriteJSON(msg)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func ReadMessage(conn *websocket.Conn) ([]byte, error) {
-	_, msg, err := conn.ReadMessage()
-	if err != nil {
-		return []byte{}, err
-	}
-	return msg, nil
-}
-
-func SetupConnection(ctx context.Context, ip, port, authToken string) (*websocket.Conn, error) {
-	uri := fmt.Sprintf("ws://%s:%s/api/websocket", ip, port)
-	return ConnectionFromUri(ctx, uri, authToken)
-}
-
-func SetupSecureConnection(ctx context.Context, ip, port, authToken string) (*websocket.Conn, error) {
-	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
-	return ConnectionFromUri(ctx, uri, authToken)
-}
-
-func ConnectionFromUri(ctx context.Context, uri, authToken string) (*websocket.Conn, error) {
+func NewConnFromURI(ctx context.Context, uri string, authToken string) (*WebsocketConn, error) {
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
 	conn, _, err := dialer.DialContext(ctx, uri, nil)
@@ -89,7 +59,37 @@ func ConnectionFromUri(ctx context.Context, uri, authToken string) (*websocket.C
 		return nil, err
 	}
 
-	return conn, nil
+	return &WebsocketConn{Conn: conn}, nil
+}
+
+func NewConn(ctx context.Context, ip, port, authToken string) (*WebsocketConn, error) {
+	uri := fmt.Sprintf("ws://%s:%s/api/websocket", ip, port)
+	return NewConnFromURI(ctx, uri, authToken)
+}
+
+func NewSecureConn(ctx context.Context, ip, port, authToken string) (*WebsocketConn, error) {
+	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
+	return NewConnFromURI(ctx, uri, authToken)
+}
+
+func (conn *WebsocketConn) WriteMessage(msg interface{}) error {
+	conn.mutex.Lock()
+	defer conn.mutex.Unlock()
+
+	err := conn.Conn.WriteJSON(msg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ReadMessage(conn *websocket.Conn) ([]byte, error) {
+	_, msg, err := conn.ReadMessage()
+	if err != nil {
+		return []byte{}, err
+	}
+	return msg, nil
 }
 
 func (conn *WebsocketConn) Close() error {
