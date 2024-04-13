@@ -384,7 +384,7 @@ func (a *App) Close() {
 // called exactly once.
 func (a *App) close() {
 	a.cancel()
-	a.conn.Close()
+	a.wsConn.Close()
 }
 
 func (a *App) GetService() *Service {

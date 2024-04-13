@@ -92,6 +92,10 @@ func ConnectionFromUri(ctx context.Context, uri, authToken string) (*websocket.C
 	return conn, nil
 }
 
+func (conn *WebsocketConn) Close() error {
+	return conn.Conn.Close()
+}
+
 func SendAuthMessage(conn *websocket.Conn, token string) error {
 	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
