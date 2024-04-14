@@ -25,7 +25,10 @@ func (mp MediaPlayer) ClearPlaylist(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "clear_playlist"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Group players together. Only works on platforms with support for player groups.
@@ -39,7 +42,10 @@ func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command for next track.
@@ -49,7 +55,10 @@ func (mp MediaPlayer) Next(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_next_track"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command for pause.
@@ -59,7 +68,10 @@ func (mp MediaPlayer) Pause(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_pause"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command for play.
@@ -69,7 +81,10 @@ func (mp MediaPlayer) Play(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_play"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Toggle media player play/pause state.
@@ -79,7 +94,10 @@ func (mp MediaPlayer) PlayPause(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_play_pause"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command for previous track.
@@ -89,7 +107,10 @@ func (mp MediaPlayer) Previous(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_previous_track"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command to seek in current playing media.
@@ -103,7 +124,10 @@ func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the stop command.
@@ -113,7 +137,10 @@ func (mp MediaPlayer) Stop(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "media_stop"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command for playing media.
@@ -127,7 +154,10 @@ func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Set repeat mode. Takes an entityId and an optional
@@ -140,7 +170,10 @@ func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command to change sound mode.
@@ -154,7 +187,10 @@ func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the media player the command to change input source.
@@ -168,7 +204,10 @@ func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]an
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Set shuffling state.
@@ -182,7 +221,10 @@ func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Toggles a media player power state.
@@ -192,7 +234,10 @@ func (mp MediaPlayer) Toggle(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "toggle"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Turn a media player power off.
@@ -202,7 +247,10 @@ func (mp MediaPlayer) TurnOff(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "turn_off"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Turn a media player power on.
@@ -212,7 +260,10 @@ func (mp MediaPlayer) TurnOn(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "turn_on"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Unjoin the player from a group. Only works on
@@ -223,7 +274,10 @@ func (mp MediaPlayer) Unjoin(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "unjoin"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Turn a media player volume down.
@@ -233,7 +287,10 @@ func (mp MediaPlayer) VolumeDown(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "volume_down"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Mute a media player's volume.
@@ -247,7 +304,10 @@ func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any)
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Set a media player's volume level.
@@ -261,7 +321,10 @@ func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Turn a media player volume up.
@@ -271,5 +334,8 @@ func (mp MediaPlayer) VolumeUp(entityId string) {
 	req.Domain = "media_player"
 	req.Service = "volume_up"
 
-	mp.conn.WriteMessage(req)
+	mp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

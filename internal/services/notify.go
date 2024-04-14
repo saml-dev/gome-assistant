@@ -29,5 +29,9 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) {
 	}
 
 	req.ServiceData = serviceData
-	ha.conn.WriteMessage(req)
+
+	ha.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

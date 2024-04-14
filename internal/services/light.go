@@ -28,7 +28,10 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(req)
+	l.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Toggle a light entity. Takes an entityId and an optional
@@ -41,12 +44,19 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(req)
+	l.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (l Light) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(l.conn, entityId)
 	req.Domain = "light"
 	req.Service = "turn_off"
-	l.conn.WriteMessage(req)
+
+	l.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

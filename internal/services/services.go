@@ -16,9 +16,7 @@ type BaseServiceRequest struct {
 }
 
 func NewBaseServiceRequest(conn *websocket.Conn, entityId string) BaseServiceRequest {
-	id := conn.NextID()
 	bsr := BaseServiceRequest{
-		Id:          id,
 		RequestType: "call_service",
 	}
 	if entityId != "" {

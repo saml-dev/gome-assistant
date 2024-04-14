@@ -28,7 +28,10 @@ func (l Lock) Lock(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(req)
+	l.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Unlock a lock entity. Takes an entityId and an optional
@@ -41,5 +44,8 @@ func (l Lock) Unlock(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(req)
+	l.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

@@ -29,12 +29,19 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputDatetime) Reload() {
 	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_datetime"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req)
+
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

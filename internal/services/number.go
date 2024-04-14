@@ -24,5 +24,8 @@ func (ib Number) SetValue(entityId string, value float32) {
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

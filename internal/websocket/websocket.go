@@ -27,9 +27,11 @@ type Conn struct {
 	conn       *websocket.Conn
 
 	subscribeMutex sync.RWMutex
-	// lastID is the last message ID that has already been used.
-	lastID      int64
-	subscribers map[int64]Subscriber
+	subscribers    map[int64]Subscriber
+
+	// lastID is the last message ID that has already been used. It
+	// must be accessed atomically.
+	lastID int64
 }
 
 // Subscriber is called synchronously when a message with the
@@ -50,9 +52,13 @@ func (subscription *Subscription) Cancel() {
 		return
 	}
 
-	// FIXME: this should also unsubscribe at the server.
+	subscription.conn.subscribeMutex.Lock()
+	defer subscription.conn.subscribeMutex.Unlock()
 
 	subscription.conn.unsubscribe(subscription.id)
+
+	subscription.conn.unwatchEvents(subscription.id)
+
 	subscription.id = 0
 }
 
@@ -104,18 +110,6 @@ func NewConn(ctx context.Context, ip, port, authToken string) (*Conn, error) {
 func NewSecureConn(ctx context.Context, ip, port, authToken string) (*Conn, error) {
 	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
 	return NewConnFromURI(ctx, uri, authToken)
-}
-
-func (conn *Conn) WriteMessage(msg interface{}) error {
-	conn.writeMutex.Lock()
-	defer conn.writeMutex.Unlock()
-
-	err := conn.conn.WriteJSON(msg)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (conn *Conn) readMessage() ([]byte, error) {

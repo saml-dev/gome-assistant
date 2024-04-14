@@ -23,7 +23,10 @@ func (ib InputBoolean) TurnOn(entityId string) {
 	req.Domain = "input_boolean"
 	req.Service = "turn_on"
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputBoolean) Toggle(entityId string) {
@@ -31,19 +34,30 @@ func (ib InputBoolean) Toggle(entityId string) {
 	req.Domain = "input_boolean"
 	req.Service = "toggle"
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputBoolean) TurnOff(entityId string) {
 	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_boolean"
 	req.Service = "turn_off"
-	ib.conn.WriteMessage(req)
+
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputBoolean) Reload() {
 	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_boolean"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req)
+
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

@@ -19,35 +19,10 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
-func (conn *Conn) NextID() int64 {
-	conn.subscribeMutex.Lock()
-	defer conn.subscribeMutex.Unlock()
-
-	conn.lastID++
-	return conn.lastID
-}
-
-// subscribe creates a new (unique) subscription number and subscribes
-// `subscriber` to it.
-func (conn *Conn) subscribe(subscriber Subscriber) Subscription {
-	conn.subscribeMutex.Lock()
-	defer conn.subscribeMutex.Unlock()
-
-	conn.lastID++
-	id := conn.lastID
-	conn.subscribers[id] = subscriber
-	return Subscription{
-		conn: conn,
-		id:   conn.lastID,
-	}
-}
-
 // unsubscribe unsubscribes from `subscription`. It must be called
-// exactly once for each subscription.
+// exactly once for each subscription. It must be invoked while
+// holding the `subscribeMutex` for writing.
 func (conn *Conn) unsubscribe(id int64) error {
-	conn.subscribeMutex.Lock()
-	defer conn.subscribeMutex.Unlock()
-
 	if _, ok := conn.subscribers[id]; !ok {
 		return fmt.Errorf("subscription ID %d wasn't active", id)
 	}
@@ -75,21 +50,55 @@ type SubEvent struct {
 // messages, but asynchronous with respect to writes.
 func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscription, error) {
 	// Make sure we're listening before events might start arriving:
-	subscription := conn.subscribe(subscriber)
-
 	e := SubEvent{
-		Id:        subscription.ID(),
 		Type:      "subscribe_events",
 		EventType: eventType,
 	}
-	err := conn.WriteMessage(e)
+	var subscription Subscription
+	err := conn.Send(func(mw MessageWriter) error {
+		subscription = mw.Subscribe(subscriber)
+		e.Id = subscription.ID()
+		if err := mw.SendMessage(e); err != nil {
+			conn.unsubscribe(subscription.ID())
+			return fmt.Errorf("error writing to websocket: %w", err)
+		}
+		return nil
+	})
 	if err != nil {
-		conn.unsubscribe(subscription.ID())
 		return Subscription{}, fmt.Errorf("error writing to websocket: %w", err)
 	}
 	// m, _ := ReadMessage(conn, ctx)
 	// log.Default().Println(string(m))
 	return subscription, nil
+}
+
+type UnsubEvent struct {
+	Id           int64  `json:"id"`
+	Type         string `json:"type"`
+	Subscription int64  `json:"subscription"`
+}
+
+// unwatchEvents unsubscribes to events with the given `subscriptionID`. This does
+// not remove the subscriber.
+func (conn *Conn) unwatchEvents(subscriptionID int64) error {
+	conn.subscribeMutex.Lock()
+	defer conn.subscribeMutex.Unlock()
+
+	e := UnsubEvent{
+		Type:         "unsubscribe_events",
+		Subscription: subscriptionID,
+	}
+
+	err := conn.Send(func(mw MessageWriter) error {
+		e.Id = mw.NextID()
+		return mw.SendMessage(e)
+	})
+	if err != nil {
+		return fmt.Errorf("unsubscribing from ID %d: %w", subscriptionID, err)
+	}
+	// m, _ := ReadMessage(conn, ctx)
+	// log.Default().Println(string(m))
+	return nil
 }
 
 func (conn *Conn) WatchStateChangedEvents(subscriber Subscriber) (Subscription, error) {

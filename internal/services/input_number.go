@@ -24,7 +24,10 @@ func (ib InputNumber) Set(entityId string, value float32) {
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputNumber) Increment(entityId string) {
@@ -32,7 +35,10 @@ func (ib InputNumber) Increment(entityId string) {
 	req.Domain = "input_number"
 	req.Service = "increment"
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputNumber) Decrement(entityId string) {
@@ -40,12 +46,19 @@ func (ib InputNumber) Decrement(entityId string) {
 	req.Domain = "input_number"
 	req.Service = "decrement"
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputNumber) Reload() {
 	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_number"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req)
+
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

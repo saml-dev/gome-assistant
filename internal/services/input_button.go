@@ -23,12 +23,19 @@ func (ib InputButton) Press(entityId string) {
 	req.Domain = "input_button"
 	req.Service = "press"
 
-	ib.conn.WriteMessage(req)
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ib InputButton) Reload() {
 	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_button"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req)
+
+	ib.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

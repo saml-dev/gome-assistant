@@ -29,7 +29,10 @@ func (acp AlarmControlPanel) ArmAway(entityId string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the alarm the command for arm away.
@@ -43,7 +46,10 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(entityId string, serviceData ..
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the alarm the command for arm home.
@@ -57,7 +63,10 @@ func (acp AlarmControlPanel) ArmHome(entityId string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the alarm the command for arm night.
@@ -71,7 +80,10 @@ func (acp AlarmControlPanel) ArmNight(entityId string, serviceData ...map[string
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the alarm the command for arm vacation.
@@ -85,7 +97,10 @@ func (acp AlarmControlPanel) ArmVacation(entityId string, serviceData ...map[str
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the alarm the command for disarm.
@@ -99,7 +114,10 @@ func (acp AlarmControlPanel) Disarm(entityId string, serviceData ...map[string]a
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Send the alarm the command for trigger.
@@ -113,5 +131,8 @@ func (acp AlarmControlPanel) Trigger(entityId string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	acp.conn.WriteMessage(req)
+	acp.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

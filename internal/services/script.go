@@ -24,7 +24,10 @@ func (s Script) Reload(entityId string) {
 	req.Domain = "script"
 	req.Service = "reload"
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Toggle a script that was created in the HA UI.
@@ -33,7 +36,10 @@ func (s Script) Toggle(entityId string) {
 	req.Domain = "script"
 	req.Service = "toggle"
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Turn off a script that was created in the HA UI.
@@ -42,7 +48,10 @@ func (s Script) TurnOff() {
 	req.Domain = "script"
 	req.Service = "turn_off"
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Turn on a script that was created in the HA UI.
@@ -51,5 +60,8 @@ func (s Script) TurnOn(entityId string) {
 	req.Domain = "script"
 	req.Service = "turn_on"
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

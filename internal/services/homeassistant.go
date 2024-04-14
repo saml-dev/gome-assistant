@@ -24,7 +24,10 @@ func (ha *HomeAssistant) TurnOn(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ha.conn.WriteMessage(req)
+	ha.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Toggle a Home Assistant entity. Takes an entityId and an optional
@@ -37,7 +40,10 @@ func (ha *HomeAssistant) Toggle(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	ha.conn.WriteMessage(req)
+	ha.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 func (ha *HomeAssistant) TurnOff(entityId string) {
@@ -45,5 +51,8 @@ func (ha *HomeAssistant) TurnOff(entityId string) {
 	req.Domain = "homeassistant"
 	req.Service = "turn_off"
 
-	ha.conn.WriteMessage(req)
+	ha.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

@@ -28,5 +28,8 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(entityId string, parameter int, valu
 		"value":     value,
 	}
 
-	zw.conn.WriteMessage(req)
+	zw.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }

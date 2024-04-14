@@ -27,7 +27,10 @@ func (s Scene) Apply(serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Create a scene entity. Takes an entityId and an optional
@@ -40,7 +43,10 @@ func (s Scene) Create(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // Reload the scenes.
@@ -49,7 +55,10 @@ func (s Scene) Reload() {
 	req.Domain = "scene"
 	req.Service = "reload"
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
 
 // TurnOn a scene entity. Takes an entityId and an optional
@@ -62,5 +71,8 @@ func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	s.conn.WriteMessage(req)
+	s.conn.Send(func(mw websocket.MessageWriter) error {
+		req.Id = mw.NextID()
+		return mw.SendMessage(req)
+	})
 }
