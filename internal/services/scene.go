@@ -10,6 +10,12 @@ type Scene struct {
 	conn *websocket.Conn
 }
 
+func NewScene(conn *websocket.Conn) *Scene {
+	return &Scene{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Apply a scene. Takes map that is translated into service_data.

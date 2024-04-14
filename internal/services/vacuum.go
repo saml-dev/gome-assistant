@@ -10,6 +10,12 @@ type Vacuum struct {
 	conn *websocket.Conn
 }
 
+func NewVacuum(conn *websocket.Conn) *Vacuum {
+	return &Vacuum{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.

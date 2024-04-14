@@ -10,6 +10,12 @@ type InputText struct {
 	conn *websocket.Conn
 }
 
+func NewInputText(conn *websocket.Conn) *InputText {
+	return &InputText{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (ib InputText) Set(entityId string, value string) {

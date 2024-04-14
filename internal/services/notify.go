@@ -9,6 +9,12 @@ type Notify struct {
 	conn *websocket.Conn
 }
 
+func NewNotify(conn *websocket.Conn) *Notify {
+	return &Notify{
+		conn: conn,
+	}
+}
+
 // Send a notification. Takes a types.NotifyRequest.
 func (ha *Notify) Notify(reqData types.NotifyRequest) {
 	req := NewBaseServiceRequest(ha.conn, "")

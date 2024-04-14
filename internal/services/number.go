@@ -10,6 +10,12 @@ type Number struct {
 	conn *websocket.Conn
 }
 
+func NewNumber(conn *websocket.Conn) *Number {
+	return &Number{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (ib Number) SetValue(entityId string, value float32) {

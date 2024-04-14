@@ -10,6 +10,12 @@ type Switch struct {
 	conn *websocket.Conn
 }
 
+func NewSwitch(conn *websocket.Conn) *Switch {
+	return &Switch{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (s Switch) TurnOn(entityId string) {

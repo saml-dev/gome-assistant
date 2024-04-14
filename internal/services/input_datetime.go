@@ -13,6 +13,12 @@ type InputDatetime struct {
 	conn *websocket.Conn
 }
 
+func NewInputDatetime(conn *websocket.Conn) *InputDatetime {
+	return &InputDatetime{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (ib InputDatetime) Set(entityId string, value time.Time) {

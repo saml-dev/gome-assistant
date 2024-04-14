@@ -10,6 +10,12 @@ type Script struct {
 	conn *websocket.Conn
 }
 
+func NewScript(conn *websocket.Conn) *Script {
+	return &Script{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Reload a script that was created in the HA UI.

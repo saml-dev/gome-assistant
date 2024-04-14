@@ -10,6 +10,12 @@ type Cover struct {
 	conn *websocket.Conn
 }
 
+func NewCover(conn *websocket.Conn) *Cover {
+	return &Cover{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Close all or specified cover. Takes an entityId.

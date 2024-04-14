@@ -10,6 +10,12 @@ type MediaPlayer struct {
 	conn *websocket.Conn
 }
 
+func NewMediaPlayer(conn *websocket.Conn) *MediaPlayer {
+	return &MediaPlayer{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Send the media player the command to clear players playlist.

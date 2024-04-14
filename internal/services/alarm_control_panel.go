@@ -12,6 +12,12 @@ type AlarmControlPanel struct {
 
 /* Public API */
 
+func NewAlarmControlPanel(conn *websocket.Conn) *AlarmControlPanel {
+	return &AlarmControlPanel{
+		conn: conn,
+	}
+}
+
 // Send the alarm the command for arm away.
 // Takes an entityId and an optional
 // map that is translated into service_data.

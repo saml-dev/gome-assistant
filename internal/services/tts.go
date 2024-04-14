@@ -10,6 +10,12 @@ type TTS struct {
 	conn *websocket.Conn
 }
 
+func NewTTS(conn *websocket.Conn) *TTS {
+	return &TTS{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Remove all text-to-speech cache files and RAM cache.

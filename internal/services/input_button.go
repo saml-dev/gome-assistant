@@ -10,6 +10,12 @@ type InputButton struct {
 	conn *websocket.Conn
 }
 
+func NewInputButton(conn *websocket.Conn) *InputButton {
+	return &InputButton{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (ib InputButton) Press(entityId string) {

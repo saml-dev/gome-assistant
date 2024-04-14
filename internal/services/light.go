@@ -10,6 +10,12 @@ type Light struct {
 	conn *websocket.Conn
 }
 
+func NewLight(conn *websocket.Conn) *Light {
+	return &Light{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // TurnOn a light entity. Takes an entityId and an optional

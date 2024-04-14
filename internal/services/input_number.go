@@ -10,6 +10,12 @@ type InputNumber struct {
 	conn *websocket.Conn
 }
 
+func NewInputNumber(conn *websocket.Conn) *InputNumber {
+	return &InputNumber{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (ib InputNumber) Set(entityId string, value float32) {

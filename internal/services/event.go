@@ -8,6 +8,12 @@ type Event struct {
 	conn *websocket.Conn
 }
 
+func NewEvent(conn *websocket.Conn) *Event {
+	return &Event{
+		conn: conn,
+	}
+}
+
 // Fire an event
 type FireEventRequest struct {
 	Id        int64          `json:"id"`

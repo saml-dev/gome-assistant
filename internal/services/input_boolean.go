@@ -10,6 +10,12 @@ type InputBoolean struct {
 	conn *websocket.Conn
 }
 
+func NewInputBoolean(conn *websocket.Conn) *InputBoolean {
+	return &InputBoolean{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (ib InputBoolean) TurnOn(entityId string) {

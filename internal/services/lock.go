@@ -10,6 +10,12 @@ type Lock struct {
 	conn *websocket.Conn
 }
 
+func NewLock(conn *websocket.Conn) *Lock {
+	return &Lock{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // Lock a lock entity. Takes an entityId and an optional

@@ -8,6 +8,12 @@ type HomeAssistant struct {
 	conn *websocket.Conn
 }
 
+func NewHomeAssistant(conn *websocket.Conn) *HomeAssistant {
+	return &HomeAssistant{
+		conn: conn,
+	}
+}
+
 // TurnOn a Home Assistant entity. Takes an entityId and an optional
 // map that is translated into service_data.
 func (ha *HomeAssistant) TurnOn(entityId string, serviceData ...map[string]any) {

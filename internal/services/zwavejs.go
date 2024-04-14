@@ -10,6 +10,12 @@ type ZWaveJS struct {
 	conn *websocket.Conn
 }
 
+func NewZWaveJS(conn *websocket.Conn) *ZWaveJS {
+	return &ZWaveJS{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 // ZWaveJS bulk_set_partial_config_parameters service.

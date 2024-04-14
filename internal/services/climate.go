@@ -11,6 +11,12 @@ type Climate struct {
 	conn *websocket.Conn
 }
 
+func NewClimate(conn *websocket.Conn) *Climate {
+	return &Climate{
+		conn: conn,
+	}
+}
+
 /* Public API */
 
 func (c Climate) SetFanMode(entityId string, fanMode string) {
