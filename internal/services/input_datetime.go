@@ -16,7 +16,7 @@ type InputDatetime struct {
 /* Public API */
 
 func (ib InputDatetime) Set(entityId string, value time.Time) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_datetime"
 	req.Service = "set_datetime"
 	req.ServiceData = map[string]any{
@@ -27,7 +27,7 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 }
 
 func (ib InputDatetime) Reload() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_datetime"
 	req.Service = "reload"
 	ib.conn.WriteMessage(req)

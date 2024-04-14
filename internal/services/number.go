@@ -13,7 +13,7 @@ type Number struct {
 /* Public API */
 
 func (ib Number) SetValue(entityId string, value float32) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "number"
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}

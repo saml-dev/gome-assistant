@@ -19,6 +19,14 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
+func (conn *Conn) NextID() int64 {
+	conn.subscribeMutex.Lock()
+	defer conn.subscribeMutex.Unlock()
+
+	conn.lastID++
+	return conn.lastID
+}
+
 // subscribe creates a new (unique) subscription number and subscribes
 // `subscriber` to it.
 func (conn *Conn) subscribe(subscriber Subscriber) Subscription {
@@ -53,6 +61,12 @@ func (conn *Conn) getSubscriber(id int64) (Subscriber, bool) {
 
 	subscriber, ok := conn.subscribers[id]
 	return subscriber, ok
+}
+
+type SubEvent struct {
+	Id        int64  `json:"id"`
+	Type      string `json:"type"`
+	EventType string `json:"event_type"`
 }
 
 // WatchEvents subscribes to events of the given type, invoking

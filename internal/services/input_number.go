@@ -13,7 +13,7 @@ type InputNumber struct {
 /* Public API */
 
 func (ib InputNumber) Set(entityId string, value float32) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_number"
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
@@ -22,7 +22,7 @@ func (ib InputNumber) Set(entityId string, value float32) {
 }
 
 func (ib InputNumber) Increment(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_number"
 	req.Service = "increment"
 
@@ -30,7 +30,7 @@ func (ib InputNumber) Increment(entityId string) {
 }
 
 func (ib InputNumber) Decrement(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_number"
 	req.Service = "decrement"
 
@@ -38,7 +38,7 @@ func (ib InputNumber) Decrement(entityId string) {
 }
 
 func (ib InputNumber) Reload() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_number"
 	req.Service = "reload"
 	ib.conn.WriteMessage(req)

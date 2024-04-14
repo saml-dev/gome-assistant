@@ -13,7 +13,7 @@ type InputBoolean struct {
 /* Public API */
 
 func (ib InputBoolean) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_boolean"
 	req.Service = "turn_on"
 
@@ -21,7 +21,7 @@ func (ib InputBoolean) TurnOn(entityId string) {
 }
 
 func (ib InputBoolean) Toggle(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_boolean"
 	req.Service = "toggle"
 
@@ -29,14 +29,14 @@ func (ib InputBoolean) Toggle(entityId string) {
 }
 
 func (ib InputBoolean) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_boolean"
 	req.Service = "turn_off"
 	ib.conn.WriteMessage(req)
 }
 
 func (ib InputBoolean) Reload() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_boolean"
 	req.Service = "reload"
 	ib.conn.WriteMessage(req)

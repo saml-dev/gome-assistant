@@ -11,7 +11,7 @@ type Notify struct {
 
 // Send a notification. Takes a types.NotifyRequest.
 func (ha *Notify) Notify(reqData types.NotifyRequest) {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(ha.conn, "")
 	req.Domain = "notify"
 	req.Service = reqData.ServiceName
 

@@ -14,7 +14,7 @@ type Scene struct {
 
 // Apply a scene. Takes map that is translated into service_data.
 func (s Scene) Apply(serviceData ...map[string]any) {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(s.conn, "")
 	req.Domain = "scene"
 	req.Service = "apply"
 	if len(serviceData) != 0 {
@@ -27,7 +27,7 @@ func (s Scene) Apply(serviceData ...map[string]any) {
 // Create a scene entity. Takes an entityId and an optional
 // map that is translated into service_data.
 func (s Scene) Create(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(s.conn, entityId)
 	req.Domain = "scene"
 	req.Service = "create"
 	if len(serviceData) != 0 {
@@ -39,7 +39,7 @@ func (s Scene) Create(entityId string, serviceData ...map[string]any) {
 
 // Reload the scenes.
 func (s Scene) Reload() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(s.conn, "")
 	req.Domain = "scene"
 	req.Service = "reload"
 
@@ -49,7 +49,7 @@ func (s Scene) Reload() {
 // TurnOn a scene entity. Takes an entityId and an optional
 // map that is translated into service_data.
 func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(s.conn, entityId)
 	req.Domain = "scene"
 	req.Service = "turn_on"
 	if len(serviceData) != 0 {

@@ -13,8 +13,6 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-
-	"saml.dev/gome-assistant/internal"
 )
 
 var ErrInvalidToken = errors.New("invalid authentication token")
@@ -159,32 +157,4 @@ func (conn *Conn) verifyAuthResponse() error {
 	}
 
 	return nil
-}
-
-type SubEvent struct {
-	Id        int64  `json:"id"`
-	Type      string `json:"type"`
-	EventType string `json:"event_type"`
-}
-
-func (conn *Conn) SubscribeToEventType(eventType string, id ...int64) {
-	var finalId int64
-	if len(id) == 0 {
-		finalId = internal.GetId()
-	} else {
-		finalId = id[0]
-	}
-	e := SubEvent{
-		Id:        finalId,
-		Type:      "subscribe_events",
-		EventType: eventType,
-	}
-	err := conn.WriteMessage(e)
-	if err != nil {
-		wrappedErr := fmt.Errorf("error writing to websocket: %w", err)
-		slog.Error(wrappedErr.Error())
-		panic(wrappedErr)
-	}
-	// m, _ := ReadMessage(conn, ctx)
-	// log.Default().Println(string(m))
 }

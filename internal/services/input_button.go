@@ -13,7 +13,7 @@ type InputButton struct {
 /* Public API */
 
 func (ib InputButton) Press(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_button"
 	req.Service = "press"
 
@@ -21,7 +21,7 @@ func (ib InputButton) Press(entityId string) {
 }
 
 func (ib InputButton) Reload() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_button"
 	req.Service = "reload"
 	ib.conn.WriteMessage(req)

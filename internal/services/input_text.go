@@ -13,7 +13,7 @@ type InputText struct {
 /* Public API */
 
 func (ib InputText) Set(entityId string, value string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(ib.conn, entityId)
 	req.Domain = "input_text"
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{
@@ -24,7 +24,7 @@ func (ib InputText) Set(entityId string, value string) {
 }
 
 func (ib InputText) Reload() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(ib.conn, "")
 	req.Domain = "input_text"
 	req.Service = "reload"
 	ib.conn.WriteMessage(req)

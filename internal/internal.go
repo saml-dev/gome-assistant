@@ -16,13 +16,6 @@ type EnabledDisabledInfo struct {
 	RunOnError bool
 }
 
-var id int64 = 0
-
-func GetId() int64 {
-	id += 1
-	return id
-}
-
 // Parses a HH:MM string.
 func ParseTime(s string) carbon.Carbon {
 	t, err := time.Parse("15:04", s)

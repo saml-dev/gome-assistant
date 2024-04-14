@@ -14,7 +14,7 @@ type TTS struct {
 
 // Remove all text-to-speech cache files and RAM cache.
 func (tts TTS) ClearCache() {
-	req := NewBaseServiceRequest("")
+	req := NewBaseServiceRequest(tts.conn, "")
 	req.Domain = "tts"
 	req.Service = "clear_cache"
 
@@ -25,7 +25,7 @@ func (tts TTS) ClearCache() {
 // Takes an entityId and an optional
 // map that is translated into service_data.
 func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(tts.conn, entityId)
 	req.Domain = "tts"
 	req.Service = "cloud_say"
 	if len(serviceData) != 0 {
@@ -39,7 +39,7 @@ func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
 // Takes an entityId and an optional
 // map that is translated into service_data.
 func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(tts.conn, entityId)
 	req.Domain = "tts"
 	req.Service = "google_translate_say"
 	if len(serviceData) != 0 {

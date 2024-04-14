@@ -1,7 +1,6 @@
 package services
 
 import (
-	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -23,7 +22,7 @@ type FireEventRequest struct {
 // as `event_data`.
 func (e Event) Fire(eventType string, eventData ...map[string]any) {
 	req := FireEventRequest{
-		Id:   internal.GetId(),
+		Id:   e.conn.NextID(),
 		Type: "fire_event",
 	}
 

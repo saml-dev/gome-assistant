@@ -13,7 +13,7 @@ type Switch struct {
 /* Public API */
 
 func (s Switch) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(s.conn, entityId)
 	req.Domain = "switch"
 	req.Service = "turn_on"
 
@@ -21,7 +21,7 @@ func (s Switch) TurnOn(entityId string) {
 }
 
 func (s Switch) Toggle(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(s.conn, entityId)
 	req.Domain = "switch"
 	req.Service = "toggle"
 
@@ -29,7 +29,7 @@ func (s Switch) Toggle(entityId string) {
 }
 
 func (s Switch) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(s.conn, entityId)
 	req.Domain = "switch"
 	req.Service = "turn_off"
 	s.conn.WriteMessage(req)

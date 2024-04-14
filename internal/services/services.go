@@ -1,7 +1,6 @@
 package services
 
 import (
-	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -42,8 +41,8 @@ type BaseServiceRequest struct {
 	} `json:"target,omitempty"`
 }
 
-func NewBaseServiceRequest(entityId string) BaseServiceRequest {
-	id := internal.GetId()
+func NewBaseServiceRequest(conn *websocket.Conn, entityId string) BaseServiceRequest {
+	id := conn.NextID()
 	bsr := BaseServiceRequest{
 		Id:          id,
 		RequestType: "call_service",

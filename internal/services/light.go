@@ -15,7 +15,7 @@ type Light struct {
 // TurnOn a light entity. Takes an entityId and an optional
 // map that is translated into service_data.
 func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(l.conn, entityId)
 	req.Domain = "light"
 	req.Service = "turn_on"
 	if len(serviceData) != 0 {
@@ -28,7 +28,7 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
 // Toggle a light entity. Takes an entityId and an optional
 // map that is translated into service_data.
 func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(l.conn, entityId)
 	req.Domain = "light"
 	req.Service = "toggle"
 	if len(serviceData) != 0 {
@@ -39,7 +39,7 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
 }
 
 func (l Light) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(l.conn, entityId)
 	req.Domain = "light"
 	req.Service = "turn_off"
 	l.conn.WriteMessage(req)

@@ -15,7 +15,7 @@ type Vacuum struct {
 // Tell the vacuum cleaner to do a spot clean-up.
 // Takes an entityId.
 func (v Vacuum) CleanSpot(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "clean_spot"
 
@@ -25,7 +25,7 @@ func (v Vacuum) CleanSpot(entityId string) {
 // Locate the vacuum cleaner robot.
 // Takes an entityId.
 func (v Vacuum) Locate(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "locate"
 
@@ -35,7 +35,7 @@ func (v Vacuum) Locate(entityId string) {
 // Pause the cleaning task.
 // Takes an entityId.
 func (v Vacuum) Pause(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "pause"
 
@@ -45,7 +45,7 @@ func (v Vacuum) Pause(entityId string) {
 // Tell the vacuum cleaner to return to its dock.
 // Takes an entityId.
 func (v Vacuum) ReturnToBase(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "return_to_base"
 
@@ -55,7 +55,7 @@ func (v Vacuum) ReturnToBase(entityId string) {
 // Send a raw command to the vacuum cleaner. Takes an entityId and an optional
 // map that is translated into service_data.
 func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "send_command"
 	if len(serviceData) != 0 {
@@ -68,7 +68,7 @@ func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
 // Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
 // map that is translated into service_data.
 func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "set_fan_speed"
 
@@ -82,7 +82,7 @@ func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
 // Start or resume the cleaning task.
 // Takes an entityId.
 func (v Vacuum) Start(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "start"
 
@@ -92,7 +92,7 @@ func (v Vacuum) Start(entityId string) {
 // Start, pause, or resume the cleaning task.
 // Takes an entityId.
 func (v Vacuum) StartPause(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "start_pause"
 
@@ -102,7 +102,7 @@ func (v Vacuum) StartPause(entityId string) {
 // Stop the current cleaning task.
 // Takes an entityId.
 func (v Vacuum) Stop(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "stop"
 
@@ -112,7 +112,7 @@ func (v Vacuum) Stop(entityId string) {
 // Stop the current cleaning task and return to home.
 // Takes an entityId.
 func (v Vacuum) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "turn_off"
 
@@ -122,7 +122,7 @@ func (v Vacuum) TurnOff(entityId string) {
 // Start a new cleaning task.
 // Takes an entityId.
 func (v Vacuum) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(entityId)
+	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "turn_on"
 
