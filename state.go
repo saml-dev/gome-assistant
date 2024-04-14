@@ -15,8 +15,8 @@ type State interface {
 	BeforeSunrise(...DurationString) bool
 	AfterSunset(...DurationString) bool
 	BeforeSunset(...DurationString) bool
-	Get(entityId string) (EntityState, error)
-	Equals(entityId, state string) (bool, error)
+	Get(entityID string) (EntityState, error)
+	Equals(entityID, state string) (bool, error)
 }
 
 // State is used to retrieve state from Home Assistant.
@@ -33,22 +33,22 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 }
 
-func newState(c *http.HttpClient, homeZoneEntityId string) (*StateImpl, error) {
+func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
 	state := &StateImpl{httpClient: c}
-	err := state.getLatLong(c, homeZoneEntityId)
+	err := state.getLatLong(c, homeZoneEntityID)
 	if err != nil {
 		return nil, err
 	}
 	return state, nil
 }
 
-func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
-	resp, err := s.Get(homeZoneEntityId)
+func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityID string) error {
+	resp, err := s.Get(homeZoneEntityID)
 	if err != nil {
 		return fmt.Errorf(
 			"couldn't get latitude/longitude from home assistant entity '%s'. "+
 				"Did you type it correctly? It should be a zone like 'zone.home'",
-			homeZoneEntityId,
+			homeZoneEntityID,
 		)
 	}
 
@@ -67,8 +67,8 @@ func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) erro
 	return nil
 }
 
-func (s *StateImpl) Get(entityId string) (EntityState, error) {
-	resp, err := s.httpClient.GetState(entityId)
+func (s *StateImpl) Get(entityID string) (EntityState, error) {
+	resp, err := s.httpClient.GetState(entityID)
 	if err != nil {
 		return EntityState{}, err
 	}
@@ -77,8 +77,8 @@ func (s *StateImpl) Get(entityId string) (EntityState, error) {
 	return es, nil
 }
 
-func (s *StateImpl) Equals(entityId string, expectedState string) (bool, error) {
-	currentState, err := s.Get(entityId)
+func (s *StateImpl) Equals(entityID string, expectedState string) (bool, error) {
+	currentState, err := s.Get(entityID)
 	if err != nil {
 		return false, err
 	}

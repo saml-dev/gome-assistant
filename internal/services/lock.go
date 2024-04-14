@@ -18,30 +18,30 @@ func NewLock(conn *websocket.Conn) *Lock {
 
 /* Public API */
 
-// Lock a lock entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Lock) Lock(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(l.conn, entityId)
+// Lock a lock entity.
+func (l Lock) Lock(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "lock"
 	req.Service = "lock"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-// Unlock a lock entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Lock) Unlock(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(l.conn, entityId)
+// Unlock a lock entity.
+func (l Lock) Unlock(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "lock"
 	req.Service = "unlock"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

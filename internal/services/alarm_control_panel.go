@@ -19,106 +19,103 @@ func NewAlarmControlPanel(conn *websocket.Conn) *AlarmControlPanel {
 }
 
 // Send the alarm the command for arm away.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmAway(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) ArmAway(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_arm_away"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Send the alarm the command for arm away.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmWithCustomBypass(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_arm_custom_bypass"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Send the alarm the command for arm home.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmHome(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) ArmHome(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_arm_home"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Send the alarm the command for arm night.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmNight(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) ArmNight(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_arm_night"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Send the alarm the command for arm vacation.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmVacation(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_arm_vacation"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Send the alarm the command for disarm.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) Disarm(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) Disarm(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_disarm"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Send the alarm the command for trigger.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) Trigger(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(acp.conn, entityId)
+func (acp AlarmControlPanel) Trigger(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "alarm_control_panel"
 	req.Service = "alarm_trigger"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

@@ -18,46 +18,49 @@ func NewInputBoolean(conn *websocket.Conn) *InputBoolean {
 
 /* Public API */
 
-func (ib InputBoolean) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(ib.conn, entityId)
+func (ib InputBoolean) TurnOn(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "input_boolean"
 	req.Service = "turn_on"
+	req.Target.EntityID = entityID
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (ib InputBoolean) Toggle(entityId string) {
-	req := NewBaseServiceRequest(ib.conn, entityId)
+func (ib InputBoolean) Toggle(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "input_boolean"
 	req.Service = "toggle"
+	req.Target.EntityID = entityID
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (ib InputBoolean) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(ib.conn, entityId)
+func (ib InputBoolean) TurnOff(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "input_boolean"
 	req.Service = "turn_off"
+	req.Target.EntityID = entityID
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 func (ib InputBoolean) Reload() {
-	req := NewBaseServiceRequest(ib.conn, "")
+	req := CallServiceRequest{}
 	req.Domain = "input_boolean"
 	req.Service = "reload"
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

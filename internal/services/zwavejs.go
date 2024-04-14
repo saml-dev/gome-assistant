@@ -19,17 +19,18 @@ func NewZWaveJS(conn *websocket.Conn) *ZWaveJS {
 /* Public API */
 
 // ZWaveJS bulk_set_partial_config_parameters service.
-func (zw ZWaveJS) BulkSetPartialConfigParam(entityId string, parameter int, value any) {
-	req := NewBaseServiceRequest(zw.conn, entityId)
+func (zw ZWaveJS) BulkSetPartialConfigParam(entityID string, parameter int, value any) {
+	req := CallServiceRequest{}
 	req.Domain = "zwave_js"
 	req.Service = "bulk_set_partial_config_parameters"
+	req.Target.EntityID = entityID
 	req.ServiceData = map[string]any{
 		"parameter": parameter,
 		"value":     value,
 	}
 
 	zw.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

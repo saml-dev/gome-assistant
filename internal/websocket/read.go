@@ -8,13 +8,13 @@ import (
 
 type BaseMessage struct {
 	Type    string `json:"type"`
-	Id      int64  `json:"id"`
+	ID      int64  `json:"id"`
 	Success bool   `json:"success"`
 }
 
 type ChanMsg struct {
 	Type    string
-	Id      int64
+	ID      int64
 	Success bool
 	Raw     []byte
 }
@@ -39,7 +39,7 @@ func (conn *Conn) getSubscriber(id int64) (Subscriber, bool) {
 }
 
 type SubEvent struct {
-	Id        int64  `json:"id"`
+	ID        int64  `json:"id"`
 	Type      string `json:"type"`
 	EventType string `json:"event_type"`
 }
@@ -57,7 +57,7 @@ func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscrip
 	var subscription Subscription
 	err := conn.Send(func(mw MessageWriter) error {
 		subscription = mw.Subscribe(subscriber)
-		e.Id = subscription.ID()
+		e.ID = subscription.ID()
 		if err := mw.SendMessage(e); err != nil {
 			conn.unsubscribe(subscription.ID())
 			return fmt.Errorf("error writing to websocket: %w", err)
@@ -73,7 +73,7 @@ func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscrip
 }
 
 type UnsubEvent struct {
-	Id           int64  `json:"id"`
+	ID           int64  `json:"id"`
 	Type         string `json:"type"`
 	Subscription int64  `json:"subscription"`
 }
@@ -87,7 +87,7 @@ func (conn *Conn) unwatchEvents(subscriptionID int64) error {
 	}
 
 	err := conn.Send(func(mw MessageWriter) error {
-		e.Id = mw.NextID()
+		e.ID = mw.NextID()
 		return mw.SendMessage(e)
 	})
 	if err != nil {
@@ -124,12 +124,12 @@ func (conn *Conn) Start() {
 		}
 		chanMsg := ChanMsg{
 			Type:    base.Type,
-			Id:      base.Id,
+			ID:      base.ID,
 			Success: base.Success,
 			Raw:     bytes,
 		}
 
-		if subscriber, ok := conn.getSubscriber(chanMsg.Id); ok {
+		if subscriber, ok := conn.getSubscriber(chanMsg.ID); ok {
 			subscriber(chanMsg)
 		}
 	}

@@ -18,14 +18,15 @@ func NewNumber(conn *websocket.Conn) *Number {
 
 /* Public API */
 
-func (ib Number) SetValue(entityId string, value float32) {
-	req := NewBaseServiceRequest(ib.conn, entityId)
+func (ib Number) SetValue(entityID string, value float32) {
+	req := CallServiceRequest{}
 	req.Domain = "number"
 	req.Service = "set_value"
+	req.Target.EntityID = entityID
 	req.ServiceData = map[string]any{"value": value}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type EntityListener struct {
-	entityIds []string
+	entityIDs []string
 	callback  EntityListenerCallback
 	fromState string
 	toState   string
@@ -37,7 +37,7 @@ type EntityListener struct {
 type EntityListenerCallback func(*Service, State, EntityData)
 
 type EntityData struct {
-	TriggerEntityId string
+	TriggerEntityID string
 	FromState       string
 	FromAttributes  map[string]any
 	ToState         string
@@ -78,11 +78,11 @@ type elBuilder1 struct {
 	entityListener EntityListener
 }
 
-func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
-	if len(entityIds) == 0 {
-		panic("must pass at least one entityId to EntityIds()")
+func (b elBuilder1) EntityIDs(entityIDs ...string) elBuilder2 {
+	if len(entityIDs) == 0 {
+		panic("must pass at least one entityID to EntityIDs()")
 	} else {
-		b.entityListener.entityIds = entityIds
+		b.entityListener.entityIDs = entityIDs
 	}
 	return elBuilder2(b)
 }
@@ -155,20 +155,20 @@ func (b elBuilder3) RunOnStartup() elBuilder3 {
 	return b
 }
 
-// Enable this listener only when the current state of {entityId}
+// Enable this listener only when the current state of {entityID}
 // matches {state}. If there is a network error while retrieving
 // state, the listener runs if {runOnNetworkError} is true.
-func (b elBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
-	if entityId == "" {
+func (b elBuilder3) EnabledWhen(entityID, state string, runOnNetworkError bool) elBuilder3 {
+	if entityID == "" {
 		panic(
 			fmt.Sprintf(
-				"entityId is empty in EnabledWhen entityId='%s' state='%s'",
-				entityId, state,
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
 			),
 		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -176,20 +176,20 @@ func (b elBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) 
 	return b
 }
 
-// Disable this listener when the current state of {entityId} matches
+// Disable this listener when the current state of {entityID} matches
 // {state}. If there is a network error while retrieving state, the
 // listener runs if {runOnNetworkError} is true.
-func (b elBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
-	if entityId == "" {
+func (b elBuilder3) DisabledWhen(entityID, state string, runOnNetworkError bool) elBuilder3 {
+	if entityID == "" {
 		panic(
 			fmt.Sprintf(
-				"entityId is empty in EnabledWhen entityId='%s' state='%s'",
-				entityId, state,
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
 			),
 		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -253,7 +253,7 @@ func (app *App) callEntityListeners(chanMsg websocket.ChanMsg) {
 		}
 
 		entityData := EntityData{
-			TriggerEntityId: eid,
+			TriggerEntityID: eid,
 			FromState:       data.OldState.State,
 			FromAttributes:  data.OldState.Attributes,
 			ToState:         data.NewState.State,

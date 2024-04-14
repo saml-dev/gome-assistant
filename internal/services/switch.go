@@ -18,35 +18,38 @@ func NewSwitch(conn *websocket.Conn) *Switch {
 
 /* Public API */
 
-func (s Switch) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(s.conn, entityId)
+func (s Switch) TurnOn(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "switch"
 	req.Service = "turn_on"
+	req.Target.EntityID = entityID
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (s Switch) Toggle(entityId string) {
-	req := NewBaseServiceRequest(s.conn, entityId)
+func (s Switch) Toggle(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "switch"
 	req.Service = "toggle"
+	req.Target.EntityID = entityID
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (s Switch) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(s.conn, entityId)
+func (s Switch) TurnOff(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "switch"
 	req.Service = "turn_off"
+	req.Target.EntityID = entityID
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

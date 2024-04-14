@@ -21,27 +21,28 @@ func NewInputDatetime(conn *websocket.Conn) *InputDatetime {
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityId string, value time.Time) {
-	req := NewBaseServiceRequest(ib.conn, entityId)
+func (ib InputDatetime) Set(entityID string, value time.Time) {
+	req := CallServiceRequest{}
 	req.Domain = "input_datetime"
 	req.Service = "set_datetime"
+	req.Target.EntityID = entityID
 	req.ServiceData = map[string]any{
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 func (ib InputDatetime) Reload() {
-	req := NewBaseServiceRequest(ib.conn, "")
+	req := CallServiceRequest{}
 	req.Domain = "input_datetime"
 	req.Service = "reload"
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

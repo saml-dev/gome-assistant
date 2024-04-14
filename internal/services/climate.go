@@ -19,26 +19,28 @@ func NewClimate(conn *websocket.Conn) *Climate {
 
 /* Public API */
 
-func (c Climate) SetFanMode(entityId string, fanMode string) {
-	req := NewBaseServiceRequest(c.conn, entityId)
+func (c Climate) SetFanMode(entityID string, fanMode string) {
+	req := CallServiceRequest{}
 	req.Domain = "climate"
 	req.Service = "set_fan_mode"
+	req.Target.EntityID = entityID
 	req.ServiceData = map[string]any{"fan_mode": fanMode}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (c Climate) SetTemperature(entityId string, serviceData types.SetTemperatureRequest) {
-	req := NewBaseServiceRequest(c.conn, entityId)
+func (c Climate) SetTemperature(entityID string, serviceData types.SetTemperatureRequest) {
+	req := CallServiceRequest{}
 	req.Domain = "climate"
 	req.Service = "set_temperature"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData.ToJSON()
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

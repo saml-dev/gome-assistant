@@ -17,7 +17,7 @@ func main() {
 		ga.NewAppRequest{
 			IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
 			HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
-			HomeZoneEntityId: "zone.home",
+			HomeZoneEntityID: "zone.home",
 		},
 	)
 	if err != nil {
@@ -29,7 +29,7 @@ func main() {
 
 	pantryDoor := ga.
 		NewEntityListener().
-		EntityIds("binary_sensor.pantry_door").
+		EntityIDs("binary_sensor.pantry_door").
 		Call(pantryLights).
 		Build()
 

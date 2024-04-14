@@ -18,24 +18,25 @@ func NewInputButton(conn *websocket.Conn) *InputButton {
 
 /* Public API */
 
-func (ib InputButton) Press(entityId string) {
-	req := NewBaseServiceRequest(ib.conn, entityId)
+func (ib InputButton) Press(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "input_button"
 	req.Service = "press"
+	req.Target.EntityID = entityID
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 func (ib InputButton) Reload() {
-	req := NewBaseServiceRequest(ib.conn, "")
+	req := CallServiceRequest{}
 	req.Domain = "input_button"
 	req.Service = "reload"
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

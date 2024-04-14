@@ -14,41 +14,44 @@ func NewHomeAssistant(conn *websocket.Conn) *HomeAssistant {
 	}
 }
 
-// TurnOn a Home Assistant entity. Takes an entityId and an optional
+// TurnOn a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (ha *HomeAssistant) TurnOn(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(ha.conn, entityId)
+func (ha *HomeAssistant) TurnOn(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "homeassistant"
 	req.Service = "turn_on"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-// Toggle a Home Assistant entity. Takes an entityId and an optional
+// Toggle a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (ha *HomeAssistant) Toggle(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(ha.conn, entityId)
+func (ha *HomeAssistant) Toggle(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "homeassistant"
 	req.Service = "toggle"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (ha *HomeAssistant) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(ha.conn, entityId)
+func (ha *HomeAssistant) TurnOff(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "homeassistant"
 	req.Service = "turn_off"
+	req.Target.EntityID = entityID
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

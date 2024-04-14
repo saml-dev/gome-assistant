@@ -79,10 +79,10 @@ type NewAppConfig struct {
 	HAAuthToken string
 
 	// Required
-	// EntityId of the zone representing your home e.g. "zone.home".
+	// EntityID of the zone representing your home e.g. "zone.home".
 	// Used to pull latitude/longitude from Home Assistant
 	// to calculate sunset/sunrise times.
-	HomeZoneEntityId string
+	HomeZoneEntityID string
 }
 
 // NewAppFromConfig establishes the websocket connection and returns
@@ -92,9 +92,9 @@ type NewAppConfig struct {
 // app.
 func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	if config.RESTBaseURI == "" || config.WebsocketURI == "" ||
-		config.HAAuthToken == "" || config.HomeZoneEntityId == "" {
+		config.HAAuthToken == "" || config.HomeZoneEntityID == "" {
 		slog.Error(
-			"RESTBaseURI, WebsocketURI, HAAuthToken, and HomeZoneEntityId " +
+			"RESTBaseURI, WebsocketURI, HAAuthToken, and HomeZoneEntityID " +
 				"are all required arguments in NewAppRequest",
 		)
 		return nil, ErrInvalidArgs
@@ -108,7 +108,7 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	httpClient := http.ClientFromUri(config.RESTBaseURI, config.HAAuthToken)
 
 	service := newService(wsWriter, httpClient)
-	state, err := newState(httpClient, config.HomeZoneEntityId)
+	state, err := newState(httpClient, config.HomeZoneEntityID)
 	if err != nil {
 		return nil, err
 	}
@@ -141,10 +141,10 @@ type NewAppRequest struct {
 	HAAuthToken string
 
 	// Required
-	// EntityId of the zone representing your home e.g. "zone.home".
+	// EntityID of the zone representing your home e.g. "zone.home".
 	// Used to pull latitude/longitude from Home Assistant
 	// to calculate sunset/sunrise times.
-	HomeZoneEntityId string
+	HomeZoneEntityID string
 
 	// Optional
 	// Whether to use secure connections for http and websockets.
@@ -159,9 +159,9 @@ type NewAppRequest struct {
 // cancel the app. If this function returns successfully, then
 // `App.Close()` must eventually be called to release resources.
 func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
-	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
+	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityID == "" {
 		slog.Error(
-			"IpAddress, HAAuthToken, and HomeZoneEntityId " +
+			"IpAddress, HAAuthToken, and HomeZoneEntityID " +
 				"are all required arguments in NewAppRequest",
 		)
 		return nil, ErrInvalidArgs
@@ -173,7 +173,7 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 
 	config := NewAppConfig{
 		HAAuthToken:      request.HAAuthToken,
-		HomeZoneEntityId: request.HomeZoneEntityId,
+		HomeZoneEntityID: request.HomeZoneEntityID,
 	}
 
 	if request.Secure {
@@ -222,7 +222,7 @@ func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 			panic(ErrInvalidArgs)
 		}
 
-		for _, entity := range etl.entityIds {
+		for _, entity := range etl.entityIDs {
 			if elList, ok := app.entityListeners[entity]; ok {
 				app.entityListeners[entity] = append(elList, &etl)
 			} else {
@@ -354,7 +354,7 @@ func (app *App) Start(ctx context.Context) error {
 				etl := etl
 				eg.Go(func() error {
 					etl.callback(app.service, app.state, EntityData{
-						TriggerEntityId: eid,
+						TriggerEntityID: eid,
 						FromState:       entityState.State,
 						FromAttributes:  entityState.Attributes,
 						ToState:         entityState.State,

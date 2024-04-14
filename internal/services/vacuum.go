@@ -19,146 +19,146 @@ func NewVacuum(conn *websocket.Conn) *Vacuum {
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.
-// Takes an entityId.
-func (v Vacuum) CleanSpot(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) CleanSpot(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "clean_spot"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Locate the vacuum cleaner robot.
-// Takes an entityId.
-func (v Vacuum) Locate(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) Locate(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "locate"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Pause the cleaning task.
-// Takes an entityId.
-func (v Vacuum) Pause(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) Pause(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "pause"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Tell the vacuum cleaner to return to its dock.
-// Takes an entityId.
-func (v Vacuum) ReturnToBase(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) ReturnToBase(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "return_to_base"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-// Send a raw command to the vacuum cleaner. Takes an entityId and an optional
-// map that is translated into service_data.
-func (v Vacuum) SendCommand(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+// Send a raw command to the vacuum cleaner.
+func (v Vacuum) SendCommand(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "send_command"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-// Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
-// map that is translated into service_data.
-func (v Vacuum) SetFanSpeed(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+// Set the fan speed of the vacuum cleaner.
+func (v Vacuum) SetFanSpeed(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "set_fan_speed"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Start or resume the cleaning task.
-// Takes an entityId.
-func (v Vacuum) Start(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) Start(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "start"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Start, pause, or resume the cleaning task.
-// Takes an entityId.
-func (v Vacuum) StartPause(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) StartPause(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "start_pause"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Stop the current cleaning task.
-// Takes an entityId.
-func (v Vacuum) Stop(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) Stop(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "stop"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Stop the current cleaning task and return to home.
-// Takes an entityId.
-func (v Vacuum) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) TurnOff(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "turn_off"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
 // Start a new cleaning task.
-// Takes an entityId.
-func (v Vacuum) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(v.conn, entityId)
+func (v Vacuum) TurnOn(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "vacuum"
 	req.Service = "turn_on"
+	req.Target.EntityID = entityID
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

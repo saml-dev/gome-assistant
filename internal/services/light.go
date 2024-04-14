@@ -18,41 +18,42 @@ func NewLight(conn *websocket.Conn) *Light {
 
 /* Public API */
 
-// TurnOn a light entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Light) TurnOn(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(l.conn, entityId)
+// TurnOn a light entity.
+func (l Light) TurnOn(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "light"
 	req.Service = "turn_on"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-// Toggle a light entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Light) Toggle(entityId string, serviceData map[string]any) {
-	req := NewBaseServiceRequest(l.conn, entityId)
+// Toggle a light entity.
+func (l Light) Toggle(entityID string, serviceData map[string]any) {
+	req := CallServiceRequest{}
 	req.Domain = "light"
 	req.Service = "toggle"
+	req.Target.EntityID = entityID
 	req.ServiceData = serviceData
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
 
-func (l Light) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(l.conn, entityId)
+func (l Light) TurnOff(entityID string) {
+	req := CallServiceRequest{}
 	req.Domain = "light"
 	req.Service = "turn_off"
+	req.Target.EntityID = entityID
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

@@ -16,7 +16,7 @@ func NewEvent(conn *websocket.Conn) *Event {
 
 // Fire an event
 type FireEventRequest struct {
-	Id        int64          `json:"id"`
+	ID        int64          `json:"id"`
 	Type      string         `json:"type"` // always set to "fire_event"
 	EventType string         `json:"event_type"`
 	EventData map[string]any `json:"event_data,omitempty"`
@@ -35,7 +35,7 @@ func (e Event) Fire(eventType string, eventData map[string]any) {
 	req.EventData = eventData
 
 	e.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }

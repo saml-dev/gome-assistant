@@ -27,10 +27,10 @@ type (
 			HAAuthToken      string `yaml:"token"`
 			IpAddress        string `yaml:"address"`
 			Port             string `yaml:"port"`
-			HomeZoneEntityId string `yaml:"zone"`
+			HomeZoneEntityID string `yaml:"zone"`
 		}
 		Entities struct {
-			LightEntityId string `yaml:"light_entity_id"`
+			LightEntityID string `yaml:"light_entity_id"`
 		}
 	}
 )
@@ -67,7 +67,7 @@ func (s *MySuite) SetupSuite(ctx context.Context) {
 		ga.NewAppRequest{
 			HAAuthToken:      s.config.Hass.HAAuthToken,
 			IpAddress:        s.config.Hass.IpAddress,
-			HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
+			HomeZoneEntityID: s.config.Hass.HomeZoneEntityID,
 		},
 	)
 	if err != nil {
@@ -76,10 +76,10 @@ func (s *MySuite) SetupSuite(ctx context.Context) {
 	}
 
 	// Register all automations
-	entityId := s.config.Entities.LightEntityId
-	if entityId != "" {
+	entityID := s.config.Entities.LightEntityID
+	if entityID != "" {
 		s.suiteCtx["entityCallbackInvoked"] = false
-		etl := ga.NewEntityListener().EntityIds(entityId).Call(s.entityCallback).Build()
+		etl := ga.NewEntityListener().EntityIDs(entityID).Call(s.entityCallback).Build()
 		s.app.RegisterEntityListeners(etl)
 	}
 
@@ -101,16 +101,16 @@ func (s *MySuite) TearDownSuite() {
 
 // Basic test of light toggle service and entity listener
 func (s *MySuite) TestLightService() {
-	entityId := s.config.Entities.LightEntityId
+	entityID := s.config.Entities.LightEntityID
 
-	if entityId != "" {
-		initState := getEntityState(s, entityId)
-		s.app.GetService().Light.Toggle(entityId, nil)
+	if entityID != "" {
+		initState := getEntityState(s, entityID)
+		s.app.GetService().Light.Toggle(entityID, nil)
 
 		assert.EventuallyWithT(
 			s.T(),
 			func(c *assert.CollectT) {
-				newState := getEntityState(s, entityId)
+				newState := getEntityState(s, entityID)
 				assert.NotEqual(c, initState, newState)
 				assert.True(c, s.suiteCtx["entityCallbackInvoked"].(bool))
 			},
@@ -133,7 +133,7 @@ func (s *MySuite) TestSchedule() {
 func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
 	slog.Info(
 		"Entity callback called.",
-		"entity id", e.TriggerEntityId,
+		"entity id", e.TriggerEntityID,
 		"from state", e.FromState,
 		"to state", e.ToState,
 	)
@@ -146,8 +146,8 @@ func (s *MySuite) dailyScheduleCallback(se *ga.Service, st ga.State) {
 	s.suiteCtx["dailyScheduleCallbackInvoked"] = true
 }
 
-func getEntityState(s *MySuite, entityId string) string {
-	state, err := s.app.GetState().Get(entityId)
+func getEntityState(s *MySuite, entityID string) string {
+	state, err := s.app.GetState().Get(entityID)
 	if err != nil {
 		slog.Error("Error getting entity state", err)
 		s.T().FailNow()

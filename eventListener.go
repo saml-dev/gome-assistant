@@ -100,23 +100,23 @@ func (b eventListenerBuilder3) ExceptionRange(start, end time.Time) eventListene
 	return b
 }
 
-// Enable this listener only when the current state of {entityId}
+// Enable this listener only when the current state of {entityID}
 // matches {state}. If there is a network error while retrieving
 // state, the listener runs if {runOnNetworkError} is true.
 func (b eventListenerBuilder3) EnabledWhen(
-	entityId, state string, runOnNetworkError bool,
+	entityID, state string, runOnNetworkError bool,
 ) eventListenerBuilder3 {
-	if entityId == "" {
+	if entityID == "" {
 		panic(
 			fmt.Sprintf(
-				"entityId is empty in eventListener EnabledWhen "+
-					"entityId='%s' state='%s' runOnNetworkError='%t'",
-				entityId, state, runOnNetworkError,
+				"entityID is empty in eventListener EnabledWhen "+
+					"entityID='%s' state='%s' runOnNetworkError='%t'",
+				entityID, state, runOnNetworkError,
 			),
 		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -124,23 +124,23 @@ func (b eventListenerBuilder3) EnabledWhen(
 	return b
 }
 
-// Disable this listener when the current state of {entityId} matches
+// Disable this listener when the current state of {entityID} matches
 // {state}. If there is a network error while retrieving state, the
 // listener runs if {runOnNetworkError} is true.
 func (b eventListenerBuilder3) DisabledWhen(
-	entityId, state string, runOnNetworkError bool,
+	entityID, state string, runOnNetworkError bool,
 ) eventListenerBuilder3 {
-	if entityId == "" {
+	if entityID == "" {
 		panic(
 			fmt.Sprintf(
-				"entityId is empty in eventListener EnabledWhen "+
-					"entityId='%s' state='%s' runOnNetworkError='%t'",
-				entityId, state, runOnNetworkError,
+				"entityID is empty in eventListener EnabledWhen "+
+					"entityID='%s' state='%s' runOnNetworkError='%t'",
+				entityID, state, runOnNetworkError,
 			),
 		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}

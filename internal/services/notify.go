@@ -17,7 +17,7 @@ func NewNotify(conn *websocket.Conn) *Notify {
 
 // Send a notification. Takes a types.NotifyRequest.
 func (ha *Notify) Notify(reqData types.NotifyRequest) {
-	req := NewBaseServiceRequest(ha.conn, "")
+	req := CallServiceRequest{}
 	req.Domain = "notify"
 	req.Service = reqData.ServiceName
 
@@ -31,7 +31,7 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) {
 	req.ServiceData = serviceData
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.Id = mw.NextID()
+		req.ID = mw.NextID()
 		return mw.SendMessage(req)
 	})
 }
