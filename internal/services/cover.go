@@ -68,13 +68,11 @@ func (c Cover) OpenTilt(entityId string) {
 
 // Move to specific position all or specified cover. Takes an entityId and an optional
 // map that is translated into service_data.
-func (c Cover) SetPosition(entityId string, serviceData ...map[string]any) {
+func (c Cover) SetPosition(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(c.conn, entityId)
 	req.Domain = "cover"
 	req.Service = "set_cover_position"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -84,13 +82,11 @@ func (c Cover) SetPosition(entityId string, serviceData ...map[string]any) {
 
 // Move to specific position all or specified cover tilt. Takes an entityId and an optional
 // map that is translated into service_data.
-func (c Cover) SetTiltPosition(entityId string, serviceData ...map[string]any) {
+func (c Cover) SetTiltPosition(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(c.conn, entityId)
 	req.Domain = "cover"
 	req.Service = "set_cover_tilt_position"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()

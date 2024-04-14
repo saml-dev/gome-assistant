@@ -61,7 +61,7 @@ func main() {
 func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
 	l := "light.pantry"
 	if sensor.ToState == "on" {
-		service.HomeAssistant.TurnOn(l)
+		service.HomeAssistant.TurnOn(l, nil)
 	} else {
 		service.HomeAssistant.TurnOff(l)
 	}
@@ -94,6 +94,6 @@ func lightsOut(service *ga.Service, state ga.State) {
 }
 
 func sunriseSched(service *ga.Service, state ga.State) {
-	service.Light.TurnOn("light.living_room_lamps")
+	service.Light.TurnOn("light.living_room_lamps", nil)
 	service.Light.TurnOff("light.christmas_lights")
 }

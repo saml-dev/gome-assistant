@@ -20,13 +20,11 @@ func NewLock(conn *websocket.Conn) *Lock {
 
 // Lock a lock entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (l Lock) Lock(entityId string, serviceData ...map[string]any) {
+func (l Lock) Lock(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(l.conn, entityId)
 	req.Domain = "lock"
 	req.Service = "lock"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -36,13 +34,11 @@ func (l Lock) Lock(entityId string, serviceData ...map[string]any) {
 
 // Unlock a lock entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (l Lock) Unlock(entityId string, serviceData ...map[string]any) {
+func (l Lock) Unlock(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(l.conn, entityId)
 	req.Domain = "lock"
 	req.Service = "unlock"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	l.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()

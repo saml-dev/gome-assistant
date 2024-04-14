@@ -81,9 +81,6 @@ type UnsubEvent struct {
 // unwatchEvents unsubscribes to events with the given `subscriptionID`. This does
 // not remove the subscriber.
 func (conn *Conn) unwatchEvents(subscriptionID int64) error {
-	conn.subscribeMutex.Lock()
-	defer conn.subscribeMutex.Unlock()
-
 	e := UnsubEvent{
 		Type:         "unsubscribe_events",
 		Subscription: subscriptionID,

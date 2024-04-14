@@ -26,15 +26,13 @@ type FireEventRequest struct {
 
 // Fire an event. Takes an event type and an optional map that is sent
 // as `event_data`.
-func (e Event) Fire(eventType string, eventData ...map[string]any) {
+func (e Event) Fire(eventType string, eventData map[string]any) {
 	req := FireEventRequest{
 		Type: "fire_event",
 	}
 
 	req.EventType = eventType
-	if len(eventData) != 0 {
-		req.EventData = eventData[0]
-	}
+	req.EventData = eventData
 
 	e.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()

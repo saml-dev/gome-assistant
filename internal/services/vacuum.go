@@ -72,13 +72,11 @@ func (v Vacuum) ReturnToBase(entityId string) {
 
 // Send a raw command to the vacuum cleaner. Takes an entityId and an optional
 // map that is translated into service_data.
-func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
+func (v Vacuum) SendCommand(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "send_command"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -88,14 +86,11 @@ func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
 
 // Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
 // map that is translated into service_data.
-func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
+func (v Vacuum) SetFanSpeed(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(v.conn, entityId)
 	req.Domain = "vacuum"
 	req.Service = "set_fan_speed"
-
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()

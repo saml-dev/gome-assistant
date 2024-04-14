@@ -33,13 +33,11 @@ func (tts TTS) ClearCache() {
 // Say something using text-to-speech on a media player with cloud.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
+func (tts TTS) CloudSay(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(tts.conn, entityId)
 	req.Domain = "tts"
 	req.Service = "cloud_say"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	tts.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -50,13 +48,11 @@ func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
 // Say something using text-to-speech on a media player with google_translate.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any) {
+func (tts TTS) GoogleTranslateSay(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(tts.conn, entityId)
 	req.Domain = "tts"
 	req.Service = "google_translate_say"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	tts.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()

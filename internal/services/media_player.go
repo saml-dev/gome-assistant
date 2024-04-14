@@ -34,13 +34,11 @@ func (mp MediaPlayer) ClearPlaylist(entityId string) {
 // Group players together. Only works on platforms with support for player groups.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) Join(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "join"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -116,13 +114,11 @@ func (mp MediaPlayer) Previous(entityId string) {
 // Send the media player the command to seek in current playing media.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) Seek(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "media_seek"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -146,13 +142,11 @@ func (mp MediaPlayer) Stop(entityId string) {
 // Send the media player the command for playing media.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) PlayMedia(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "play_media"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -162,13 +156,11 @@ func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) 
 
 // Set repeat mode. Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) RepeatSet(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "repeat_set"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -179,13 +171,11 @@ func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) 
 // Send the media player the command to change sound mode.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "select_sound_mode"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -196,13 +186,11 @@ func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string
 // Send the media player the command to change input source.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) SelectSource(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "select_source"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -213,13 +201,11 @@ func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]an
 // Set shuffling state.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) Shuffle(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "shuffle_set"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -296,13 +282,11 @@ func (mp MediaPlayer) VolumeDown(entityId string) {
 // Mute a media player's volume.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) VolumeMute(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "volume_mute"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
@@ -313,13 +297,11 @@ func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any)
 // Set a media player's volume level.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) VolumeSet(entityId string, serviceData map[string]any) {
 	req := NewBaseServiceRequest(mp.conn, entityId)
 	req.Domain = "media_player"
 	req.Service = "volume_set"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+	req.ServiceData = serviceData
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.Id = mw.NextID()
