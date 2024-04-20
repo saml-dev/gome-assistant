@@ -2,7 +2,6 @@ package services
 
 import (
 	"saml.dev/gome-assistant/internal/websocket"
-	"saml.dev/gome-assistant/types"
 )
 
 type Notify struct {
@@ -15,8 +14,16 @@ func NewNotify(conn *websocket.Conn) *Notify {
 	}
 }
 
+type NotifyRequest struct {
+	// Which notify service to call, such as mobile_app_sams_iphone
+	ServiceName string
+	Message     string
+	Title       string
+	Data        map[string]any
+}
+
 // Send a notification.
-func (ha *Notify) Notify(reqData types.NotifyRequest) {
+func (ha *Notify) Notify(reqData NotifyRequest) {
 	serviceData := map[string]any{
 		"message": reqData.Message,
 		"title":   reqData.Title,

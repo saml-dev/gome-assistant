@@ -2,7 +2,6 @@ package services
 
 import (
 	"saml.dev/gome-assistant/internal/websocket"
-	"saml.dev/gome-assistant/types"
 )
 
 /* Structs */
@@ -16,8 +15,6 @@ func NewClimate(conn *websocket.Conn) *Climate {
 		conn: conn,
 	}
 }
-
-/* Public API */
 
 func (c Climate) SetFanMode(entityID string, fanMode string) {
 	req := CallServiceRequest{
@@ -35,7 +32,31 @@ func (c Climate) SetFanMode(entityID string, fanMode string) {
 	})
 }
 
-func (c Climate) SetTemperature(entityID string, serviceData types.SetTemperatureRequest) {
+type SetTemperatureRequest struct {
+	Temperature    float32
+	TargetTempHigh float32
+	TargetTempLow  float32
+	HvacMode       string
+}
+
+func (r *SetTemperatureRequest) ToJSON() map[string]any {
+	m := map[string]any{}
+	if r.Temperature != 0 {
+		m["temperature"] = r.Temperature
+	}
+	if r.TargetTempHigh != 0 {
+		m["target_temp_high"] = r.TargetTempHigh
+	}
+	if r.TargetTempLow != 0 {
+		m["target_temp_low"] = r.TargetTempLow
+	}
+	if r.HvacMode != "" {
+		m["hvac_mode"] = r.HvacMode
+	}
+	return m
+}
+
+func (c Climate) SetTemperature(entityID string, serviceData SetTemperatureRequest) {
 	req := CallServiceRequest{
 		Domain:  "climate",
 		Service: "set_temperature",
