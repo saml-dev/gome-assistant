@@ -21,10 +21,13 @@ func NewMediaPlayer(conn *websocket.Conn) *MediaPlayer {
 // Send the media player the command to clear players playlist.
 // Takes an entityID.
 func (mp MediaPlayer) ClearPlaylist(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "clear_playlist"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "clear_playlist",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -36,11 +39,14 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) {
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) Join(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "join"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "join",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -51,10 +57,13 @@ func (mp MediaPlayer) Join(entityID string, serviceData map[string]any) {
 // Send the media player the command for next track.
 // Takes an entityID.
 func (mp MediaPlayer) Next(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_next_track"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_next_track",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -65,10 +74,13 @@ func (mp MediaPlayer) Next(entityID string) {
 // Send the media player the command for pause.
 // Takes an entityID.
 func (mp MediaPlayer) Pause(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_pause"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_pause",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -79,10 +91,13 @@ func (mp MediaPlayer) Pause(entityID string) {
 // Send the media player the command for play.
 // Takes an entityID.
 func (mp MediaPlayer) Play(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_play"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_play",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -93,10 +108,13 @@ func (mp MediaPlayer) Play(entityID string) {
 // Toggle media player play/pause state.
 // Takes an entityID.
 func (mp MediaPlayer) PlayPause(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_play_pause"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_play_pause",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -107,10 +125,13 @@ func (mp MediaPlayer) PlayPause(entityID string) {
 // Send the media player the command for previous track.
 // Takes an entityID.
 func (mp MediaPlayer) Previous(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_previous_track"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_previous_track",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -122,12 +143,14 @@ func (mp MediaPlayer) Previous(entityID string) {
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) Seek(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_seek"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
-
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_seek",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
 		return mw.SendMessage(req)
@@ -137,10 +160,13 @@ func (mp MediaPlayer) Seek(entityID string, serviceData map[string]any) {
 // Send the media player the stop command.
 // Takes an entityID.
 func (mp MediaPlayer) Stop(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "media_stop"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "media_stop",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -152,11 +178,14 @@ func (mp MediaPlayer) Stop(entityID string) {
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) PlayMedia(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "play_media"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "play_media",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -167,11 +196,14 @@ func (mp MediaPlayer) PlayMedia(entityID string, serviceData map[string]any) {
 // Set repeat mode. Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) RepeatSet(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "repeat_set"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "repeat_set",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -183,11 +215,14 @@ func (mp MediaPlayer) RepeatSet(entityID string, serviceData map[string]any) {
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "select_sound_mode"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "select_sound_mode",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -199,11 +234,14 @@ func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData map[string]an
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) SelectSource(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "select_source"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "select_source",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -215,11 +253,14 @@ func (mp MediaPlayer) SelectSource(entityID string, serviceData map[string]any) 
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) Shuffle(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "shuffle_set"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "shuffle_set",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -230,10 +271,13 @@ func (mp MediaPlayer) Shuffle(entityID string, serviceData map[string]any) {
 // Toggles a media player power state.
 // Takes an entityID.
 func (mp MediaPlayer) Toggle(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "toggle"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "toggle",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -244,10 +288,13 @@ func (mp MediaPlayer) Toggle(entityID string) {
 // Turn a media player power off.
 // Takes an entityID.
 func (mp MediaPlayer) TurnOff(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "turn_off"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "turn_off",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -258,10 +305,13 @@ func (mp MediaPlayer) TurnOff(entityID string) {
 // Turn a media player power on.
 // Takes an entityID.
 func (mp MediaPlayer) TurnOn(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "turn_on"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "turn_on",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -273,10 +323,13 @@ func (mp MediaPlayer) TurnOn(entityID string) {
 // platforms with support for player groups.
 // Takes an entityID.
 func (mp MediaPlayer) Unjoin(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "unjoin"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "unjoin",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -287,10 +340,13 @@ func (mp MediaPlayer) Unjoin(entityID string) {
 // Turn a media player volume down.
 // Takes an entityID.
 func (mp MediaPlayer) VolumeDown(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "volume_down"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "volume_down",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -302,11 +358,14 @@ func (mp MediaPlayer) VolumeDown(entityID string) {
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) VolumeMute(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "volume_mute"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "volume_mute",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -318,11 +377,14 @@ func (mp MediaPlayer) VolumeMute(entityID string, serviceData map[string]any) {
 // Takes an entityID and an optional
 // map that is translated into service_data.
 func (mp MediaPlayer) VolumeSet(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "volume_set"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "volume_set",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -333,10 +395,13 @@ func (mp MediaPlayer) VolumeSet(entityID string, serviceData map[string]any) {
 // Turn a media player volume up.
 // Takes an entityID.
 func (mp MediaPlayer) VolumeUp(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "media_player"
-	req.Service = "volume_up"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "media_player",
+		Service: "volume_up",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	mp.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

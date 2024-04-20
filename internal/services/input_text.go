@@ -19,12 +19,15 @@ func NewInputText(conn *websocket.Conn) *InputText {
 /* Public API */
 
 func (ib InputText) Set(entityID string, value string) {
-	req := CallServiceRequest{}
-	req.Domain = "input_text"
-	req.Service = "set_value"
-	req.Target.EntityID = entityID
-	req.ServiceData = map[string]any{
-		"value": value,
+	req := CallServiceRequest{
+		Domain:  "input_text",
+		Service: "set_value",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: map[string]any{
+			"value": value,
+		},
 	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
@@ -34,9 +37,10 @@ func (ib InputText) Set(entityID string, value string) {
 }
 
 func (ib InputText) Reload() {
-	req := CallServiceRequest{}
-	req.Domain = "input_text"
-	req.Service = "reload"
+	req := CallServiceRequest{
+		Domain:  "input_text",
+		Service: "reload",
+	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

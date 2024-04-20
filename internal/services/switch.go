@@ -19,10 +19,13 @@ func NewSwitch(conn *websocket.Conn) *Switch {
 /* Public API */
 
 func (s Switch) TurnOn(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "switch"
-	req.Service = "turn_on"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "switch",
+		Service: "turn_on",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -31,10 +34,13 @@ func (s Switch) TurnOn(entityID string) {
 }
 
 func (s Switch) Toggle(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "switch"
-	req.Service = "toggle"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "switch",
+		Service: "toggle",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -43,10 +49,13 @@ func (s Switch) Toggle(entityID string) {
 }
 
 func (s Switch) TurnOff(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "switch"
-	req.Service = "turn_off"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "switch",
+		Service: "turn_off",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

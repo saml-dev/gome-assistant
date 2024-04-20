@@ -20,10 +20,11 @@ func NewScene(conn *websocket.Conn) *Scene {
 
 // Apply a scene. Takes map that is translated into service_data.
 func (s Scene) Apply(serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "scene"
-	req.Service = "apply"
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:      "scene",
+		Service:     "apply",
+		ServiceData: serviceData,
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -33,11 +34,14 @@ func (s Scene) Apply(serviceData map[string]any) {
 
 // Create a scene entity.
 func (s Scene) Create(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "scene"
-	req.Service = "create"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "scene",
+		Service: "create",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -47,9 +51,10 @@ func (s Scene) Create(entityID string, serviceData map[string]any) {
 
 // Reload the scenes.
 func (s Scene) Reload() {
-	req := CallServiceRequest{}
-	req.Domain = "scene"
-	req.Service = "reload"
+	req := CallServiceRequest{
+		Domain:  "scene",
+		Service: "reload",
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -59,11 +64,14 @@ func (s Scene) Reload() {
 
 // TurnOn a scene entity.
 func (s Scene) TurnOn(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "scene"
-	req.Service = "turn_on"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "scene",
+		Service: "turn_on",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

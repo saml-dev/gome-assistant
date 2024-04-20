@@ -17,11 +17,14 @@ func NewHomeAssistant(conn *websocket.Conn) *HomeAssistant {
 // TurnOn a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
 func (ha *HomeAssistant) TurnOn(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "homeassistant"
-	req.Service = "turn_on"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "homeassistant",
+		Service: "turn_on",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -32,11 +35,14 @@ func (ha *HomeAssistant) TurnOn(entityID string, serviceData map[string]any) {
 // Toggle a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
 func (ha *HomeAssistant) Toggle(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "homeassistant"
-	req.Service = "toggle"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "homeassistant",
+		Service: "toggle",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -45,10 +51,13 @@ func (ha *HomeAssistant) Toggle(entityID string, serviceData map[string]any) {
 }
 
 func (ha *HomeAssistant) TurnOff(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "homeassistant"
-	req.Service = "turn_off"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "homeassistant",
+		Service: "turn_off",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	ha.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

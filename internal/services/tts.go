@@ -20,9 +20,10 @@ func NewTTS(conn *websocket.Conn) *TTS {
 
 // Remove all text-to-speech cache files and RAM cache.
 func (tts TTS) ClearCache() {
-	req := CallServiceRequest{}
-	req.Domain = "tts"
-	req.Service = "clear_cache"
+	req := CallServiceRequest{
+		Domain:  "tts",
+		Service: "clear_cache",
+	}
 
 	tts.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -32,11 +33,14 @@ func (tts TTS) ClearCache() {
 
 // Say something using text-to-speech on a media player with cloud.
 func (tts TTS) CloudSay(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "tts"
-	req.Service = "cloud_say"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "tts",
+		Service: "cloud_say",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	tts.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -47,11 +51,14 @@ func (tts TTS) CloudSay(entityID string, serviceData map[string]any) {
 // Say something using text-to-speech on a media player with
 // google_translate.
 func (tts TTS) GoogleTranslateSay(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "tts"
-	req.Service = "google_translate_say"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "tts",
+		Service: "google_translate_say",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	tts.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

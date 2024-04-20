@@ -20,10 +20,13 @@ func NewCover(conn *websocket.Conn) *Cover {
 
 // Close all or specified cover. Takes an entityID.
 func (c Cover) Close(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "close_cover"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "close_cover",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -33,10 +36,13 @@ func (c Cover) Close(entityID string) {
 
 // Close all or specified cover tilt. Takes an entityID.
 func (c Cover) CloseTilt(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "close_cover_tilt"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "close_cover_tilt",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -46,10 +52,13 @@ func (c Cover) CloseTilt(entityID string) {
 
 // Open all or specified cover. Takes an entityID.
 func (c Cover) Open(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "open_cover"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "open_cover",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -59,10 +68,13 @@ func (c Cover) Open(entityID string) {
 
 // Open all or specified cover tilt. Takes an entityID.
 func (c Cover) OpenTilt(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "open_cover_tilt"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "open_cover_tilt",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -73,11 +85,14 @@ func (c Cover) OpenTilt(entityID string) {
 // Move to specific position all or specified cover. Takes an entityID and an optional
 // map that is translated into service_data.
 func (c Cover) SetPosition(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "set_cover_position"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "set_cover_position",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -88,11 +103,14 @@ func (c Cover) SetPosition(entityID string, serviceData map[string]any) {
 // Move to specific position all or specified cover tilt. Takes an entityID and an optional
 // map that is translated into service_data.
 func (c Cover) SetTiltPosition(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "set_cover_tilt_position"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "set_cover_tilt_position",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -102,10 +120,13 @@ func (c Cover) SetTiltPosition(entityID string, serviceData map[string]any) {
 
 // Stop a cover entity. Takes an entityID.
 func (c Cover) Stop(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "stop_cover"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "stop_cover",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -115,10 +136,13 @@ func (c Cover) Stop(entityID string) {
 
 // Stop a cover entity tilt. Takes an entityID.
 func (c Cover) StopTilt(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "stop_cover_tilt"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "stop_cover_tilt",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -128,10 +152,13 @@ func (c Cover) StopTilt(entityID string) {
 
 // Toggle a cover open/closed. Takes an entityID.
 func (c Cover) Toggle(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "toggle"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "toggle",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -141,10 +168,13 @@ func (c Cover) Toggle(entityID string) {
 
 // Toggle a cover tilt open/closed. Takes an entityID.
 func (c Cover) ToggleTilt(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "cover"
-	req.Service = "toggle_cover_tilt"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "cover",
+		Service: "toggle_cover_tilt",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	c.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

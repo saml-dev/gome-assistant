@@ -20,10 +20,13 @@ func NewScript(conn *websocket.Conn) *Script {
 
 // Reload a script that was created in the HA UI.
 func (s Script) Reload(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "script"
-	req.Service = "reload"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "script",
+		Service: "reload",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -33,10 +36,13 @@ func (s Script) Reload(entityID string) {
 
 // Toggle a script that was created in the HA UI.
 func (s Script) Toggle(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "script"
-	req.Service = "toggle"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "script",
+		Service: "toggle",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -46,9 +52,10 @@ func (s Script) Toggle(entityID string) {
 
 // Turn off a script that was created in the HA UI.
 func (s Script) TurnOff() {
-	req := CallServiceRequest{}
-	req.Domain = "script"
-	req.Service = "turn_off"
+	req := CallServiceRequest{
+		Domain:  "script",
+		Service: "turn_off",
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -58,10 +65,13 @@ func (s Script) TurnOff() {
 
 // Turn on a script that was created in the HA UI.
 func (s Script) TurnOn(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "script"
-	req.Service = "turn_on"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "script",
+		Service: "turn_on",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	s.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

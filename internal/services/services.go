@@ -11,13 +11,16 @@ func (CallService) MarshalJSON() ([]byte, error) {
 	return []byte(`"call_service"`), nil
 }
 
+// Target represents the target of the service call, if applicable.
+type Target struct {
+	EntityID string `json:"entity_id,omitempty"`
+}
+
 type CallServiceRequest struct {
 	ID          int64          `json:"id"`
 	RequestType CallService    `json:"type"` // hardcoded "call_service"
 	Domain      string         `json:"domain"`
 	Service     string         `json:"service"`
 	ServiceData map[string]any `json:"service_data,omitempty"`
-	Target      struct {
-		EntityID string `json:"entity_id,omitempty"`
-	} `json:"target,omitempty"`
+	Target      Target         `json:"target,omitempty"`
 }

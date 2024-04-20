@@ -20,10 +20,13 @@ func NewVacuum(conn *websocket.Conn) *Vacuum {
 
 // Tell the vacuum cleaner to do a spot clean-up.
 func (v Vacuum) CleanSpot(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "clean_spot"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "clean_spot",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -33,10 +36,13 @@ func (v Vacuum) CleanSpot(entityID string) {
 
 // Locate the vacuum cleaner robot.
 func (v Vacuum) Locate(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "locate"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "locate",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -46,10 +52,13 @@ func (v Vacuum) Locate(entityID string) {
 
 // Pause the cleaning task.
 func (v Vacuum) Pause(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "pause"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "pause",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -59,10 +68,13 @@ func (v Vacuum) Pause(entityID string) {
 
 // Tell the vacuum cleaner to return to its dock.
 func (v Vacuum) ReturnToBase(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "return_to_base"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "return_to_base",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -72,11 +84,14 @@ func (v Vacuum) ReturnToBase(entityID string) {
 
 // Send a raw command to the vacuum cleaner.
 func (v Vacuum) SendCommand(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "send_command"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "send_command",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -86,11 +101,14 @@ func (v Vacuum) SendCommand(entityID string, serviceData map[string]any) {
 
 // Set the fan speed of the vacuum cleaner.
 func (v Vacuum) SetFanSpeed(entityID string, serviceData map[string]any) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "set_fan_speed"
-	req.Target.EntityID = entityID
-	req.ServiceData = serviceData
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "set_fan_speed",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: serviceData,
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -100,10 +118,13 @@ func (v Vacuum) SetFanSpeed(entityID string, serviceData map[string]any) {
 
 // Start or resume the cleaning task.
 func (v Vacuum) Start(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "start"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "start",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -113,10 +134,13 @@ func (v Vacuum) Start(entityID string) {
 
 // Start, pause, or resume the cleaning task.
 func (v Vacuum) StartPause(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "start_pause"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "start_pause",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -126,10 +150,13 @@ func (v Vacuum) StartPause(entityID string) {
 
 // Stop the current cleaning task.
 func (v Vacuum) Stop(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "stop"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "stop",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -139,10 +166,13 @@ func (v Vacuum) Stop(entityID string) {
 
 // Stop the current cleaning task and return to home.
 func (v Vacuum) TurnOff(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "turn_off"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "turn_off",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -152,10 +182,13 @@ func (v Vacuum) TurnOff(entityID string) {
 
 // Start a new cleaning task.
 func (v Vacuum) TurnOn(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "vacuum"
-	req.Service = "turn_on"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "vacuum",
+		Service: "turn_on",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	v.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()

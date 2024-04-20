@@ -19,11 +19,14 @@ func NewInputNumber(conn *websocket.Conn) *InputNumber {
 /* Public API */
 
 func (ib InputNumber) Set(entityID string, value float32) {
-	req := CallServiceRequest{}
-	req.Domain = "input_number"
-	req.Service = "set_value"
-	req.Target.EntityID = entityID
-	req.ServiceData = map[string]any{"value": value}
+	req := CallServiceRequest{
+		Domain:  "input_number",
+		Service: "set_value",
+		Target: Target{
+			EntityID: entityID,
+		},
+		ServiceData: map[string]any{"value": value},
+	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -32,10 +35,13 @@ func (ib InputNumber) Set(entityID string, value float32) {
 }
 
 func (ib InputNumber) Increment(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "input_number"
-	req.Service = "increment"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "input_number",
+		Service: "increment",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -44,10 +50,13 @@ func (ib InputNumber) Increment(entityID string) {
 }
 
 func (ib InputNumber) Decrement(entityID string) {
-	req := CallServiceRequest{}
-	req.Domain = "input_number"
-	req.Service = "decrement"
-	req.Target.EntityID = entityID
+	req := CallServiceRequest{
+		Domain:  "input_number",
+		Service: "decrement",
+		Target: Target{
+			EntityID: entityID,
+		},
+	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
@@ -56,9 +65,10 @@ func (ib InputNumber) Decrement(entityID string) {
 }
 
 func (ib InputNumber) Reload() {
-	req := CallServiceRequest{}
-	req.Domain = "input_number"
-	req.Service = "reload"
+	req := CallServiceRequest{
+		Domain:  "input_number",
+		Service: "reload",
+	}
 
 	ib.conn.Send(func(mw websocket.MessageWriter) error {
 		req.ID = mw.NextID()
