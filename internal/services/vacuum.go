@@ -83,7 +83,7 @@ func (v Vacuum) ReturnToBase(entityID string) {
 }
 
 // Send a raw command to the vacuum cleaner.
-func (v Vacuum) SendCommand(entityID string, serviceData map[string]any) {
+func (v Vacuum) SendCommand(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "vacuum",
 		Service: "send_command",
@@ -100,7 +100,7 @@ func (v Vacuum) SendCommand(entityID string, serviceData map[string]any) {
 }
 
 // Set the fan speed of the vacuum cleaner.
-func (v Vacuum) SetFanSpeed(entityID string, serviceData map[string]any) {
+func (v Vacuum) SetFanSpeed(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "vacuum",
 		Service: "set_fan_speed",

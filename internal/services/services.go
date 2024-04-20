@@ -17,10 +17,13 @@ type Target struct {
 }
 
 type CallServiceRequest struct {
-	ID          int64          `json:"id"`
-	RequestType CallService    `json:"type"` // hardcoded "call_service"
-	Domain      string         `json:"domain"`
-	Service     string         `json:"service"`
-	ServiceData map[string]any `json:"service_data,omitempty"`
-	Target      Target         `json:"target,omitempty"`
+	ID          int64       `json:"id"`
+	RequestType CallService `json:"type"` // hardcoded "call_service"
+	Domain      string      `json:"domain"`
+	Service     string      `json:"service"`
+
+	// ServiceData must be serializable to a JSON object.
+	ServiceData any `json:"service_data,omitempty"`
+
+	Target Target `json:"target,omitempty"`
 }

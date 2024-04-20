@@ -38,7 +38,7 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) {
 // Group players together. Only works on platforms with support for player groups.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Join(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) Join(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "join",
@@ -142,7 +142,7 @@ func (mp MediaPlayer) Previous(entityID string) {
 // Send the media player the command to seek in current playing media.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) Seek(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "media_seek",
@@ -177,7 +177,7 @@ func (mp MediaPlayer) Stop(entityID string) {
 // Send the media player the command for playing media.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "play_media",
@@ -195,7 +195,7 @@ func (mp MediaPlayer) PlayMedia(entityID string, serviceData map[string]any) {
 
 // Set repeat mode. Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "repeat_set",
@@ -214,7 +214,7 @@ func (mp MediaPlayer) RepeatSet(entityID string, serviceData map[string]any) {
 // Send the media player the command to change sound mode.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "select_sound_mode",
@@ -233,7 +233,7 @@ func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData map[string]an
 // Send the media player the command to change input source.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) SelectSource(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "select_source",
@@ -252,7 +252,7 @@ func (mp MediaPlayer) SelectSource(entityID string, serviceData map[string]any) 
 // Set shuffling state.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) Shuffle(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "shuffle_set",
@@ -357,7 +357,7 @@ func (mp MediaPlayer) VolumeDown(entityID string) {
 // Mute a media player's volume.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_mute",
@@ -376,7 +376,7 @@ func (mp MediaPlayer) VolumeMute(entityID string, serviceData map[string]any) {
 // Set a media player's volume level.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityID string, serviceData map[string]any) {
+func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_set",

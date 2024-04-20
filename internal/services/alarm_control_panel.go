@@ -19,7 +19,7 @@ func NewAlarmControlPanel(conn *websocket.Conn) *AlarmControlPanel {
 }
 
 // Send the alarm the command for arm away.
-func (acp AlarmControlPanel) ArmAway(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) ArmAway(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_away",
@@ -38,7 +38,7 @@ func (acp AlarmControlPanel) ArmAway(entityID string, serviceData map[string]any
 // Send the alarm the command for arm away.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_custom_bypass",
@@ -57,7 +57,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData ma
 // Send the alarm the command for arm home.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmHome(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) ArmHome(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_home",
@@ -74,7 +74,7 @@ func (acp AlarmControlPanel) ArmHome(entityID string, serviceData map[string]any
 }
 
 // Send the alarm the command for arm night.
-func (acp AlarmControlPanel) ArmNight(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) ArmNight(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_night",
@@ -91,7 +91,7 @@ func (acp AlarmControlPanel) ArmNight(entityID string, serviceData map[string]an
 }
 
 // Send the alarm the command for arm vacation.
-func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_vacation",
@@ -108,7 +108,7 @@ func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData map[string
 }
 
 // Send the alarm the command for disarm.
-func (acp AlarmControlPanel) Disarm(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) Disarm(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_disarm",
@@ -125,7 +125,7 @@ func (acp AlarmControlPanel) Disarm(entityID string, serviceData map[string]any)
 }
 
 // Send the alarm the command for trigger.
-func (acp AlarmControlPanel) Trigger(entityID string, serviceData map[string]any) {
+func (acp AlarmControlPanel) Trigger(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_trigger",

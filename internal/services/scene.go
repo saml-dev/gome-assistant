@@ -19,7 +19,7 @@ func NewScene(conn *websocket.Conn) *Scene {
 /* Public API */
 
 // Apply a scene. Takes map that is translated into service_data.
-func (s Scene) Apply(serviceData map[string]any) {
+func (s Scene) Apply(serviceData any) {
 	req := CallServiceRequest{
 		Domain:      "scene",
 		Service:     "apply",
@@ -33,7 +33,7 @@ func (s Scene) Apply(serviceData map[string]any) {
 }
 
 // Create a scene entity.
-func (s Scene) Create(entityID string, serviceData map[string]any) {
+func (s Scene) Create(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "scene",
 		Service: "create",
@@ -63,7 +63,7 @@ func (s Scene) Reload() {
 }
 
 // TurnOn a scene entity.
-func (s Scene) TurnOn(entityID string, serviceData map[string]any) {
+func (s Scene) TurnOn(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "scene",
 		Service: "turn_on",

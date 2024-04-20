@@ -19,7 +19,7 @@ func NewLight(conn *websocket.Conn) *Light {
 /* Public API */
 
 // TurnOn a light entity.
-func (l Light) TurnOn(entityID string, serviceData map[string]any) {
+func (l Light) TurnOn(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "light",
 		Service: "turn_on",
@@ -36,7 +36,7 @@ func (l Light) TurnOn(entityID string, serviceData map[string]any) {
 }
 
 // Toggle a light entity.
-func (l Light) Toggle(entityID string, serviceData map[string]any) {
+func (l Light) Toggle(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "light",
 		Service: "toggle",

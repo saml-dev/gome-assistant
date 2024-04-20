@@ -19,7 +19,7 @@ func NewLock(conn *websocket.Conn) *Lock {
 /* Public API */
 
 // Lock a lock entity.
-func (l Lock) Lock(entityID string, serviceData map[string]any) {
+func (l Lock) Lock(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "lock",
 		Service: "lock",
@@ -36,7 +36,7 @@ func (l Lock) Lock(entityID string, serviceData map[string]any) {
 }
 
 // Unlock a lock entity.
-func (l Lock) Unlock(entityID string, serviceData map[string]any) {
+func (l Lock) Unlock(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "lock",
 		Service: "unlock",

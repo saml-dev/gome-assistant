@@ -84,7 +84,7 @@ func (c Cover) OpenTilt(entityID string) {
 
 // Move to specific position all or specified cover. Takes an entityID and an optional
 // map that is translated into service_data.
-func (c Cover) SetPosition(entityID string, serviceData map[string]any) {
+func (c Cover) SetPosition(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "cover",
 		Service: "set_cover_position",
@@ -102,7 +102,7 @@ func (c Cover) SetPosition(entityID string, serviceData map[string]any) {
 
 // Move to specific position all or specified cover tilt. Takes an entityID and an optional
 // map that is translated into service_data.
-func (c Cover) SetTiltPosition(entityID string, serviceData map[string]any) {
+func (c Cover) SetTiltPosition(entityID string, serviceData any) {
 	req := CallServiceRequest{
 		Domain:  "cover",
 		Service: "set_cover_tilt_position",
