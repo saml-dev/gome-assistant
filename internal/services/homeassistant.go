@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type HomeAssistant struct {

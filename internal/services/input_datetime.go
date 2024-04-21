@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */

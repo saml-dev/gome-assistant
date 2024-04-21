@@ -15,7 +15,7 @@ import (
 	"saml.dev/gome-assistant/internal/http"
 	"saml.dev/gome-assistant/internal/priorityqueue"
 	"saml.dev/gome-assistant/internal/services"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 // Returned by NewApp() if authentication fails
