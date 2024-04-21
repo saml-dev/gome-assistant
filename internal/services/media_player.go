@@ -29,9 +29,9 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -48,9 +48,9 @@ func (mp MediaPlayer) Join(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -65,9 +65,9 @@ func (mp MediaPlayer) Next(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -82,9 +82,9 @@ func (mp MediaPlayer) Pause(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -99,9 +99,9 @@ func (mp MediaPlayer) Play(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -116,9 +116,9 @@ func (mp MediaPlayer) PlayPause(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -133,9 +133,9 @@ func (mp MediaPlayer) Previous(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -151,9 +151,9 @@ func (mp MediaPlayer) Seek(entityID string, serviceData any) {
 		},
 		ServiceData: serviceData,
 	}
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -168,9 +168,9 @@ func (mp MediaPlayer) Stop(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -187,9 +187,9 @@ func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -205,9 +205,9 @@ func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -224,9 +224,9 @@ func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -243,9 +243,9 @@ func (mp MediaPlayer) SelectSource(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -262,9 +262,9 @@ func (mp MediaPlayer) Shuffle(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -279,9 +279,9 @@ func (mp MediaPlayer) Toggle(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -296,9 +296,9 @@ func (mp MediaPlayer) TurnOff(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -313,9 +313,9 @@ func (mp MediaPlayer) TurnOn(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -331,9 +331,9 @@ func (mp MediaPlayer) Unjoin(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -348,9 +348,9 @@ func (mp MediaPlayer) VolumeDown(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -367,9 +367,9 @@ func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -386,9 +386,9 @@ func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -403,8 +403,8 @@ func (mp MediaPlayer) VolumeUp(entityID string) {
 		},
 	}
 
-	mp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	mp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

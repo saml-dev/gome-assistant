@@ -32,8 +32,8 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(entityID string, parameter int, valu
 		},
 	}
 
-	zw.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	zw.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

@@ -38,10 +38,10 @@ func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscrip
 		EventType: eventType,
 	}
 	var subscription Subscription
-	err := conn.Send(func(mw MessageWriter) error {
-		subscription = mw.Subscribe(subscriber)
+	err := conn.Send(func(lc LockedConn) error {
+		subscription = lc.Subscribe(subscriber)
 		e.ID = subscription.ID()
-		if err := mw.SendMessage(e); err != nil {
+		if err := lc.SendMessage(e); err != nil {
 			conn.unsubscribe(subscription.ID())
 			return fmt.Errorf("error writing to websocket: %w", err)
 		}
@@ -65,9 +65,9 @@ func (conn *Conn) unwatchEvents(subscriptionID int64) error {
 		Subscription: subscriptionID,
 	}
 
-	err := conn.Send(func(mw MessageWriter) error {
-		e.ID = mw.NextID()
-		return mw.SendMessage(e)
+	err := conn.Send(func(lc LockedConn) error {
+		e.ID = lc.NextID()
+		return lc.SendMessage(e)
 	})
 	if err != nil {
 		return fmt.Errorf("unsubscribing from ID %d: %w", subscriptionID, err)

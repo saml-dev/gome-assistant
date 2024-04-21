@@ -26,9 +26,9 @@ func (s Scene) Apply(serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	s.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -43,9 +43,9 @@ func (s Scene) Create(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	s.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -56,9 +56,9 @@ func (s Scene) Reload() {
 		Service: "reload",
 	}
 
-	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	s.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -73,8 +73,8 @@ func (s Scene) TurnOn(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	s.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	s.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

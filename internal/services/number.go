@@ -28,8 +28,8 @@ func (ib Number) SetValue(entityID string, value float32) {
 		ServiceData: map[string]any{"value": value},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

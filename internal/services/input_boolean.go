@@ -27,9 +27,9 @@ func (ib InputBoolean) TurnOn(entityID string) {
 		},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -42,9 +42,9 @@ func (ib InputBoolean) Toggle(entityID string) {
 		},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -57,9 +57,9 @@ func (ib InputBoolean) TurnOff(entityID string) {
 		},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -69,8 +69,8 @@ func (ib InputBoolean) Reload() {
 		Service: "reload",
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

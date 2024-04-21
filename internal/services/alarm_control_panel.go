@@ -29,9 +29,9 @@ func (acp AlarmControlPanel) ArmAway(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -48,9 +48,9 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData an
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -67,9 +67,9 @@ func (acp AlarmControlPanel) ArmHome(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -84,9 +84,9 @@ func (acp AlarmControlPanel) ArmNight(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -101,9 +101,9 @@ func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -118,9 +118,9 @@ func (acp AlarmControlPanel) Disarm(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -135,8 +135,8 @@ func (acp AlarmControlPanel) Trigger(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	acp.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	acp.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

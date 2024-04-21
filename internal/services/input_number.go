@@ -28,9 +28,9 @@ func (ib InputNumber) Set(entityID string, value float32) {
 		ServiceData: map[string]any{"value": value},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -43,9 +43,9 @@ func (ib InputNumber) Increment(entityID string) {
 		},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -58,9 +58,9 @@ func (ib InputNumber) Decrement(entityID string) {
 		},
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -70,8 +70,8 @@ func (ib InputNumber) Reload() {
 		Service: "reload",
 	}
 
-	ib.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ib.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

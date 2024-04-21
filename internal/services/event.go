@@ -34,8 +34,8 @@ func (e Event) Fire(eventType string, eventData map[string]any) {
 	req.EventType = eventType
 	req.EventData = eventData
 
-	e.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	e.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

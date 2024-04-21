@@ -25,9 +25,9 @@ func (tts TTS) ClearCache() {
 		Service: "clear_cache",
 	}
 
-	tts.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	tts.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -42,9 +42,9 @@ func (tts TTS) CloudSay(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	tts.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	tts.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -60,8 +60,8 @@ func (tts TTS) GoogleTranslateSay(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	tts.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	tts.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

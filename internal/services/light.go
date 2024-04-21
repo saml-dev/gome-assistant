@@ -29,9 +29,9 @@ func (l Light) TurnOn(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	l.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -46,9 +46,9 @@ func (l Light) Toggle(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	l.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -61,8 +61,8 @@ func (l Light) TurnOff(entityID string) {
 		},
 	}
 
-	l.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	l.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

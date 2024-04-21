@@ -26,9 +26,9 @@ func (ha *HomeAssistant) TurnOn(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ha.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -44,9 +44,9 @@ func (ha *HomeAssistant) Toggle(entityID string, serviceData any) {
 		ServiceData: serviceData,
 	}
 
-	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ha.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -59,8 +59,8 @@ func (ha *HomeAssistant) TurnOff(entityID string) {
 		},
 	}
 
-	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ha.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

@@ -26,9 +26,9 @@ func (c Climate) SetFanMode(entityID string, fanMode string) {
 		ServiceData: map[string]any{"fan_mode": fanMode},
 	}
 
-	c.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	c.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }
 
@@ -66,8 +66,8 @@ func (c Climate) SetTemperature(entityID string, setTemperatureRequest SetTemper
 		ServiceData: setTemperatureRequest.ToJSON(),
 	}
 
-	c.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	c.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

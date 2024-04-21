@@ -38,8 +38,8 @@ func (ha *Notify) Notify(reqData NotifyRequest) {
 		ServiceData: serviceData,
 	}
 
-	ha.conn.Send(func(mw websocket.MessageWriter) error {
-		req.ID = mw.NextID()
-		return mw.SendMessage(req)
+	ha.conn.Send(func(lc websocket.LockedConn) error {
+		req.ID = lc.NextID()
+		return lc.SendMessage(req)
 	})
 }

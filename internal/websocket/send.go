@@ -1,19 +1,14 @@
 package websocket
 
-import "fmt"
-
-type MessageWriter interface {
-	NextID() int64
-	Subscribe(subscriber Subscriber) Subscription
-	Unsubscribe(subscription Subscription)
-	SendMessage(msg any) error
-}
+import (
+	"fmt"
+)
 
 // Messager is called by `Send()` while holding the `writeMutex`. It
-// can send a message by allocating an ID using `mw.NextID()` then
-// sending it using `mw.SendMessage()`. The `MessageWriter` should
+// can send a message by allocating an ID using `lc.NextID()` then
+// sending it using `lc.SendMessage()`. The `MessageWriter` should
 // only be used while the callback is running.
-type Messager func(mw MessageWriter) error
+type Messager func(lc LockedConn) error
 
 // Send is the primary way to write a message over the websocket
 // interface. Since these messages require monotonically-increasing ID
@@ -25,48 +20,50 @@ type Messager func(mw MessageWriter) error
 // Usage:
 //
 //	msg := NewFooMessage{…}
-//	err := conn.Send(func(mw MessageWriter) error {
-//		id := mw.NextID()
+//	err := conn.Send(func(lc MessageWriter) error {
+//		id := lc.NextID()
 //		// …do anything else that needs to be done with `id`…
 //		msg.ID = id
-//		return mw.SendMessage(msg)
+//		return lc.SendMessage(msg)
 //	})
 func (conn *Conn) Send(msgr Messager) error {
 	conn.writeMutex.Lock()
 	defer conn.writeMutex.Unlock()
 
-	return msgr(connMessageWriter{conn: conn})
+	return msgr(lockedConn{conn: conn})
+}
+
+// lockedConn is a `LockedConn` view of a `Conn`, to be used
+// only for a finite time when the connection is locked.
+type lockedConn struct {
+	conn *Conn
 }
 
 // SendMessage sends the specified message over the websocket
 // connection. `msg` must be JSON-serializable and have the correct
 // format and a unique, monotonically-increasing ID.
-func (mw connMessageWriter) SendMessage(msg any) error {
-	if err := mw.conn.conn.WriteJSON(msg); err != nil {
+func (lc lockedConn) SendMessage(msg any) error {
+	if err := lc.conn.conn.WriteJSON(msg); err != nil {
 		return fmt.Errorf("sending websocket message to server: %w", err)
 	}
 
 	return nil
 }
 
-type connMessageWriter struct {
-	conn *Conn
-}
-
-func (mw connMessageWriter) NextID() int64 {
-	mw.conn.lastID++
-	return mw.conn.lastID
+func (lc lockedConn) NextID() int64 {
+	lc.conn.lastID++
+	return lc.conn.lastID
 }
 
 // Subscribe creates a new (unique) subscription ID and subscribes
 // `subscriber` to it, in the sense that the subscriber will be called
 // for any responses that have that ID. This doesn't actually interact
 // with the server.
-func (mw connMessageWriter) Subscribe(subscriber Subscriber) Subscription {
-	id := mw.NextID()
-	mw.conn.subscribers[id] = subscriber
+func (lc lockedConn) Subscribe(subscriber Subscriber) Subscription {
+	id := lc.NextID()
+	lc.conn.subscribers[id] = subscriber
 	return Subscription{
-		conn: mw.conn,
+		conn: lc.conn,
 		id:   id,
 	}
 }
@@ -76,7 +73,7 @@ func (mw connMessageWriter) Subscribe(subscriber Subscriber) Subscription {
 // `Subscriber`. Note that this does not interact with the server; it
 // is the caller's responsibility to send it an "unsubscribe" command
 // if necessary.
-func (mw connMessageWriter) Unsubscribe(subscription Subscription) {
+func (lc lockedConn) Unsubscribe(subscription Subscription) {
 	if subscription.id == 0 {
 		return
 	}
