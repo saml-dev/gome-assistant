@@ -15,7 +15,10 @@ type BaseMessage struct {
 type ChanMsg struct {
 	Type string
 	ID   int64
-	Raw  []byte
+
+	// Raw contains the original, full, unparsed message (including
+	// `Type` and `ID`).
+	Raw json.RawMessage
 }
 
 // unsubscribe unsubscribes from `subscription`. It must be called
