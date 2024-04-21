@@ -11,6 +11,19 @@ type BaseMessage struct {
 	ID   int64  `json:"id"`
 }
 
+type Request interface {
+	GetID() int64
+	SetID(id int64)
+}
+
+func (msg *BaseMessage) GetID() int64 {
+	return msg.ID
+}
+
+func (msg *BaseMessage) SetID(id int64) {
+	msg.ID = id
+}
+
 type BaseResultMessage struct {
 	BaseMessage
 	Success bool `json:"success"`
