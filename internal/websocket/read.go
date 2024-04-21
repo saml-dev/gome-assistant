@@ -6,28 +6,6 @@ import (
 	"log/slog"
 )
 
-// BaseMessage implements the required part of any websocket message.
-// The idea is to embed this type in other message types.
-type BaseMessage struct {
-	Type string `json:"type"`
-	ID   int64  `json:"id"`
-}
-
-type BaseResultMessage struct {
-	BaseMessage
-	Success bool `json:"success"`
-}
-
-// Message holds a complete message, only partly parsed. The entire,
-// original, unparsed message is available in the `Raw` field.
-type Message struct {
-	BaseMessage
-
-	// Raw contains the original, full, unparsed message (including
-	// fields `Type` and `ID`, which appear in `BaseMessage`).
-	Raw json.RawMessage
-}
-
 // unsubscribe unsubscribes from `subscription`. It must be called
 // exactly once for each subscription. It must be invoked while
 // holding the `subscribeMutex` for writing.
@@ -45,11 +23,6 @@ func (conn *Conn) getSubscriber(id int64) (Subscriber, bool) {
 
 	subscriber, ok := conn.subscribers[id]
 	return subscriber, ok
-}
-
-type SubEvent struct {
-	BaseMessage
-	EventType string `json:"event_type"`
 }
 
 // WatchEvents subscribes to events of the given type, invoking
@@ -80,11 +53,6 @@ func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscrip
 	// m, _ := ReadMessage(conn, ctx)
 	// log.Default().Println(string(m))
 	return subscription, nil
-}
-
-type UnsubEvent struct {
-	BaseMessage
-	Subscription int64 `json:"subscription"`
 }
 
 // unwatchEvents unsubscribes to events with the given `subscriptionID`. This does
