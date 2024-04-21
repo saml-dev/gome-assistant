@@ -25,13 +25,3 @@ type Message struct {
 	// fields `Type` and `ID`, which appear in `BaseMessage`).
 	Raw json.RawMessage
 }
-
-type SubEvent struct {
-	BaseMessage
-	EventType string `json:"event_type"`
-}
-
-type UnsubEvent struct {
-	BaseMessage
-	Subscription int64 `json:"subscription"`
-}

@@ -51,18 +51,3 @@ type Subscription struct {
 func (subscription Subscription) ID() int64 {
 	return subscription.id
 }
-
-func (subscription *Subscription) Cancel() {
-	if subscription.id == 0 {
-		return
-	}
-
-	subscription.conn.subscribeMutex.Lock()
-	defer subscription.conn.subscribeMutex.Unlock()
-
-	subscription.conn.unsubscribe(subscription.id)
-
-	subscription.conn.unwatchEvents(subscription.id)
-
-	subscription.id = 0
-}

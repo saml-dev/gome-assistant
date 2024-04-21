@@ -240,7 +240,7 @@ func (app *App) RegisterEventListeners(evls ...EventListener) {
 			if !ok {
 				// FIXME: keep track of subscriptions so that they can
 				// be unsubscribed from.
-				_, err := app.wsConn.WatchEvents(
+				_, err := app.WatchEvents(
 					eventType,
 					func(msg websocket.Message) {
 						go app.callEventListeners(msg)
@@ -325,7 +325,7 @@ func (app *App) Start(ctx context.Context) error {
 	})
 
 	// subscribe to state_changed events
-	stateChangedSubscription, err := app.wsConn.WatchStateChangedEvents(
+	stateChangedSubscription, err := app.WatchStateChangedEvents(
 		func(msg websocket.Message) {
 			go app.callEntityListeners(msg)
 		},
@@ -334,7 +334,7 @@ func (app *App) Start(ctx context.Context) error {
 		return fmt.Errorf("subscribing to 'state_changed' events: %w", err)
 	}
 
-	defer stateChangedSubscription.Cancel()
+	defer app.unwatchEvents(stateChangedSubscription)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
@@ -447,4 +447,77 @@ func (app *App) popScheduledAction() scheduledAction {
 func (app *App) requeueScheduledAction(action scheduledAction) {
 	action.updateNextRunTime(app)
 	app.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
+}
+
+type SubEvent struct {
+	websocket.BaseMessage
+	EventType string `json:"event_type"`
+}
+
+// WatchEvents subscribes to events of the given type, invoking
+// `subscriber` when any such events are received. Calls to
+// `subscriber` are synchronous with respect to any other received
+// messages, but asynchronous with respect to writes.
+func (app *App) WatchEvents(
+	eventType string, subscriber websocket.Subscriber,
+) (websocket.Subscription, error) {
+	// Make sure we're listening before events might start arriving:
+	e := SubEvent{
+		BaseMessage: websocket.BaseMessage{
+			Type: "subscribe_events",
+		},
+		EventType: eventType,
+	}
+	var subscription websocket.Subscription
+	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
+		subscription = lc.Subscribe(subscriber)
+		e.ID = subscription.ID()
+		if err := lc.SendMessage(e); err != nil {
+			lc.Unsubscribe(subscription)
+			return fmt.Errorf("error writing to websocket: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return websocket.Subscription{}, err
+	}
+	// m, _ := ReadMessage(conn, ctx)
+	// log.Default().Println(string(m))
+	return subscription, nil
+}
+
+func (app *App) WatchStateChangedEvents(
+	subscriber websocket.Subscriber,
+) (websocket.Subscription, error) {
+	return app.WatchEvents("state_changed", subscriber)
+}
+
+type UnsubEvent struct {
+	websocket.BaseMessage
+	Subscription int64 `json:"subscription"`
+}
+
+// unwatchEvents unsubscribes to events with the given `subscriptionID`. This does
+// not remove the subscriber.
+func (app *App) unwatchEvents(subscription websocket.Subscription) error {
+	e := UnsubEvent{
+		BaseMessage: websocket.BaseMessage{
+			Type: "unsubscribe_events",
+		},
+		Subscription: subscription.ID(),
+	}
+
+	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
+		lc.Unsubscribe(subscription)
+
+		e.ID = lc.NextID()
+		return lc.SendMessage(e)
+	})
+	if err != nil {
+		return fmt.Errorf("unsubscribing from ID %d: %w", subscription.ID(), err)
+	}
+
+	// m, _ := ReadMessage(conn, ctx)
+	// log.Default().Println(string(m))
+	return nil
 }
