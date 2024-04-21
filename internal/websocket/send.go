@@ -39,9 +39,6 @@ type lockedConn struct {
 	conn *Conn
 }
 
-// SendMessage sends the specified message over the websocket
-// connection. `msg` must be JSON-serializable and have the correct
-// format and a unique, monotonically-increasing ID.
 func (lc lockedConn) SendMessage(msg any) error {
 	if err := lc.conn.conn.WriteJSON(msg); err != nil {
 		return fmt.Errorf("sending websocket message to server: %w", err)
@@ -55,31 +52,18 @@ func (lc lockedConn) NextID() int64 {
 	return lc.conn.lastID
 }
 
-// Subscribe creates a new (unique) subscription ID and subscribes
-// `subscriber` to it, in the sense that the subscriber will be called
-// for any responses that have that ID. This doesn't actually interact
-// with the server.
 func (lc lockedConn) Subscribe(subscriber Subscriber) Subscription {
 	id := lc.NextID()
-	if err := lc.conn.subscribe(id, subscriber); err != nil {
-		panic(fmt.Sprintf("newly-created ID %d is already subscribed", id))
-	}
+	lc.conn.subscribers[id] = subscriber
 	return Subscription{
-		conn: lc.conn,
-		id:   id,
+		id: id,
 	}
 }
 
-// Unsubscribe terminates `subscription` at the websocket level; i.e.,
-// no more incoming messages will be forwarded to the corresponding
-// `Subscriber`. Note that this does not interact with the server; it
-// is the caller's responsibility to send it an "unsubscribe" command
-// if necessary.
 func (lc lockedConn) Unsubscribe(subscription Subscription) {
 	if subscription.id == 0 {
 		return
 	}
-
-	subscription.conn.unsubscribe(subscription.id)
+	delete(lc.conn.subscribers, subscription.id)
 	subscription.id = 0
 }
