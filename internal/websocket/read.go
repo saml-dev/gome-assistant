@@ -18,7 +18,9 @@ type BaseResultMessage struct {
 	Success bool `json:"success"`
 }
 
-type ChanMsg struct {
+// Message holds a complete message, only partly parsed. The entire,
+// original, unparsed message is available in the `Raw` field.
+type Message struct {
 	BaseMessage
 
 	// Raw contains the original, full, unparsed message (including
@@ -131,13 +133,13 @@ func (conn *Conn) Start() {
 		if !base.Success {
 			slog.Warn("Received unsuccessful response", "response", string(bytes))
 		}
-		chanMsg := ChanMsg{
+		msg := Message{
 			BaseMessage: base.BaseMessage,
 			Raw:         bytes,
 		}
 
-		if subscriber, ok := conn.getSubscriber(chanMsg.ID); ok {
-			subscriber(chanMsg)
+		if subscriber, ok := conn.getSubscriber(msg.ID); ok {
+			subscriber(msg)
 		}
 	}
 }

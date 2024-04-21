@@ -242,7 +242,7 @@ func (app *App) RegisterEventListeners(evls ...EventListener) {
 				// be unsubscribed from.
 				_, err := app.wsConn.WatchEvents(
 					eventType,
-					func(msg websocket.ChanMsg) {
+					func(msg websocket.Message) {
 						go app.callEventListeners(msg)
 					},
 				)
@@ -326,7 +326,7 @@ func (app *App) Start(ctx context.Context) error {
 
 	// subscribe to state_changed events
 	stateChangedSubscription, err := app.wsConn.WatchStateChangedEvents(
-		func(msg websocket.ChanMsg) {
+		func(msg websocket.Message) {
 			go app.callEntityListeners(msg)
 		},
 	)

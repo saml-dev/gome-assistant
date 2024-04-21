@@ -201,7 +201,7 @@ func (b elBuilder3) Build() EntityListener {
 }
 
 /* Functions */
-func (app *App) callEntityListeners(chanMsg websocket.ChanMsg) {
+func (app *App) callEntityListeners(chanMsg websocket.Message) {
 	msgBytes := chanMsg.Raw
 	msg := stateChangedMsg{}
 	json.Unmarshal(msgBytes, &msg)

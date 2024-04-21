@@ -36,7 +36,7 @@ type Conn struct {
 
 // Subscriber is called synchronously when a message with the
 // subscribed `id` is received.
-type Subscriber func(msg ChanMsg)
+type Subscriber func(msg Message)
 
 type Subscription struct {
 	conn *Conn
