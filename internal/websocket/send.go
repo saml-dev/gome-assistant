@@ -5,6 +5,7 @@ import "fmt"
 type MessageWriter interface {
 	NextID() int64
 	Subscribe(subscriber Subscriber) Subscription
+	Unsubscribe(subscription Subscription)
 	SendMessage(msg any) error
 }
 
@@ -68,4 +69,18 @@ func (mw connMessageWriter) Subscribe(subscriber Subscriber) Subscription {
 		conn: mw.conn,
 		id:   id,
 	}
+}
+
+// Unsubscribe terminates `subscription` at the websocket level; i.e.,
+// no more incoming messages will be forwarded to the corresponding
+// `Subscriber`. Note that this does not interact with the server; it
+// is the caller's responsibility to send it an "unsubscribe" command
+// if necessary.
+func (mw connMessageWriter) Unsubscribe(subscription Subscription) {
+	if subscription.id == 0 {
+		return
+	}
+
+	subscription.conn.unsubscribe(subscription.id)
+	subscription.id = 0
 }

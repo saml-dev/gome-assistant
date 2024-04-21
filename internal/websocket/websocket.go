@@ -33,6 +33,9 @@ type Conn struct {
 // subscribed `id` is received.
 type Subscriber func(msg Message)
 
+// Subscription represents a websocket-level subscription to a
+// particular message ID. Incoming messages with that ID will be
+// forwarded to the corresponding `Subscriber`.
 type Subscription struct {
 	conn *Conn
 	id   int64
