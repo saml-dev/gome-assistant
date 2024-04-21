@@ -338,7 +338,9 @@ func (app *App) Start(ctx context.Context) error {
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
+		eid := eid
 		for _, etl := range etls {
+			etl := etl
 			// ensure each ETL only runs once, even if
 			// it listens to multiple entities
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
@@ -351,7 +353,6 @@ func (app *App) Start(ctx context.Context) error {
 				}
 
 				etl.runOnStartupCompleted = true
-				etl := etl
 				eg.Go(func() error {
 					etl.callback(app.service, app.state, EntityData{
 						TriggerEntityID: eid,
