@@ -6,7 +6,7 @@ import (
 	"log/slog"
 )
 
-type BaseMessage struct {
+type BaseResultMessage struct {
 	Type    string `json:"type"`
 	ID      int64  `json:"id"`
 	Success bool   `json:"success"`
@@ -116,7 +116,7 @@ func (conn *Conn) Start() {
 			return
 		}
 
-		base := BaseMessage{
+		base := BaseResultMessage{
 			// default to true for messages that don't include "success" at all
 			Success: true,
 		}
