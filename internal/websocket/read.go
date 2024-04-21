@@ -6,25 +6,6 @@ import (
 	"log/slog"
 )
 
-// unsubscribe unsubscribes from `subscription`. It must be called
-// exactly once for each subscription. It must be invoked while
-// holding the `subscribeMutex` for writing.
-func (conn *Conn) unsubscribe(id int64) error {
-	if _, ok := conn.subscribers[id]; !ok {
-		return fmt.Errorf("subscription ID %d wasn't active", id)
-	}
-	delete(conn.subscribers, id)
-	return nil
-}
-
-func (conn *Conn) getSubscriber(id int64) (Subscriber, bool) {
-	conn.subscribeMutex.RLock()
-	defer conn.subscribeMutex.RUnlock()
-
-	subscriber, ok := conn.subscribers[id]
-	return subscriber, ok
-}
-
 // WatchEvents subscribes to events of the given type, invoking
 // `subscriber` when any such events are received. Calls to
 // `subscriber` are synchronous with respect to any other received

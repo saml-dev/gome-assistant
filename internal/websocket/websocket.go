@@ -29,37 +29,6 @@ type Conn struct {
 	lastID int64
 }
 
-// Subscriber is called synchronously when a message with the
-// subscribed `id` is received.
-type Subscriber func(msg Message)
-
-// Subscription represents a websocket-level subscription to a
-// particular message ID. Incoming messages with that ID will be
-// forwarded to the corresponding `Subscriber`.
-type Subscription struct {
-	conn *Conn
-	id   int64
-}
-
-func (subscription Subscription) ID() int64 {
-	return subscription.id
-}
-
-func (subscription *Subscription) Cancel() {
-	if subscription.id == 0 {
-		return
-	}
-
-	subscription.conn.subscribeMutex.Lock()
-	defer subscription.conn.subscribeMutex.Unlock()
-
-	subscription.conn.unsubscribe(subscription.id)
-
-	subscription.conn.unwatchEvents(subscription.id)
-
-	subscription.id = 0
-}
-
 func NewConnFromURI(ctx context.Context, uri string, authToken string) (*Conn, error) {
 	// Init websocket connection
 	dialer := websocket.DefaultDialer

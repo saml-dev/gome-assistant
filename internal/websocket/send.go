@@ -61,7 +61,9 @@ func (lc lockedConn) NextID() int64 {
 // with the server.
 func (lc lockedConn) Subscribe(subscriber Subscriber) Subscription {
 	id := lc.NextID()
-	lc.conn.subscribers[id] = subscriber
+	if err := lc.conn.subscribe(id, subscriber); err != nil {
+		panic(fmt.Sprintf("newly-created ID %d is already subscribed", id))
+	}
 	return Subscription{
 		conn: lc.conn,
 		id:   id,
