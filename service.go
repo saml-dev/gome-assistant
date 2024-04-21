@@ -3,7 +3,6 @@ package gomeassistant
 import (
 	"saml.dev/gome-assistant/internal/http"
 	"saml.dev/gome-assistant/internal/services"
-	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type Service struct {
@@ -30,12 +29,13 @@ type Service struct {
 	ZWaveJS           *services.ZWaveJS
 }
 
-func newService(conn *websocket.Conn, httpClient *http.HttpClient) *Service {
+func newService(app *App, httpClient *http.HttpClient) *Service {
+	conn := app.wsConn
 	return &Service{
 		AlarmControlPanel: services.NewAlarmControlPanel(conn),
 		Climate:           services.NewClimate(conn),
 		Cover:             services.NewCover(conn),
-		Light:             services.NewLight(conn),
+		Light:             services.NewLight(app),
 		HomeAssistant:     services.NewHomeAssistant(conn),
 		Lock:              services.NewLock(conn),
 		MediaPlayer:       services.NewMediaPlayer(conn),
@@ -45,7 +45,7 @@ func newService(conn *websocket.Conn, httpClient *http.HttpClient) *Service {
 		InputText:         services.NewInputText(conn),
 		InputDatetime:     services.NewInputDatetime(conn),
 		InputNumber:       services.NewInputNumber(conn),
-		Event:             services.NewEvent(conn),
+		Event:             services.NewEvent(app),
 		Notify:            services.NewNotify(conn),
 		Number:            services.NewNumber(conn),
 		Scene:             services.NewScene(conn),

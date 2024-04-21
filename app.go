@@ -108,22 +108,22 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 
 	httpClient := http.ClientFromUri(config.RESTBaseURI, config.HAAuthToken)
 
-	service := newService(wsWriter, httpClient)
 	state, err := newState(httpClient, config.HomeZoneEntityID)
 	if err != nil {
 		return nil, err
 	}
-
-	return &App{
+	app := App{
 		wsConn:           wsWriter,
 		httpClient:       httpClient,
-		service:          service,
 		state:            state,
 		scheduledActions: priorityqueue.New(),
 		entityListeners:  map[string][]*EntityListener{},
 		eventListeners:   map[string][]*EventListener{},
 		cancel:           func() {},
-	}, nil
+	}
+	app.service = newService(&app, httpClient)
+
+	return &app, nil
 }
 
 type NewAppRequest struct {
