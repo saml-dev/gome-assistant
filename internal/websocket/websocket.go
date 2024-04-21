@@ -17,11 +17,6 @@ import (
 
 var ErrInvalidToken = errors.New("invalid authentication token")
 
-type AuthMessage struct {
-	MsgType     string `json:"type"`
-	AccessToken string `json:"access_token"`
-}
-
 type Conn struct {
 	writeMutex sync.Mutex
 	conn       *websocket.Conn
@@ -124,8 +119,13 @@ func (conn *Conn) Close() error {
 	return conn.conn.Close()
 }
 
+type authRequest struct {
+	MsgType     string `json:"type"`
+	AccessToken string `json:"access_token"`
+}
+
 func (conn *Conn) sendAuthMessage(token string) error {
-	err := conn.conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
+	err := conn.conn.WriteJSON(authRequest{MsgType: "auth", AccessToken: token})
 	if err != nil {
 		return err
 	}
