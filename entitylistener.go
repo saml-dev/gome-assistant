@@ -46,8 +46,7 @@ type EntityData struct {
 }
 
 type stateChangedMsg struct {
-	ID    int    `json:"id"`
-	Type  string `json:"type"`
+	websocket.BaseMessage
 	Event struct {
 		Data struct {
 			EntityID string   `json:"entity_id"`

@@ -6,18 +6,23 @@ import (
 	"log/slog"
 )
 
+// BaseMessage implements the required part of any websocket message.
+// The idea is to embed this type in other message types.
+type BaseMessage struct {
+	Type string `json:"type"`
+	ID   int64  `json:"id"`
+}
+
 type BaseResultMessage struct {
-	Type    string `json:"type"`
-	ID      int64  `json:"id"`
-	Success bool   `json:"success"`
+	BaseMessage
+	Success bool `json:"success"`
 }
 
 type ChanMsg struct {
-	Type string
-	ID   int64
+	BaseMessage
 
 	// Raw contains the original, full, unparsed message (including
-	// `Type` and `ID`).
+	// fields `Type` and `ID`, which appear in `BaseMessage`).
 	Raw json.RawMessage
 }
 
@@ -41,8 +46,7 @@ func (conn *Conn) getSubscriber(id int64) (Subscriber, bool) {
 }
 
 type SubEvent struct {
-	ID        int64  `json:"id"`
-	Type      string `json:"type"`
+	BaseMessage
 	EventType string `json:"event_type"`
 }
 
@@ -53,7 +57,9 @@ type SubEvent struct {
 func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscription, error) {
 	// Make sure we're listening before events might start arriving:
 	e := SubEvent{
-		Type:      "subscribe_events",
+		BaseMessage: BaseMessage{
+			Type: "subscribe_events",
+		},
 		EventType: eventType,
 	}
 	var subscription Subscription
@@ -75,16 +81,17 @@ func (conn *Conn) WatchEvents(eventType string, subscriber Subscriber) (Subscrip
 }
 
 type UnsubEvent struct {
-	ID           int64  `json:"id"`
-	Type         string `json:"type"`
-	Subscription int64  `json:"subscription"`
+	BaseMessage
+	Subscription int64 `json:"subscription"`
 }
 
 // unwatchEvents unsubscribes to events with the given `subscriptionID`. This does
 // not remove the subscriber.
 func (conn *Conn) unwatchEvents(subscriptionID int64) error {
 	e := UnsubEvent{
-		Type:         "unsubscribe_events",
+		BaseMessage: BaseMessage{
+			Type: "unsubscribe_events",
+		},
 		Subscription: subscriptionID,
 	}
 
@@ -125,9 +132,8 @@ func (conn *Conn) Start() {
 			slog.Warn("Received unsuccessful response", "response", string(bytes))
 		}
 		chanMsg := ChanMsg{
-			Type: base.Type,
-			ID:   base.ID,
-			Raw:  bytes,
+			BaseMessage: base.BaseMessage,
+			Raw:         bytes,
 		}
 
 		if subscriber, ok := conn.getSubscriber(chanMsg.ID); ok {
