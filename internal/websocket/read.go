@@ -13,10 +13,9 @@ type BaseMessage struct {
 }
 
 type ChanMsg struct {
-	Type    string
-	ID      int64
-	Success bool
-	Raw     []byte
+	Type string
+	ID   int64
+	Raw  []byte
 }
 
 // unsubscribe unsubscribes from `subscription`. It must be called
@@ -123,10 +122,9 @@ func (conn *Conn) Start() {
 			slog.Warn("Received unsuccessful response", "response", string(bytes))
 		}
 		chanMsg := ChanMsg{
-			Type:    base.Type,
-			ID:      base.ID,
-			Success: base.Success,
-			Raw:     bytes,
+			Type: base.Type,
+			ID:   base.ID,
+			Raw:  bytes,
 		}
 
 		if subscriber, ok := conn.getSubscriber(chanMsg.ID); ok {
