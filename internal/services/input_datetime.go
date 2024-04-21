@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -10,43 +11,31 @@ import (
 /* Structs */
 
 type InputDatetime struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewInputDatetime(conn *websocket.Conn) *InputDatetime {
+func NewInputDatetime(service Service) *InputDatetime {
 	return &InputDatetime{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityID string, value time.Time) {
-	req := CallServiceRequest{
-		Domain:  "input_datetime",
-		Service: "set_datetime",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: map[string]any{
+func (ib InputDatetime) Set(entityID string, value time.Time) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_datetime", "set_datetime",
+		map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+		EntityTarget(entityID),
+	)
 }
 
-func (ib InputDatetime) Reload() {
-	req := CallServiceRequest{
-		Domain:  "input_datetime",
-		Service: "reload",
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputDatetime) Reload() (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_datetime", "reload", nil, Target{},
+	)
 }

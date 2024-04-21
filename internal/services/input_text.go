@@ -1,49 +1,39 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputText struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewInputText(conn *websocket.Conn) *InputText {
+func NewInputText(service Service) *InputText {
 	return &InputText{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
-func (ib InputText) Set(entityID string, value string) {
-	req := CallServiceRequest{
-		Domain:  "input_text",
-		Service: "set_value",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: map[string]any{
+func (ib InputText) Set(entityID string, value string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_text", "set_value",
+		map[string]any{
 			"value": value,
 		},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+		EntityTarget(entityID),
+	)
 }
 
-func (ib InputText) Reload() {
-	req := CallServiceRequest{
-		Domain:  "input_text",
-		Service: "reload",
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputText) Reload() (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_text", "reload", nil, Target{},
+	)
 }

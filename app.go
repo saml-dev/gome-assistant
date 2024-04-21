@@ -572,7 +572,7 @@ func (app *App) Call(
 	}
 }
 
-type CallServiceRequest2 struct {
+type CallServiceRequest struct {
 	websocket.BaseMessage
 	Domain  string `json:"domain"`
 	Service string `json:"service"`
@@ -590,7 +590,7 @@ type CallServiceRequest2 struct {
 func (app *App) CallService(
 	ctx context.Context, domain string, service string, serviceData any, target services.Target,
 ) (websocket.Message, error) {
-	req := CallServiceRequest2{
+	req := CallServiceRequest{
 		BaseMessage: websocket.BaseMessage{
 			Type: "call_service",
 		},

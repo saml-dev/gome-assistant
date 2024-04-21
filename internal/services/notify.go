@@ -1,16 +1,18 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type Notify struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewNotify(conn *websocket.Conn) *Notify {
+func NewNotify(service Service) *Notify {
 	return &Notify{
-		conn: conn,
+		service: service,
 	}
 }
 
@@ -23,7 +25,8 @@ type NotifyRequest struct {
 }
 
 // Send a notification.
-func (ha *Notify) Notify(reqData NotifyRequest) {
+func (ha *Notify) Notify(reqData NotifyRequest) (websocket.Message, error) {
+	ctx := context.TODO()
 	serviceData := map[string]any{
 		"message": reqData.Message,
 		"title":   reqData.Title,
@@ -32,14 +35,8 @@ func (ha *Notify) Notify(reqData NotifyRequest) {
 		serviceData["data"] = reqData.Data
 	}
 
-	req := CallServiceRequest{
-		Domain:      "notify",
-		Service:     reqData.ServiceName,
-		ServiceData: serviceData,
-	}
-
-	ha.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+	return ha.service.CallService(
+		ctx, "notify", reqData.ServiceName,
+		serviceData, Target{},
+	)
 }

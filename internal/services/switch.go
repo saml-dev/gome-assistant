@@ -1,64 +1,45 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Switch struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewSwitch(conn *websocket.Conn) *Switch {
+func NewSwitch(service Service) *Switch {
 	return &Switch{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
-func (s Switch) TurnOn(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "switch",
-		Service: "turn_on",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Switch) TurnOn(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "switch", "turn_on",
+		nil, EntityTarget(entityID),
+	)
 }
 
-func (s Switch) Toggle(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "switch",
-		Service: "toggle",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Switch) Toggle(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "switch", "toggle",
+		nil, EntityTarget(entityID),
+	)
 }
 
-func (s Switch) TurnOff(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "switch",
-		Service: "turn_off",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Switch) TurnOff(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "switch", "turn_off",
+		nil, EntityTarget(entityID),
+	)
 }

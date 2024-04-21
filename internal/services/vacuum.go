@@ -1,197 +1,120 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Vacuum struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewVacuum(conn *websocket.Conn) *Vacuum {
+func NewVacuum(service Service) *Vacuum {
 	return &Vacuum{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.
-func (v Vacuum) CleanSpot(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "clean_spot",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) CleanSpot(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "clean_spot",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Locate the vacuum cleaner robot.
-func (v Vacuum) Locate(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "locate",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) Locate(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "locate",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Pause the cleaning task.
-func (v Vacuum) Pause(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "pause",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) Pause(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "pause",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Tell the vacuum cleaner to return to its dock.
-func (v Vacuum) ReturnToBase(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "return_to_base",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) ReturnToBase(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "return_to_base",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Send a raw command to the vacuum cleaner.
-func (v Vacuum) SendCommand(entityID string, serviceData any) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "send_command",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: serviceData,
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) SendCommand(entityID string, serviceData any) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "send_command",
+		serviceData, EntityTarget(entityID),
+	)
 }
 
 // Set the fan speed of the vacuum cleaner.
-func (v Vacuum) SetFanSpeed(entityID string, serviceData any) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "set_fan_speed",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: serviceData,
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) SetFanSpeed(entityID string, serviceData any) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "set_fan_speed",
+		serviceData, EntityTarget(entityID),
+	)
 }
 
 // Start or resume the cleaning task.
-func (v Vacuum) Start(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "start",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) Start(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "start",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Start, pause, or resume the cleaning task.
-func (v Vacuum) StartPause(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "start_pause",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) StartPause(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "start_pause",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Stop the current cleaning task.
-func (v Vacuum) Stop(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "stop",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) Stop(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "stop",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Stop the current cleaning task and return to home.
-func (v Vacuum) TurnOff(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "turn_off",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) TurnOff(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "turn_off",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Start a new cleaning task.
-func (v Vacuum) TurnOn(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "vacuum",
-		Service: "turn_on",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	v.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (v Vacuum) TurnOn(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return v.service.CallService(
+		ctx, "vacuum", "turn_on",
+		nil, EntityTarget(entityID),
+	)
 }

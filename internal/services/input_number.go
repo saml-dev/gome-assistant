@@ -1,77 +1,53 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputNumber struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewInputNumber(conn *websocket.Conn) *InputNumber {
+func NewInputNumber(service Service) *InputNumber {
 	return &InputNumber{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
-func (ib InputNumber) Set(entityID string, value float32) {
-	req := CallServiceRequest{
-		Domain:  "input_number",
-		Service: "set_value",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: map[string]any{"value": value},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputNumber) Set(entityID string, value float32) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_number", "set_value",
+		map[string]any{"value": value},
+		EntityTarget(entityID),
+	)
 }
 
-func (ib InputNumber) Increment(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "input_number",
-		Service: "increment",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputNumber) Increment(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_number", "increment",
+		nil, EntityTarget(entityID),
+	)
 }
 
-func (ib InputNumber) Decrement(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "input_number",
-		Service: "decrement",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputNumber) Decrement(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_number", "decrement",
+		nil, EntityTarget(entityID),
+	)
 }
 
-func (ib InputNumber) Reload() {
-	req := CallServiceRequest{
-		Domain:  "input_number",
-		Service: "reload",
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputNumber) Reload() (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_number", "reload", nil, Target{},
+	)
 }

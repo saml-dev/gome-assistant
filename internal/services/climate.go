@@ -1,35 +1,32 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Climate struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewClimate(conn *websocket.Conn) *Climate {
+func NewClimate(service Service) *Climate {
 	return &Climate{
-		conn: conn,
+		service: service,
 	}
 }
 
-func (c Climate) SetFanMode(entityID string, fanMode string) {
-	req := CallServiceRequest{
-		Domain:  "climate",
-		Service: "set_fan_mode",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: map[string]any{"fan_mode": fanMode},
-	}
-
-	c.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (c Climate) SetFanMode(
+	entityID string, fanMode string,
+) (websocket.Message, error) {
+	ctx := context.TODO()
+	return c.service.CallService(
+		ctx, "climate", "set_fan_mode",
+		map[string]any{"fan_mode": fanMode},
+		EntityTarget(entityID),
+	)
 }
 
 type SetTemperatureRequest struct {
@@ -56,18 +53,13 @@ func (r *SetTemperatureRequest) ToJSON() map[string]any {
 	return m
 }
 
-func (c Climate) SetTemperature(entityID string, setTemperatureRequest SetTemperatureRequest) {
-	req := CallServiceRequest{
-		Domain:  "climate",
-		Service: "set_temperature",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: setTemperatureRequest.ToJSON(),
-	}
-
-	c.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (c Climate) SetTemperature(
+	entityID string, setTemperatureRequest SetTemperatureRequest,
+) (websocket.Message, error) {
+	ctx := context.TODO()
+	return c.service.CallService(
+		ctx, "climate", "set_temperature",
+		setTemperatureRequest.ToJSON(),
+		EntityTarget(entityID),
+	)
 }

@@ -1,80 +1,57 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Script struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewScript(conn *websocket.Conn) *Script {
+func NewScript(service Service) *Script {
 	return &Script{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
 // Reload a script that was created in the HA UI.
-func (s Script) Reload(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "script",
-		Service: "reload",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Script) Reload(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "script", "reload",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Toggle a script that was created in the HA UI.
-func (s Script) Toggle(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "script",
-		Service: "toggle",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Script) Toggle(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "script", "toggle",
+		nil, EntityTarget(entityID),
+	)
 }
 
 // Turn off a script that was created in the HA UI.
-func (s Script) TurnOff() {
-	req := CallServiceRequest{
-		Domain:  "script",
-		Service: "turn_off",
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Script) TurnOff() (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "script", "turn_off",
+		nil, Target{},
+	)
 }
 
 // Turn on a script that was created in the HA UI.
-func (s Script) TurnOn(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "script",
-		Service: "turn_on",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	s.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (s Script) TurnOn(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return s.service.CallService(
+		ctx, "script", "turn_on",
+		nil, EntityTarget(entityID),
+	)
 }

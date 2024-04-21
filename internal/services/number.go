@@ -1,35 +1,30 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Number struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewNumber(conn *websocket.Conn) *Number {
+func NewNumber(service Service) *Number {
 	return &Number{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
-func (ib Number) SetValue(entityID string, value float32) {
-	req := CallServiceRequest{
-		Domain:  "number",
-		Service: "set_value",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: map[string]any{"value": value},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib Number) SetValue(entityID string, value float32) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "number", "set_value",
+		map[string]any{"value": value},
+		EntityTarget(entityID),
+	)
 }

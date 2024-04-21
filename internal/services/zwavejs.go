@@ -1,39 +1,36 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type ZWaveJS struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewZWaveJS(conn *websocket.Conn) *ZWaveJS {
+func NewZWaveJS(service Service) *ZWaveJS {
 	return &ZWaveJS{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
 // ZWaveJS bulk_set_partial_config_parameters service.
-func (zw ZWaveJS) BulkSetPartialConfigParam(entityID string, parameter int, value any) {
-	req := CallServiceRequest{
-		Domain:  "zwave_js",
-		Service: "bulk_set_partial_config_parameters",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: map[string]any{
+func (zw ZWaveJS) BulkSetPartialConfigParam(
+	entityID string, parameter int, value any,
+) (websocket.Message, error) {
+	ctx := context.TODO()
+	return zw.service.CallService(
+		ctx, "zwave_js", "bulk_set_partial_config_parameters",
+		map[string]any{
 			"parameter": parameter,
 			"value":     value,
 		},
-	}
-
-	zw.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+		EntityTarget(entityID),
+	)
 }

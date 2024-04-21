@@ -1,46 +1,36 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputButton struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewInputButton(conn *websocket.Conn) *InputButton {
+func NewInputButton(service Service) *InputButton {
 	return &InputButton{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
-func (ib InputButton) Press(entityID string) {
-	req := CallServiceRequest{
-		Domain:  "input_button",
-		Service: "press",
-		Target: Target{
-			EntityID: entityID,
-		},
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputButton) Press(entityID string) (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_button", "press",
+		nil, EntityTarget(entityID),
+	)
 }
 
-func (ib InputButton) Reload() {
-	req := CallServiceRequest{
-		Domain:  "input_button",
-		Service: "reload",
-	}
-
-	ib.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (ib InputButton) Reload() (websocket.Message, error) {
+	ctx := context.TODO()
+	return ib.service.CallService(
+		ctx, "input_button", "reload", nil, Target{},
+	)
 }

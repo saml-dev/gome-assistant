@@ -1,53 +1,39 @@
 package services
 
 import (
+	"context"
+
 	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type Lock struct {
-	conn *websocket.Conn
+	service Service
 }
 
-func NewLock(conn *websocket.Conn) *Lock {
+func NewLock(service Service) *Lock {
 	return &Lock{
-		conn: conn,
+		service: service,
 	}
 }
 
 /* Public API */
 
 // Lock a lock entity.
-func (l Lock) Lock(entityID string, serviceData any) {
-	req := CallServiceRequest{
-		Domain:  "lock",
-		Service: "lock",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: serviceData,
-	}
-
-	l.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (l Lock) Lock(entityID string, serviceData any) (websocket.Message, error) {
+	ctx := context.TODO()
+	return l.service.CallService(
+		ctx, "lock", "lock",
+		serviceData, EntityTarget(entityID),
+	)
 }
 
 // Unlock a lock entity.
-func (l Lock) Unlock(entityID string, serviceData any) {
-	req := CallServiceRequest{
-		Domain:  "lock",
-		Service: "unlock",
-		Target: Target{
-			EntityID: entityID,
-		},
-		ServiceData: serviceData,
-	}
-
-	l.conn.Send(func(lc websocket.LockedConn) error {
-		req.ID = lc.NextID()
-		return lc.SendMessage(req)
-	})
+func (l Lock) Unlock(entityID string, serviceData any) (websocket.Message, error) {
+	ctx := context.TODO()
+	return l.service.CallService(
+		ctx, "lock", "unlock",
+		serviceData, EntityTarget(entityID),
+	)
 }
