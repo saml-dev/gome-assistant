@@ -215,45 +215,51 @@ func (app *App) RegisterIntervals(intervals ...*Interval) {
 	}
 }
 
+func (app *App) RegisterEntityListener(etl EntityListener) {
+	if etl.delay != 0 && etl.toState == "" {
+		slog.Error("EntityListener error: you have to use ToState() when using Duration()")
+		panic(ErrInvalidArgs)
+	}
+
+	for _, entity := range etl.entityIDs {
+		if elList, ok := app.entityListeners[entity]; ok {
+			app.entityListeners[entity] = append(elList, &etl)
+		} else {
+			app.entityListeners[entity] = []*EntityListener{&etl}
+		}
+	}
+}
+
 func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
-		etl := etl
-		if etl.delay != 0 && etl.toState == "" {
-			slog.Error("EntityListener error: you have to use ToState() when using Duration()")
-			panic(ErrInvalidArgs)
-		}
+		app.RegisterEntityListener(etl)
+	}
+}
 
-		for _, entity := range etl.entityIDs {
-			if elList, ok := app.entityListeners[entity]; ok {
-				app.entityListeners[entity] = append(elList, &etl)
-			} else {
-				app.entityListeners[entity] = []*EntityListener{&etl}
+func (app *App) RegisterEventListener(evl EventListener) {
+	for _, eventType := range evl.eventTypes {
+		elList, ok := app.eventListeners[eventType]
+		if !ok {
+			// FIXME: keep track of subscriptions so that they can
+			// be unsubscribed from.
+			_, err := app.WatchEvents(
+				eventType,
+				func(msg websocket.Message) {
+					go app.callEventListeners(msg)
+				},
+			)
+			if err != nil {
+				// FIXME: better error handling
+				panic(err)
 			}
 		}
+		app.eventListeners[eventType] = append(elList, &evl)
 	}
 }
 
 func (app *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
-		evl := evl
-		for _, eventType := range evl.eventTypes {
-			elList, ok := app.eventListeners[eventType]
-			if !ok {
-				// FIXME: keep track of subscriptions so that they can
-				// be unsubscribed from.
-				_, err := app.WatchEvents(
-					eventType,
-					func(msg websocket.Message) {
-						go app.callEventListeners(msg)
-					},
-				)
-				if err != nil {
-					// FIXME: better error handling
-					panic(err)
-				}
-			}
-			app.eventListeners[eventType] = append(elList, &evl)
-		}
+		app.RegisterEventListener(evl)
 	}
 }
 
