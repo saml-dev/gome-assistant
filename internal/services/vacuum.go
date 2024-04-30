@@ -22,100 +22,100 @@ func NewVacuum(service Service) *Vacuum {
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.
-func (v Vacuum) CleanSpot(entityID string) (websocket.Message, error) {
+func (v Vacuum) CleanSpot(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "clean_spot",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Locate the vacuum cleaner robot.
-func (v Vacuum) Locate(entityID string) (websocket.Message, error) {
+func (v Vacuum) Locate(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "locate",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Pause the cleaning task.
-func (v Vacuum) Pause(entityID string) (websocket.Message, error) {
+func (v Vacuum) Pause(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "pause",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Tell the vacuum cleaner to return to its dock.
-func (v Vacuum) ReturnToBase(entityID string) (websocket.Message, error) {
+func (v Vacuum) ReturnToBase(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "return_to_base",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Send a raw command to the vacuum cleaner.
-func (v Vacuum) SendCommand(entityID string, serviceData any) (websocket.Message, error) {
+func (v Vacuum) SendCommand(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "send_command",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Set the fan speed of the vacuum cleaner.
-func (v Vacuum) SetFanSpeed(entityID string, serviceData any) (websocket.Message, error) {
+func (v Vacuum) SetFanSpeed(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "set_fan_speed",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Start or resume the cleaning task.
-func (v Vacuum) Start(entityID string) (websocket.Message, error) {
+func (v Vacuum) Start(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "start",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Start, pause, or resume the cleaning task.
-func (v Vacuum) StartPause(entityID string) (websocket.Message, error) {
+func (v Vacuum) StartPause(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "start_pause",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Stop the current cleaning task.
-func (v Vacuum) Stop(entityID string) (websocket.Message, error) {
+func (v Vacuum) Stop(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "stop",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Stop the current cleaning task and return to home.
-func (v Vacuum) TurnOff(entityID string) (websocket.Message, error) {
+func (v Vacuum) TurnOff(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "turn_off",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Start a new cleaning task.
-func (v Vacuum) TurnOn(entityID string) (websocket.Message, error) {
+func (v Vacuum) TurnOn(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "turn_on",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }

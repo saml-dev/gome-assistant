@@ -22,24 +22,24 @@ func NewLight(service Service) *Light {
 /* Public API */
 
 // TurnOn a light entity.
-func (l Light) TurnOn(entityID string, serviceData any) (websocket.Message, error) {
+func (l Light) TurnOn(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
-		ctx, "light", "turn_on", serviceData, ga.EntityTarget(entityID),
+		ctx, "light", "turn_on", serviceData, target,
 	)
 }
 
 // Toggle a light entity.
-func (l Light) Toggle(entityID string, serviceData any) (websocket.Message, error) {
+func (l Light) Toggle(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
-		ctx, "light", "toggle", serviceData, ga.EntityTarget(entityID),
+		ctx, "light", "toggle", serviceData, target,
 	)
 }
 
-func (l Light) TurnOff(entityID string) (websocket.Message, error) {
+func (l Light) TurnOff(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
-		ctx, "light", "turn_off", nil, ga.EntityTarget(entityID),
+		ctx, "light", "turn_off", nil, target,
 	)
 }

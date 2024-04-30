@@ -21,26 +21,26 @@ func NewSwitch(service Service) *Switch {
 
 /* Public API */
 
-func (s Switch) TurnOn(entityID string) (websocket.Message, error) {
+func (s Switch) TurnOn(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "switch", "turn_on",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
-func (s Switch) Toggle(entityID string) (websocket.Message, error) {
+func (s Switch) Toggle(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "switch", "toggle",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
-func (s Switch) TurnOff(entityID string) (websocket.Message, error) {
+func (s Switch) TurnOff(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "switch", "turn_off",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }

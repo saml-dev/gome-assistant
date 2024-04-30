@@ -23,7 +23,7 @@ func NewZWaveJS(service Service) *ZWaveJS {
 
 // ZWaveJS bulk_set_partial_config_parameters service.
 func (zw ZWaveJS) BulkSetPartialConfigParam(
-	entityID string, parameter int, value any,
+	target ga.Target, parameter int, value any,
 ) (websocket.Message, error) {
 	ctx := context.TODO()
 	return zw.service.CallService(
@@ -32,6 +32,6 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(
 			"parameter": parameter,
 			"value":     value,
 		},
-		ga.EntityTarget(entityID),
+		target,
 	)
 }

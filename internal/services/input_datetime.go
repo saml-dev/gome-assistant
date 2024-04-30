@@ -23,14 +23,14 @@ func NewInputDatetime(service Service) *InputDatetime {
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityID string, value time.Time) (websocket.Message, error) {
+func (ib InputDatetime) Set(target ga.Target, value time.Time) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_datetime", "set_datetime",
 		map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		ga.EntityTarget(entityID),
+		target,
 	)
 }
 

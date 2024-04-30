@@ -21,11 +21,11 @@ func NewInputButton(service Service) *InputButton {
 
 /* Public API */
 
-func (ib InputButton) Press(entityID string) (websocket.Message, error) {
+func (ib InputButton) Press(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_button", "press",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 

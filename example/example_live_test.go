@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v3"
 
+	ga "saml.dev/gome-assistant"
 	gaapp "saml.dev/gome-assistant/app"
 )
 
@@ -105,8 +106,9 @@ func (s *MySuite) TestLightService() {
 	entityID := s.config.Entities.LightEntityID
 
 	if entityID != "" {
+		target := ga.EntityTarget(entityID)
 		initState := getEntityState(s, entityID)
-		s.app.GetService().Light.Toggle(entityID, nil)
+		s.app.GetService().Light.Toggle(target, nil)
 
 		assert.EventuallyWithT(
 			s.T(),

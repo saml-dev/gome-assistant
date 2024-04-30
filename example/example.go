@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	ga "saml.dev/gome-assistant"
 	gaapp "saml.dev/gome-assistant/app"
 )
 
@@ -59,7 +60,7 @@ func main() {
 }
 
 func pantryLights(service *gaapp.Service, state gaapp.State, sensor gaapp.EntityData) {
-	l := "light.pantry"
+	l := ga.EntityTarget("light.pantry")
 	if sensor.ToState == "on" {
 		service.HomeAssistant.TurnOn(l, nil)
 	} else {
@@ -80,7 +81,7 @@ func onEvent(service *gaapp.Service, state gaapp.State, data gaapp.EventData) {
 
 func lightsOut(service *gaapp.Service, state gaapp.State) {
 	// always turn off outside lights
-	service.Light.TurnOff("light.outside_lights")
+	service.Light.TurnOff(ga.EntityTarget("light.outside_lights"))
 	s, err := state.Get("binary_sensor.living_room_motion")
 	if err != nil {
 		slog.Warn("couldnt get living room motion state, doing nothing")
@@ -89,11 +90,11 @@ func lightsOut(service *gaapp.Service, state gaapp.State) {
 
 	// if no motion detected in living room for 30mins
 	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
-		service.Light.TurnOff("light.main_lights")
+		service.Light.TurnOff(ga.EntityTarget("light.main_lights"))
 	}
 }
 
 func sunriseSched(service *gaapp.Service, state gaapp.State) {
-	service.Light.TurnOn("light.living_room_lamps", nil)
-	service.Light.TurnOff("light.christmas_lights")
+	service.Light.TurnOn(ga.EntityTarget("light.living_room_lamps"), nil)
+	service.Light.TurnOff(ga.EntityTarget("light.christmas_lights"))
 }

@@ -21,14 +21,14 @@ func NewInputText(service Service) *InputText {
 
 /* Public API */
 
-func (ib InputText) Set(entityID string, value string) (websocket.Message, error) {
+func (ib InputText) Set(target ga.Target, value string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_text", "set_value",
 		map[string]any{
 			"value": value,
 		},
-		ga.EntityTarget(entityID),
+		target,
 	)
 }
 

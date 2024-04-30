@@ -31,11 +31,11 @@ func (s Scene) Apply(serviceData any) (websocket.Message, error) {
 }
 
 // Create a scene entity.
-func (s Scene) Create(entityID string, serviceData any) (websocket.Message, error) {
+func (s Scene) Create(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "scene", "create",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
@@ -48,10 +48,10 @@ func (s Scene) Reload() (websocket.Message, error) {
 }
 
 // TurnOn a scene entity.
-func (s Scene) TurnOn(entityID string, serviceData any) (websocket.Message, error) {
+func (s Scene) TurnOn(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "scene", "turn_on",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }

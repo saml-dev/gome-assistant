@@ -20,13 +20,13 @@ func NewClimate(service Service) *Climate {
 }
 
 func (c Climate) SetFanMode(
-	entityID string, fanMode string,
+	target ga.Target, fanMode string,
 ) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "climate", "set_fan_mode",
 		map[string]any{"fan_mode": fanMode},
-		ga.EntityTarget(entityID),
+		target,
 	)
 }
 
@@ -55,12 +55,12 @@ func (r *SetTemperatureRequest) ToJSON() map[string]any {
 }
 
 func (c Climate) SetTemperature(
-	entityID string, setTemperatureRequest SetTemperatureRequest,
+	target ga.Target, setTemperatureRequest SetTemperatureRequest,
 ) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "climate", "set_temperature",
 		setTemperatureRequest.ToJSON(),
-		ga.EntityTarget(entityID),
+		target,
 	)
 }

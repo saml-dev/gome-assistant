@@ -22,19 +22,19 @@ func NewLock(service Service) *Lock {
 /* Public API */
 
 // Lock a lock entity.
-func (l Lock) Lock(entityID string, serviceData any) (websocket.Message, error) {
+func (l Lock) Lock(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
 		ctx, "lock", "lock",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Unlock a lock entity.
-func (l Lock) Unlock(entityID string, serviceData any) (websocket.Message, error) {
+func (l Lock) Unlock(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
 		ctx, "lock", "unlock",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }

@@ -21,28 +21,28 @@ func NewInputNumber(service Service) *InputNumber {
 
 /* Public API */
 
-func (ib InputNumber) Set(entityID string, value float32) (websocket.Message, error) {
+func (ib InputNumber) Set(target ga.Target, value float32) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_number", "set_value",
 		map[string]any{"value": value},
-		ga.EntityTarget(entityID),
+		target,
 	)
 }
 
-func (ib InputNumber) Increment(entityID string) (websocket.Message, error) {
+func (ib InputNumber) Increment(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_number", "increment",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
-func (ib InputNumber) Decrement(entityID string) (websocket.Message, error) {
+func (ib InputNumber) Decrement(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_number", "decrement",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 

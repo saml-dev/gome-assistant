@@ -21,11 +21,11 @@ func NewNumber(service Service) *Number {
 
 /* Public API */
 
-func (ib Number) SetValue(entityID string, value float32) (websocket.Message, error) {
+func (ib Number) SetValue(target ga.Target, value float32) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "number", "set_value",
 		map[string]any{"value": value},
-		ga.EntityTarget(entityID),
+		target,
 	)
 }

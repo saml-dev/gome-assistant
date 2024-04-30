@@ -22,204 +22,204 @@ func NewMediaPlayer(service Service) *MediaPlayer {
 /* Public API */
 
 // Send the media player the command to clear players playlist.
-func (mp MediaPlayer) ClearPlaylist(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) ClearPlaylist(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "clear_playlist",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Group players together. Only works on platforms with support for player groups.
-func (mp MediaPlayer) Join(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) Join(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "join",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Send the media player the command for next track.
-func (mp MediaPlayer) Next(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Next(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_next_track",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Send the media player the command for pause.
-func (mp MediaPlayer) Pause(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Pause(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_pause",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Send the media player the command for play.
-func (mp MediaPlayer) Play(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Play(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_play",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Toggle media player play/pause state.
-func (mp MediaPlayer) PlayPause(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) PlayPause(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_play_pause",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Send the media player the command for previous track.
-func (mp MediaPlayer) Previous(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Previous(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_previous_track",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Send the media player the command to seek in current playing media.
-func (mp MediaPlayer) Seek(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) Seek(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_seek",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Send the media player the stop command.
-func (mp MediaPlayer) Stop(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Stop(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_stop",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Send the media player the command for playing media.
-func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) PlayMedia(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "play_media",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Set repeat mode.
-func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) RepeatSet(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "repeat_set",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Send the media player the command to change sound mode.
 func (mp MediaPlayer) SelectSoundMode(
-	entityID string, serviceData any,
+	target ga.Target, serviceData any,
 ) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "select_sound_mode",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Send the media player the command to change input source.
 func (mp MediaPlayer) SelectSource(
-	entityID string, serviceData any,
+	target ga.Target, serviceData any,
 ) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "select_source",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Set shuffling state.
-func (mp MediaPlayer) Shuffle(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) Shuffle(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "shuffle_set",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Toggles a media player power state.
-func (mp MediaPlayer) Toggle(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Toggle(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "toggle",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Turn a media player power off.
-func (mp MediaPlayer) TurnOff(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) TurnOff(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "turn_off",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Turn a media player power on.
-func (mp MediaPlayer) TurnOn(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) TurnOn(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "turn_on",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Unjoin the player from a group. Only works on
 // platforms with support for player groups.
-func (mp MediaPlayer) Unjoin(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) Unjoin(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "unjoin",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Turn a media player volume down.
-func (mp MediaPlayer) VolumeDown(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) VolumeDown(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_down",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Mute a media player's volume.
-func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) VolumeMute(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_mute",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Set a media player's volume level.
-func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) (websocket.Message, error) {
+func (mp MediaPlayer) VolumeSet(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_set",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Turn a media player volume up.
-func (mp MediaPlayer) VolumeUp(entityID string) (websocket.Message, error) {
+func (mp MediaPlayer) VolumeUp(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_up",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }

@@ -22,20 +22,20 @@ func NewScript(service Service) *Script {
 /* Public API */
 
 // Reload a script that was created in the HA UI.
-func (s Script) Reload(entityID string) (websocket.Message, error) {
+func (s Script) Reload(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "reload",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
 // Toggle a script that was created in the HA UI.
-func (s Script) Toggle(entityID string) (websocket.Message, error) {
+func (s Script) Toggle(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "toggle",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
@@ -49,10 +49,10 @@ func (s Script) TurnOff() (websocket.Message, error) {
 }
 
 // Turn on a script that was created in the HA UI.
-func (s Script) TurnOn(entityID string) (websocket.Message, error) {
+func (s Script) TurnOn(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "turn_on",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }

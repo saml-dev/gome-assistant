@@ -30,20 +30,20 @@ func (tts TTS) ClearCache() (websocket.Message, error) {
 }
 
 // Say something using text-to-speech on a media player with cloud.
-func (tts TTS) CloudSay(entityID string, serviceData any) (websocket.Message, error) {
+func (tts TTS) CloudSay(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return tts.service.CallService(
 		ctx, "tts", "cloud_say",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }
 
 // Say something using text-to-speech on a media player with
 // google_translate.
-func (tts TTS) GoogleTranslateSay(entityID string, serviceData any) (websocket.Message, error) {
+func (tts TTS) GoogleTranslateSay(target ga.Target, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return tts.service.CallService(
 		ctx, "tts", "google_translate_say",
-		serviceData, ga.EntityTarget(entityID),
+		serviceData, target,
 	)
 }

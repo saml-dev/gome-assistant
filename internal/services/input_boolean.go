@@ -21,27 +21,27 @@ func NewInputBoolean(service Service) *InputBoolean {
 
 /* Public API */
 
-func (ib InputBoolean) TurnOn(entityID string) (websocket.Message, error) {
+func (ib InputBoolean) TurnOn(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_boolean", "turn_on",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
-func (ib InputBoolean) Toggle(entityID string) (websocket.Message, error) {
+func (ib InputBoolean) Toggle(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_boolean", "toggle",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
-func (ib InputBoolean) TurnOff(entityID string) (websocket.Message, error) {
+func (ib InputBoolean) TurnOff(target ga.Target) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_boolean", "turn_off",
-		nil, ga.EntityTarget(entityID),
+		nil, target,
 	)
 }
 
