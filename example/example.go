@@ -7,14 +7,14 @@ import (
 	"os"
 	"time"
 
-	ga "saml.dev/gome-assistant"
+	gaapp "saml.dev/gome-assistant/app"
 )
 
 func main() {
 	ctx := context.Background()
-	app, err := ga.NewApp(
+	app, err := gaapp.NewApp(
 		ctx,
-		ga.NewAppRequest{
+		gaapp.NewAppRequest{
 			IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
 			HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
 			HomeZoneEntityID: "zone.home",
@@ -27,25 +27,25 @@ func main() {
 
 	defer app.Close()
 
-	pantryDoor := ga.
+	pantryDoor := gaapp.
 		NewEntityListener().
 		EntityIDs("binary_sensor.pantry_door").
 		Call(pantryLights).
 		Build()
 
-	_11pmSched := ga.
+	_11pmSched := gaapp.
 		NewDailySchedule().
 		Call(lightsOut).
 		At("23:00").
 		Build()
 
-	_30minsBeforeSunrise := ga.
+	_30minsBeforeSunrise := gaapp.
 		NewDailySchedule().
 		Call(sunriseSched).
 		Sunrise("-30m").
 		Build()
 
-	zwaveEventListener := ga.
+	zwaveEventListener := gaapp.
 		NewEventListener().
 		EventTypes("zwave_js_value_notification").
 		Call(onEvent).
@@ -58,7 +58,7 @@ func main() {
 	app.Start(ctx)
 }
 
-func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
+func pantryLights(service *gaapp.Service, state gaapp.State, sensor gaapp.EntityData) {
 	l := "light.pantry"
 	if sensor.ToState == "on" {
 		service.HomeAssistant.TurnOn(l, nil)
@@ -67,18 +67,18 @@ func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
 	}
 }
 
-func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
+func onEvent(service *gaapp.Service, state gaapp.State, data gaapp.EventData) {
 	// Since the structure of the event changes depending
 	// on the event type, you can Unmarshal the raw json
 	// into a Go type. If a type for your event doesn't
 	// exist, you can write it yourself! PR's welcome to
 	// the eventTypes.go file :)
-	ev := ga.EventZWaveJSValueNotification{}
+	ev := gaapp.EventZWaveJSValueNotification{}
 	json.Unmarshal(data.RawEventJSON, &ev)
 	slog.Info("On event invoked", "event", ev)
 }
 
-func lightsOut(service *ga.Service, state ga.State) {
+func lightsOut(service *gaapp.Service, state gaapp.State) {
 	// always turn off outside lights
 	service.Light.TurnOff("light.outside_lights")
 	s, err := state.Get("binary_sensor.living_room_motion")
@@ -93,7 +93,7 @@ func lightsOut(service *ga.Service, state ga.State) {
 	}
 }
 
-func sunriseSched(service *ga.Service, state ga.State) {
+func sunriseSched(service *gaapp.Service, state gaapp.State) {
 	service.Light.TurnOn("light.living_room_lamps", nil)
 	service.Light.TurnOff("light.christmas_lights")
 }

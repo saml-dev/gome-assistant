@@ -1,4 +1,4 @@
-package gomeassistant
+package app
 
 import (
 	"saml.dev/gome-assistant/internal/http"

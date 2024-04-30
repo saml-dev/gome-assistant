@@ -1,4 +1,4 @@
-package gomeassistant
+package app
 
 import (
 	"encoding/json"

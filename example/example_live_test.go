@@ -11,13 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v3"
-	ga "saml.dev/gome-assistant"
+
+	gaapp "saml.dev/gome-assistant/app"
 )
 
 type (
 	MySuite struct {
 		suite.Suite
-		app      *ga.App
+		app      *gaapp.App
 		config   *Config
 		suiteCtx map[string]any
 	}
@@ -62,9 +63,9 @@ func (s *MySuite) SetupSuite(ctx context.Context) {
 		slog.Error("Error unmarshalling config file", err)
 	}
 
-	s.app, err = ga.NewApp(
+	s.app, err = gaapp.NewApp(
 		ctx,
-		ga.NewAppRequest{
+		gaapp.NewAppRequest{
 			HAAuthToken:      s.config.Hass.HAAuthToken,
 			IpAddress:        s.config.Hass.IpAddress,
 			HomeZoneEntityID: s.config.Hass.HomeZoneEntityID,
@@ -79,13 +80,13 @@ func (s *MySuite) SetupSuite(ctx context.Context) {
 	entityID := s.config.Entities.LightEntityID
 	if entityID != "" {
 		s.suiteCtx["entityCallbackInvoked"] = false
-		etl := ga.NewEntityListener().EntityIDs(entityID).Call(s.entityCallback).Build()
+		etl := gaapp.NewEntityListener().EntityIDs(entityID).Call(s.entityCallback).Build()
 		s.app.RegisterEntityListeners(etl)
 	}
 
 	s.suiteCtx["dailyScheduleCallbackInvoked"] = false
 	runTime := time.Now().Add(1 * time.Minute).Format("15:04")
-	dailySchedule := ga.NewDailySchedule().Call(s.dailyScheduleCallback).At(runTime).Build()
+	dailySchedule := gaapp.NewDailySchedule().Call(s.dailyScheduleCallback).At(runTime).Build()
 	s.app.RegisterSchedules(dailySchedule)
 
 	// start GA app
@@ -130,7 +131,7 @@ func (s *MySuite) TestSchedule() {
 }
 
 // Capture event after light entity state has changed
-func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
+func (s *MySuite) entityCallback(se *gaapp.Service, st gaapp.State, e gaapp.EntityData) {
 	slog.Info(
 		"Entity callback called.",
 		"entity id", e.TriggerEntityID,
@@ -141,7 +142,7 @@ func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
 }
 
 // Capture planned daily schedule
-func (s *MySuite) dailyScheduleCallback(se *ga.Service, st ga.State) {
+func (s *MySuite) dailyScheduleCallback(se *gaapp.Service, st gaapp.State) {
 	slog.Info("Daily schedule callback called.")
 	s.suiteCtx["dailyScheduleCallbackInvoked"] = true
 }
