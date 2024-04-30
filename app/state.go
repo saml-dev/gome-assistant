@@ -11,6 +11,8 @@ import (
 )
 
 type State interface {
+	Latitude() float64
+	Longitude() float64
 	AfterSunrise(...DurationString) bool
 	BeforeSunrise(...DurationString) bool
 	AfterSunset(...DurationString) bool
@@ -65,6 +67,14 @@ func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityID string) erro
 	}
 
 	return nil
+}
+
+func (s *StateImpl) Latitude() float64 {
+	return s.latitude
+}
+
+func (s *StateImpl) Longitude() float64 {
+	return s.longitude
 }
 
 func (s *StateImpl) Get(entityID string) (EntityState, error) {

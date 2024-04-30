@@ -15,6 +15,14 @@ type MockState struct {
 	GetError     bool
 }
 
+func (s MockState) Latitude() float64 {
+	return 0.0
+}
+
+func (s MockState) Longitude() float64 {
+	return 0.0
+}
+
 func (s MockState) AfterSunrise(_ ...DurationString) bool {
 	return true
 }
