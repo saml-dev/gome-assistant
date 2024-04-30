@@ -29,8 +29,8 @@ type App struct {
 
 	httpClient *http.HttpClient
 
-	service *Service
-	state   State
+	Service *Service
+	State   State
 
 	scheduledActions priorityqueue.PriorityQueue
 	entityListeners  map[string][]*EntityListener
@@ -115,13 +115,13 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 	app := App{
 		wsConn:           wsWriter,
 		httpClient:       httpClient,
-		state:            state,
+		State:            state,
 		scheduledActions: priorityqueue.New(),
 		entityListeners:  map[string][]*EntityListener{},
 		eventListeners:   map[string][]*EventListener{},
 		cancel:           func() {},
 	}
-	app.service = newService(&app, httpClient)
+	app.Service = newService(&app, httpClient)
 
 	return &app, nil
 }
@@ -298,11 +298,11 @@ func getSunriseSunset(
 }
 
 func getNextSunRiseOrSet(app *App, sunrise bool, offset ...DurationString) carbon.Carbon {
-	sunriseOrSunset := getSunriseSunset(app.state, sunrise, carbon.Now(), offset...)
+	sunriseOrSunset := getSunriseSunset(app.State, sunrise, carbon.Now(), offset...)
 	if sunriseOrSunset.Lt(carbon.Now()) {
 		// if we're past today's sunset or sunrise (accounting for offset) then get tomorrows
 		// as that's the next time the schedule will run
-		sunriseOrSunset = getSunriseSunset(app.state, sunrise, carbon.Tomorrow(), offset...)
+		sunriseOrSunset = getSunriseSunset(app.State, sunrise, carbon.Tomorrow(), offset...)
 	}
 	return sunriseOrSunset
 }
@@ -345,7 +345,7 @@ func (app *App) Start(ctx context.Context) error {
 			// ensure each ETL only runs once, even if
 			// it listens to multiple entities
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
-				entityState, err := app.state.Get(eid)
+				entityState, err := app.State.Get(eid)
 				if err != nil {
 					slog.Warn(
 						"Failed to get entity state \"", eid,
@@ -355,7 +355,7 @@ func (app *App) Start(ctx context.Context) error {
 
 				etl.runOnStartupCompleted = true
 				eg.Go(func() error {
-					etl.callback(app.service, app.state, EntityData{
+					etl.callback(app.Service, app.State, EntityData{
 						TriggerEntityID: eid,
 						FromState:       entityState.State,
 						FromAttributes:  entityState.Attributes,
@@ -403,11 +403,11 @@ func (app *App) close() {
 }
 
 func (app *App) GetService() *Service {
-	return app.service
+	return app.Service
 }
 
 func (app *App) GetState() State {
-	return app.state
+	return app.State
 }
 
 func (app *App) runScheduledActions(ctx context.Context) {
