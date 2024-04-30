@@ -8,7 +8,7 @@ import (
 	"saml.dev/gome-assistant/internal"
 )
 
-type ScheduleCallback func(*Service, State)
+type ScheduleCallback func()
 
 type DailySchedule struct {
 	// 0-23
@@ -191,17 +191,17 @@ func (s *DailySchedule) shouldRun(app *App) bool {
 	if c := checkAllowlistDates(s.allowlistDates); c.fail {
 		return false
 	}
-	if c := checkEnabledEntity(app.state, s.enabledEntities); c.fail {
+	if c := checkEnabledEntity(app.State, s.enabledEntities); c.fail {
 		return false
 	}
-	if c := checkDisabledEntity(app.state, s.disabledEntities); c.fail {
+	if c := checkDisabledEntity(app.State, s.disabledEntities); c.fail {
 		return false
 	}
 	return true
 }
 
 func (s *DailySchedule) run(app *App) {
-	s.callback(app.service, app.state)
+	s.callback()
 }
 
 func (s *DailySchedule) updateNextRunTime(app *App) {

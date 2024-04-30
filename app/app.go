@@ -355,7 +355,7 @@ func (app *App) Start(ctx context.Context) error {
 
 				etl.runOnStartupCompleted = true
 				eg.Go(func() error {
-					etl.callback(app.Service, app.State, EntityData{
+					etl.callback(EntityData{
 						TriggerEntityID: eid,
 						FromState:       entityState.State,
 						FromAttributes:  entityState.Attributes,

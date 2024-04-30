@@ -8,6 +8,7 @@ import (
 	"time"
 
 	ga "saml.dev/gome-assistant"
+	"saml.dev/gome-assistant/app"
 	gaapp "saml.dev/gome-assistant/app"
 )
 
@@ -31,18 +32,24 @@ func main() {
 	pantryDoor := gaapp.
 		NewEntityListener().
 		EntityIDs("binary_sensor.pantry_door").
-		Call(pantryLights).
+		Call(func(sensor gaapp.EntityData) {
+			pantryLights(app, sensor)
+		}).
 		Build()
 
 	_11pmSched := gaapp.
 		NewDailySchedule().
-		Call(lightsOut).
+		Call(func() {
+			lightsOut(app)
+		}).
 		At("23:00").
 		Build()
 
 	_30minsBeforeSunrise := gaapp.
 		NewDailySchedule().
-		Call(sunriseSched).
+		Call(func() {
+			sunriseSched(app)
+		}).
 		Sunrise("-30m").
 		Build()
 
@@ -59,16 +66,16 @@ func main() {
 	app.Start(ctx)
 }
 
-func pantryLights(service *gaapp.Service, state gaapp.State, sensor gaapp.EntityData) {
+func pantryLights(app *app.App, sensor gaapp.EntityData) {
 	l := ga.EntityTarget("light.pantry")
 	if sensor.ToState == "on" {
-		service.HomeAssistant.TurnOn(l, nil)
+		app.Service.HomeAssistant.TurnOn(l, nil)
 	} else {
-		service.HomeAssistant.TurnOff(l)
+		app.Service.HomeAssistant.TurnOff(l)
 	}
 }
 
-func onEvent(service *gaapp.Service, state gaapp.State, data gaapp.EventData) {
+func onEvent(data gaapp.EventData) {
 	// Since the structure of the event changes depending
 	// on the event type, you can Unmarshal the raw json
 	// into a Go type. If a type for your event doesn't
@@ -79,10 +86,10 @@ func onEvent(service *gaapp.Service, state gaapp.State, data gaapp.EventData) {
 	slog.Info("On event invoked", "event", ev)
 }
 
-func lightsOut(service *gaapp.Service, state gaapp.State) {
+func lightsOut(app *app.App) {
 	// always turn off outside lights
-	service.Light.TurnOff(ga.EntityTarget("light.outside_lights"))
-	s, err := state.Get("binary_sensor.living_room_motion")
+	app.Service.Light.TurnOff(ga.EntityTarget("light.outside_lights"))
+	s, err := app.State.Get("binary_sensor.living_room_motion")
 	if err != nil {
 		slog.Warn("couldnt get living room motion state, doing nothing")
 		return
@@ -90,11 +97,11 @@ func lightsOut(service *gaapp.Service, state gaapp.State) {
 
 	// if no motion detected in living room for 30mins
 	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
-		service.Light.TurnOff(ga.EntityTarget("light.main_lights"))
+		app.Service.Light.TurnOff(ga.EntityTarget("light.main_lights"))
 	}
 }
 
-func sunriseSched(service *gaapp.Service, state gaapp.State) {
-	service.Light.TurnOn(ga.EntityTarget("light.living_room_lamps"), nil)
-	service.Light.TurnOff(ga.EntityTarget("light.christmas_lights"))
+func sunriseSched(app *app.App) {
+	app.Service.Light.TurnOn(ga.EntityTarget("light.living_room_lamps"), nil)
+	app.Service.Light.TurnOff(ga.EntityTarget("light.christmas_lights"))
 }

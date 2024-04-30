@@ -34,7 +34,7 @@ type EntityListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EntityListenerCallback func(*Service, State, EntityData)
+type EntityListenerCallback func(EntityData)
 
 type EntityData struct {
 	TriggerEntityID string
@@ -244,10 +244,10 @@ func (app *App) callEntityListeners(chanMsg websocket.Message) {
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
 			continue
 		}
-		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+		if c := checkEnabledEntity(app.State, l.enabledEntities); c.fail {
 			continue
 		}
-		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+		if c := checkDisabledEntity(app.State, l.disabledEntities); c.fail {
 			continue
 		}
 
@@ -263,14 +263,14 @@ func (app *App) callEntityListeners(chanMsg websocket.Message) {
 		if l.delay != 0 {
 			l := l
 			l.delayTimer = time.AfterFunc(l.delay, func() {
-				go l.callback(app.service, app.state, entityData)
+				go l.callback(entityData)
 				l.lastRan = carbon.Now()
 			})
 			continue
 		}
 
 		// run now if no delay set
-		go l.callback(app.service, app.state, entityData)
+		go l.callback(entityData)
 		l.lastRan = carbon.Now()
 	}
 }

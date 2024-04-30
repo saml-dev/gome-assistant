@@ -8,7 +8,7 @@ import (
 	"saml.dev/gome-assistant/internal"
 )
 
-type IntervalCallback func(*Service, State)
+type IntervalCallback func()
 
 type Interval struct {
 	frequency   time.Duration
@@ -189,17 +189,17 @@ func (i Interval) shouldRun(app *App) bool {
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
 		return false
 	}
-	if c := checkEnabledEntity(app.state, i.enabledEntities); c.fail {
+	if c := checkEnabledEntity(app.State, i.enabledEntities); c.fail {
 		return false
 	}
-	if c := checkDisabledEntity(app.state, i.disabledEntities); c.fail {
+	if c := checkDisabledEntity(app.State, i.disabledEntities); c.fail {
 		return false
 	}
 	return true
 }
 
 func (i *Interval) run(app *App) {
-	i.callback(app.service, app.state)
+	i.callback()
 }
 
 func (i *Interval) updateNextRunTime(app *App) {

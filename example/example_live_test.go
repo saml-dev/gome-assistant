@@ -133,7 +133,7 @@ func (s *MySuite) TestSchedule() {
 }
 
 // Capture event after light entity state has changed
-func (s *MySuite) entityCallback(se *gaapp.Service, st gaapp.State, e gaapp.EntityData) {
+func (s *MySuite) entityCallback(e gaapp.EntityData) {
 	slog.Info(
 		"Entity callback called.",
 		"entity id", e.TriggerEntityID,
@@ -144,7 +144,7 @@ func (s *MySuite) entityCallback(se *gaapp.Service, st gaapp.State, e gaapp.Enti
 }
 
 // Capture planned daily schedule
-func (s *MySuite) dailyScheduleCallback(se *gaapp.Service, st gaapp.State) {
+func (s *MySuite) dailyScheduleCallback() {
 	slog.Info("Daily schedule callback called.")
 	s.suiteCtx["dailyScheduleCallbackInvoked"] = true
 }

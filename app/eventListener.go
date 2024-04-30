@@ -26,7 +26,7 @@ type EventListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(*Service, State, EventData)
+type EventListenerCallback func(EventData)
 
 type EventData struct {
 	Type         string
@@ -182,10 +182,10 @@ func (app *App) callEventListeners(msg websocket.Message) {
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
 			continue
 		}
-		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+		if c := checkEnabledEntity(app.State, l.enabledEntities); c.fail {
 			continue
 		}
-		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+		if c := checkDisabledEntity(app.State, l.disabledEntities); c.fail {
 			continue
 		}
 
@@ -193,7 +193,7 @@ func (app *App) callEventListeners(msg websocket.Message) {
 			Type:         baseEventMsg.Event.EventType,
 			RawEventJSON: msg.Raw,
 		}
-		go l.callback(app.service, app.state, eventData)
+		go l.callback(eventData)
 		l.lastRan = carbon.Now()
 	}
 }
