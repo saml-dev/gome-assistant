@@ -30,7 +30,7 @@ type App struct {
 	httpClient *http.HttpClient
 
 	service *Service
-	state   *StateImpl
+	state   State
 
 	scheduledActions priorityqueue.PriorityQueue
 	entityListeners  map[string][]*EntityListener
@@ -258,11 +258,11 @@ func (app *App) RegisterEventListeners(evls ...EventListener) {
 }
 
 func getSunriseSunset(
-	s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offset ...DurationString,
+	s State, sunrise bool, dateToUse carbon.Carbon, offset ...DurationString,
 ) carbon.Carbon {
 	date := dateToUse.Carbon2Time()
 	rise, set := sunriseLib.SunriseSunset(
-		s.latitude, s.longitude, date.Year(), date.Month(), date.Day(),
+		s.Latitude(), s.Longitude(), date.Year(), date.Month(), date.Day(),
 	)
 	rise, set = rise.Local(), set.Local()
 
