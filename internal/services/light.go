@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -24,7 +25,7 @@ func NewLight(service Service) *Light {
 func (l Light) TurnOn(entityID string, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
-		ctx, "light", "turn_on", serviceData, EntityTarget(entityID),
+		ctx, "light", "turn_on", serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -32,13 +33,13 @@ func (l Light) TurnOn(entityID string, serviceData any) (websocket.Message, erro
 func (l Light) Toggle(entityID string, serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
-		ctx, "light", "toggle", serviceData, EntityTarget(entityID),
+		ctx, "light", "toggle", serviceData, ga.EntityTarget(entityID),
 	)
 }
 
 func (l Light) TurnOff(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return l.service.CallService(
-		ctx, "light", "turn_off", nil, EntityTarget(entityID),
+		ctx, "light", "turn_off", nil, ga.EntityTarget(entityID),
 	)
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -27,13 +28,13 @@ func (ib InputText) Set(entityID string, value string) (websocket.Message, error
 		map[string]any{
 			"value": value,
 		},
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }
 
 func (ib InputText) Reload() (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
-		ctx, "input_text", "reload", nil, Target{},
+		ctx, "input_text", "reload", nil, ga.Target{},
 	)
 }

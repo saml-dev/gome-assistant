@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (c Cover) Close(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "close_cover",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -34,7 +35,7 @@ func (c Cover) CloseTilt(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "close_cover_tilt",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -43,7 +44,7 @@ func (c Cover) Open(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "open_cover",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -52,7 +53,7 @@ func (c Cover) OpenTilt(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "open_cover_tilt",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -62,7 +63,7 @@ func (c Cover) SetPosition(entityID string, serviceData any) (websocket.Message,
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "set_cover_position",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -72,7 +73,7 @@ func (c Cover) SetTiltPosition(entityID string, serviceData any) (websocket.Mess
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "set_cover_tilt_position",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -81,7 +82,7 @@ func (c Cover) Stop(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "stop_cover",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -90,7 +91,7 @@ func (c Cover) StopTilt(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "stop_cover_tilt",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -99,7 +100,7 @@ func (c Cover) Toggle(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "toggle",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -108,6 +109,6 @@ func (c Cover) ToggleTilt(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return c.service.CallService(
 		ctx, "cover", "toggle_cover_tilt",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }

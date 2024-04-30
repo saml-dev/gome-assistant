@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (s Scene) Apply(serviceData any) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "scene", "apply",
-		serviceData, Target{},
+		serviceData, ga.Target{},
 	)
 }
 
@@ -34,7 +35,7 @@ func (s Scene) Create(entityID string, serviceData any) (websocket.Message, erro
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "scene", "create",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -42,7 +43,7 @@ func (s Scene) Create(entityID string, serviceData any) (websocket.Message, erro
 func (s Scene) Reload() (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
-		ctx, "scene", "reload", nil, Target{},
+		ctx, "scene", "reload", nil, ga.Target{},
 	)
 }
 
@@ -51,6 +52,6 @@ func (s Scene) TurnOn(entityID string, serviceData any) (websocket.Message, erro
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "scene", "turn_on",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }

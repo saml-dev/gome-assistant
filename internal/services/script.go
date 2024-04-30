@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (s Script) Reload(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "reload",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -34,7 +35,7 @@ func (s Script) Toggle(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "toggle",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -43,7 +44,7 @@ func (s Script) TurnOff() (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "turn_off",
-		nil, Target{},
+		nil, ga.Target{},
 	)
 }
 
@@ -52,6 +53,6 @@ func (s Script) TurnOn(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return s.service.CallService(
 		ctx, "script", "turn_on",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) (websocket.Message, error) 
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "clear_playlist",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -34,7 +35,7 @@ func (mp MediaPlayer) Join(entityID string, serviceData any) (websocket.Message,
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "join",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -43,7 +44,7 @@ func (mp MediaPlayer) Next(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_next_track",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -52,7 +53,7 @@ func (mp MediaPlayer) Pause(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_pause",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -61,7 +62,7 @@ func (mp MediaPlayer) Play(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_play",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -70,7 +71,7 @@ func (mp MediaPlayer) PlayPause(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_play_pause",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -79,7 +80,7 @@ func (mp MediaPlayer) Previous(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_previous_track",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -88,7 +89,7 @@ func (mp MediaPlayer) Seek(entityID string, serviceData any) (websocket.Message,
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_seek",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -97,7 +98,7 @@ func (mp MediaPlayer) Stop(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "media_stop",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -106,7 +107,7 @@ func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) (websocket.Mes
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "play_media",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -115,7 +116,7 @@ func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) (websocket.Mes
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "repeat_set",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -126,7 +127,7 @@ func (mp MediaPlayer) SelectSoundMode(
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "select_sound_mode",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -137,7 +138,7 @@ func (mp MediaPlayer) SelectSource(
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "select_source",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -146,7 +147,7 @@ func (mp MediaPlayer) Shuffle(entityID string, serviceData any) (websocket.Messa
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "shuffle_set",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -155,7 +156,7 @@ func (mp MediaPlayer) Toggle(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "toggle",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -164,7 +165,7 @@ func (mp MediaPlayer) TurnOff(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "turn_off",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -173,7 +174,7 @@ func (mp MediaPlayer) TurnOn(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "turn_on",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -183,7 +184,7 @@ func (mp MediaPlayer) Unjoin(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "unjoin",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -192,7 +193,7 @@ func (mp MediaPlayer) VolumeDown(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_down",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -201,7 +202,7 @@ func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) (websocket.Me
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_mute",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -210,7 +211,7 @@ func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) (websocket.Mes
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_set",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -219,6 +220,6 @@ func (mp MediaPlayer) VolumeUp(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return mp.service.CallService(
 		ctx, "media_player", "volume_up",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }

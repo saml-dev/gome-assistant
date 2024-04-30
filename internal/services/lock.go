@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (l Lock) Lock(entityID string, serviceData any) (websocket.Message, error) 
 	ctx := context.TODO()
 	return l.service.CallService(
 		ctx, "lock", "lock",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -34,6 +35,6 @@ func (l Lock) Unlock(entityID string, serviceData any) (websocket.Message, error
 	ctx := context.TODO()
 	return l.service.CallService(
 		ctx, "lock", "unlock",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }

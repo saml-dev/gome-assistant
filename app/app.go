@@ -12,9 +12,9 @@ import (
 	sunriseLib "github.com/nathan-osman/go-sunrise"
 	"golang.org/x/sync/errgroup"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/internal/http"
 	"saml.dev/gome-assistant/internal/priorityqueue"
-	"saml.dev/gome-assistant/internal/services"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -580,7 +580,7 @@ type CallServiceRequest struct {
 	// ServiceData must be serializable to a JSON object.
 	ServiceData any `json:"service_data,omitempty"`
 
-	Target services.Target `json:"target,omitempty"`
+	Target ga.Target `json:"target,omitempty"`
 }
 
 // CallService invokes a service using a `call_service` message, then
@@ -588,7 +588,7 @@ type CallServiceRequest struct {
 //
 // FIXME: can the response be parsed into a result-style message?
 func (app *App) CallService(
-	ctx context.Context, domain string, service string, serviceData any, target services.Target,
+	ctx context.Context, domain string, service string, serviceData any, target ga.Target,
 ) (websocket.Message, error) {
 	req := CallServiceRequest{
 		BaseMessage: websocket.BaseMessage{

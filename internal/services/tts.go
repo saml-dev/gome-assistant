@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -24,7 +25,7 @@ func NewTTS(service Service) *TTS {
 func (tts TTS) ClearCache() (websocket.Message, error) {
 	ctx := context.TODO()
 	return tts.service.CallService(
-		ctx, "tts", "clear_cache", nil, Target{},
+		ctx, "tts", "clear_cache", nil, ga.Target{},
 	)
 }
 
@@ -33,7 +34,7 @@ func (tts TTS) CloudSay(entityID string, serviceData any) (websocket.Message, er
 	ctx := context.TODO()
 	return tts.service.CallService(
 		ctx, "tts", "cloud_say",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -43,6 +44,6 @@ func (tts TTS) GoogleTranslateSay(entityID string, serviceData any) (websocket.M
 	ctx := context.TODO()
 	return tts.service.CallService(
 		ctx, "tts", "google_translate_say",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }

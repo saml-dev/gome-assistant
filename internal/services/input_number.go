@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (ib InputNumber) Set(entityID string, value float32) (websocket.Message, er
 	return ib.service.CallService(
 		ctx, "input_number", "set_value",
 		map[string]any{"value": value},
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }
 
@@ -33,7 +34,7 @@ func (ib InputNumber) Increment(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_number", "increment",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -41,13 +42,13 @@ func (ib InputNumber) Decrement(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
 		ctx, "input_number", "decrement",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
 func (ib InputNumber) Reload() (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
-		ctx, "input_number", "reload", nil, Target{},
+		ctx, "input_number", "reload", nil, ga.Target{},
 	)
 }

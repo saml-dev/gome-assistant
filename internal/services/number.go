@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,6 +26,6 @@ func (ib Number) SetValue(entityID string, value float32) (websocket.Message, er
 	return ib.service.CallService(
 		ctx, "number", "set_value",
 		map[string]any{"value": value},
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }

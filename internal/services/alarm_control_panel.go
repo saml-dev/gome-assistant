@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -27,7 +28,7 @@ func (acp AlarmControlPanel) ArmAway(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_arm_away",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -40,7 +41,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_arm_custom_bypass",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -53,7 +54,7 @@ func (acp AlarmControlPanel) ArmHome(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_arm_home",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -64,7 +65,7 @@ func (acp AlarmControlPanel) ArmNight(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_arm_night",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -75,7 +76,7 @@ func (acp AlarmControlPanel) ArmVacation(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_arm_vacation",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -86,7 +87,7 @@ func (acp AlarmControlPanel) Disarm(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_disarm",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -97,6 +98,6 @@ func (acp AlarmControlPanel) Trigger(
 	ctx := context.TODO()
 	return acp.service.CallService(
 		ctx, "alarm_control_panel", "alarm_trigger",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }

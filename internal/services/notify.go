@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -37,6 +38,6 @@ func (ha *Notify) Notify(reqData NotifyRequest) (websocket.Message, error) {
 
 	return ha.service.CallService(
 		ctx, "notify", reqData.ServiceName,
-		serviceData, Target{},
+		serviceData, ga.Target{},
 	)
 }

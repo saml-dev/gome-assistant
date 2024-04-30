@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -29,13 +30,13 @@ func (ib InputDatetime) Set(entityID string, value time.Time) (websocket.Message
 		map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }
 
 func (ib InputDatetime) Reload() (websocket.Message, error) {
 	ctx := context.TODO()
 	return ib.service.CallService(
-		ctx, "input_datetime", "reload", nil, Target{},
+		ctx, "input_datetime", "reload", nil, ga.Target{},
 	)
 }

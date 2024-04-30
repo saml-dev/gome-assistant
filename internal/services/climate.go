@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (c Climate) SetFanMode(
 	return c.service.CallService(
 		ctx, "climate", "set_fan_mode",
 		map[string]any{"fan_mode": fanMode},
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }
 
@@ -60,6 +61,6 @@ func (c Climate) SetTemperature(
 	return c.service.CallService(
 		ctx, "climate", "set_temperature",
 		setTemperatureRequest.ToJSON(),
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }

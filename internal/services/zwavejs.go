@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -31,6 +32,6 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(
 			"parameter": parameter,
 			"value":     value,
 		},
-		EntityTarget(entityID),
+		ga.EntityTarget(entityID),
 	)
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -25,7 +26,7 @@ func (v Vacuum) CleanSpot(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "clean_spot",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -34,7 +35,7 @@ func (v Vacuum) Locate(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "locate",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -43,7 +44,7 @@ func (v Vacuum) Pause(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "pause",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -52,7 +53,7 @@ func (v Vacuum) ReturnToBase(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "return_to_base",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -61,7 +62,7 @@ func (v Vacuum) SendCommand(entityID string, serviceData any) (websocket.Message
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "send_command",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -70,7 +71,7 @@ func (v Vacuum) SetFanSpeed(entityID string, serviceData any) (websocket.Message
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "set_fan_speed",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -79,7 +80,7 @@ func (v Vacuum) Start(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "start",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -88,7 +89,7 @@ func (v Vacuum) StartPause(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "start_pause",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -97,7 +98,7 @@ func (v Vacuum) Stop(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "stop",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -106,7 +107,7 @@ func (v Vacuum) TurnOff(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "turn_off",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
 
@@ -115,6 +116,6 @@ func (v Vacuum) TurnOn(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return v.service.CallService(
 		ctx, "vacuum", "turn_on",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }

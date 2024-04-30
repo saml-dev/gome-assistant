@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -22,7 +23,7 @@ func (ha *HomeAssistant) TurnOn(entityID string, serviceData any) (websocket.Mes
 	ctx := context.TODO()
 	return ha.service.CallService(
 		ctx, "homeassistant", "turn_on",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -32,7 +33,7 @@ func (ha *HomeAssistant) Toggle(entityID string, serviceData any) (websocket.Mes
 	ctx := context.TODO()
 	return ha.service.CallService(
 		ctx, "homeassistant", "toggle",
-		serviceData, EntityTarget(entityID),
+		serviceData, ga.EntityTarget(entityID),
 	)
 }
 
@@ -40,6 +41,6 @@ func (ha *HomeAssistant) TurnOff(entityID string) (websocket.Message, error) {
 	ctx := context.TODO()
 	return ha.service.CallService(
 		ctx, "homeassistant", "turn_off",
-		nil, EntityTarget(entityID),
+		nil, ga.EntityTarget(entityID),
 	)
 }
