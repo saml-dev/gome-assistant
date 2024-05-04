@@ -49,6 +49,6 @@ type Message struct {
 	BaseMessage
 
 	// Raw contains the original, full, unparsed message (including
-	// fields `Type` and `ID`, which appear in `BaseMessage`).
-	Raw RawMessage
+	// fields `Type` and `ID`, which also appear in `BaseMessage`).
+	Raw RawMessage `json:"-"`
 }
