@@ -637,9 +637,10 @@ type subscribeEventsRequest struct {
 }
 
 // SubscribeEvents subscribes to events of the given type, invoking
-// `subscriber` when any such events are received. Calls to
-// `subscriber` are synchronous with respect to any other received
-// messages, but asynchronous with respect to writes.
+// `subscriber` when any such events are received. `eventType` can be
+// `*` to listen to all event types. Calls to `subscriber` are
+// synchronous with respect to any other received messages, but
+// asynchronous with respect to writes.
 func (app *App) SubscribeEvents(
 	eventType string, subscriber websocket.Subscriber,
 ) (websocket.Subscription, error) {

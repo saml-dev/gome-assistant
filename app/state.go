@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type State interface {
@@ -35,7 +36,7 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 
 	// The whole message, in JSON format:
-	Raw json.RawMessage `json:"-"`
+	Raw websocket.RawMessage `json:"-"`
 }
 
 func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
