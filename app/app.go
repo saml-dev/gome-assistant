@@ -582,9 +582,6 @@ func (app *App) CallService(
 func (app *App) Subscribe(
 	ctx context.Context, req websocket.Request, subscriber websocket.Subscriber,
 ) (websocket.Message, websocket.Subscription, error) {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
 	// The result of the attempt to subscribe (i.e., the first
 	// message) will be sent to this channel.
 	resultReceived := false
