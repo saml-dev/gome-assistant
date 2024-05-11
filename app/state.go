@@ -33,6 +33,9 @@ type EntityState struct {
 	State       string         `json:"state"`
 	Attributes  map[string]any `json:"attributes"`
 	LastChanged time.Time      `json:"last_changed"`
+
+	// The whole message, in JSON format:
+	Raw json.RawMessage `json:"-"`
 }
 
 func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
@@ -84,6 +87,7 @@ func (s *StateImpl) Get(entityID string) (EntityState, error) {
 	}
 	es := EntityState{}
 	json.Unmarshal(resp, &es)
+	es.Raw = resp
 	return es, nil
 }
 
