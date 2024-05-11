@@ -242,7 +242,7 @@ func (app *App) RegisterEventListener(evl EventListener) {
 		if !ok {
 			// FIXME: keep track of subscriptions so that they can
 			// be unsubscribed from.
-			_, err := app.WatchEvents(
+			_, err := app.SubscribeEvents(
 				eventType,
 				func(msg websocket.Message) {
 					go app.callEventListeners(msg)
@@ -332,7 +332,7 @@ func (app *App) Start(ctx context.Context) error {
 	})
 
 	// subscribe to state_changed events
-	stateChangedSubscription, err := app.WatchStateChangedEvents(
+	stateChangedSubscription, err := app.SubscribeStateChangedEvents(
 		func(msg websocket.Message) {
 			go app.callEntityListeners(msg)
 		},
@@ -462,11 +462,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-// WatchEvents subscribes to events of the given type, invoking
+// SubscribeEvents subscribes to events of the given type, invoking
 // `subscriber` when any such events are received. Calls to
 // `subscriber` are synchronous with respect to any other received
 // messages, but asynchronous with respect to writes.
-func (app *App) WatchEvents(
+func (app *App) SubscribeEvents(
 	eventType string, subscriber websocket.Subscriber,
 ) (websocket.Subscription, error) {
 	// Make sure we're listening before events might start arriving:
@@ -494,10 +494,10 @@ func (app *App) WatchEvents(
 	return subscription, nil
 }
 
-func (app *App) WatchStateChangedEvents(
+func (app *App) SubscribeStateChangedEvents(
 	subscriber websocket.Subscriber,
 ) (websocket.Subscription, error) {
-	return app.WatchEvents("state_changed", subscriber)
+	return app.SubscribeEvents("state_changed", subscriber)
 }
 
 type UnsubEvent struct {
