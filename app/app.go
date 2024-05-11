@@ -36,6 +36,9 @@ type App struct {
 	entityListeners  map[string][]*EntityListener
 	eventListeners   map[string][]*EventListener
 
+	// Ready is closed when the app is ready for use.
+	ready chan struct{}
+
 	// If `App.Start()` has been called, `cancel()` cancels the
 	// context being used, which causes the app to shut down cleanly.
 	cancel context.CancelFunc
@@ -119,6 +122,7 @@ func NewAppFromConfig(ctx context.Context, config NewAppConfig) (*App, error) {
 		scheduledActions: priorityqueue.New(),
 		entityListeners:  map[string][]*EntityListener{},
 		eventListeners:   map[string][]*EventListener{},
+		ready:            make(chan struct{}),
 		cancel:           func() {},
 	}
 	app.Service = newService(&app, httpClient)
@@ -186,6 +190,11 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	}
 
 	return NewAppFromConfig(ctx, config)
+}
+
+// Ready returns a channel that is closed when the app is ready for use.
+func (app *App) Ready() <-chan struct{} {
+	return app.ready
 }
 
 type scheduledAction interface {
@@ -381,6 +390,8 @@ func (app *App) Start(ctx context.Context) error {
 		cancel()
 		return nil
 	})
+
+	close(app.ready)
 
 	eg.Go(func() error {
 		<-ctx.Done()
