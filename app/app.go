@@ -457,49 +457,6 @@ func (app *App) requeueScheduledAction(action scheduledAction) {
 	app.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
 }
 
-type SubEvent struct {
-	websocket.BaseMessage
-	EventType string `json:"event_type"`
-}
-
-// SubscribeEvents subscribes to events of the given type, invoking
-// `subscriber` when any such events are received. Calls to
-// `subscriber` are synchronous with respect to any other received
-// messages, but asynchronous with respect to writes.
-func (app *App) SubscribeEvents(
-	eventType string, subscriber websocket.Subscriber,
-) (websocket.Subscription, error) {
-	// Make sure we're listening before events might start arriving:
-	e := SubEvent{
-		BaseMessage: websocket.BaseMessage{
-			Type: "subscribe_events",
-		},
-		EventType: eventType,
-	}
-	var subscription websocket.Subscription
-	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
-		subscription = lc.Subscribe(subscriber)
-		e.ID = subscription.ID()
-		if err := lc.SendMessage(e); err != nil {
-			lc.Unsubscribe(subscription)
-			return fmt.Errorf("error writing to websocket: %w", err)
-		}
-		return nil
-	})
-	if err != nil {
-		return websocket.Subscription{}, err
-	}
-	// m, _ := ReadMessage(conn, ctx)
-	// log.Default().Println(string(m))
-	return subscription, nil
-}
-
-func (app *App) SubscribeStateChangedEvents(
-	subscriber websocket.Subscriber,
-) (websocket.Subscription, error) {
-	return app.SubscribeEvents("state_changed", subscriber)
-}
-
 type UnsubEvent struct {
 	websocket.BaseMessage
 	Subscription int64 `json:"subscription"`
@@ -672,4 +629,47 @@ func (app *App) Subscribe(
 	case <-ctx.Done():
 		return websocket.Message{}, websocket.Subscription{}, ctx.Err()
 	}
+}
+
+type SubEvent struct {
+	websocket.BaseMessage
+	EventType string `json:"event_type"`
+}
+
+// SubscribeEvents subscribes to events of the given type, invoking
+// `subscriber` when any such events are received. Calls to
+// `subscriber` are synchronous with respect to any other received
+// messages, but asynchronous with respect to writes.
+func (app *App) SubscribeEvents(
+	eventType string, subscriber websocket.Subscriber,
+) (websocket.Subscription, error) {
+	// Make sure we're listening before events might start arriving:
+	e := SubEvent{
+		BaseMessage: websocket.BaseMessage{
+			Type: "subscribe_events",
+		},
+		EventType: eventType,
+	}
+	var subscription websocket.Subscription
+	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
+		subscription = lc.Subscribe(subscriber)
+		e.ID = subscription.ID()
+		if err := lc.SendMessage(e); err != nil {
+			lc.Unsubscribe(subscription)
+			return fmt.Errorf("error writing to websocket: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return websocket.Subscription{}, err
+	}
+	// m, _ := ReadMessage(conn, ctx)
+	// log.Default().Println(string(m))
+	return subscription, nil
+}
+
+func (app *App) SubscribeStateChangedEvents(
+	subscriber websocket.Subscriber,
+) (websocket.Subscription, error) {
+	return app.SubscribeEvents("state_changed", subscriber)
 }
