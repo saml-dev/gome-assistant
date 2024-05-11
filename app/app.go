@@ -631,7 +631,7 @@ func (app *App) Subscribe(
 	}
 }
 
-type SubEvent struct {
+type subscribeEventsRequest struct {
 	websocket.BaseMessage
 	EventType string `json:"event_type"`
 }
@@ -644,7 +644,7 @@ func (app *App) SubscribeEvents(
 	eventType string, subscriber websocket.Subscriber,
 ) (websocket.Subscription, error) {
 	// Make sure we're listening before events might start arriving:
-	e := SubEvent{
+	e := subscribeEventsRequest{
 		BaseMessage: websocket.BaseMessage{
 			Type: "subscribe_events",
 		},
