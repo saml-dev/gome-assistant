@@ -335,6 +335,13 @@ func (app *App) Start(ctx context.Context) error {
 	slog.Info("Starting", "entity listeners", len(app.entityListeners))
 	slog.Info("Starting", "event listeners", len(app.eventListeners))
 
+	// entity listeners and event listeners
+	eg.Go(func() error {
+		app.wsConn.Start()
+		cancel()
+		return nil
+	})
+
 	eg.Go(func() error {
 		app.runScheduledActions(ctx)
 		return nil
@@ -383,13 +390,6 @@ func (app *App) Start(ctx context.Context) error {
 			}
 		}
 	}
-
-	// entity listeners and event listeners
-	eg.Go(func() error {
-		app.wsConn.Start()
-		cancel()
-		return nil
-	})
 
 	close(app.ready)
 
