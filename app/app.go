@@ -652,6 +652,9 @@ type subscribeEventsRequest struct {
 func (app *App) SubscribeEvents(
 	eventType string, subscriber websocket.Subscriber,
 ) (websocket.Subscription, error) {
+	ctx, cancel := context.WithTimeout(context.TODO(), 10*time.Second)
+	defer cancel()
+
 	// Make sure we're listening before events might start arriving:
 	e := subscribeEventsRequest{
 		BaseMessage: websocket.BaseMessage{
@@ -659,21 +662,15 @@ func (app *App) SubscribeEvents(
 		},
 		EventType: eventType,
 	}
-	var subscription websocket.Subscription
-	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
-		subscription = lc.Subscribe(subscriber)
-		e.ID = subscription.ID()
-		if err := lc.SendMessage(e); err != nil {
-			lc.Unsubscribe(subscription)
-			return fmt.Errorf("error writing to websocket: %w", err)
-		}
-		return nil
-	})
+
+	response, subscription, err := app.Subscribe(ctx, &e, subscriber)
 	if err != nil {
 		return websocket.Subscription{}, err
 	}
-	// m, _ := ReadMessage(conn, ctx)
-	// log.Default().Println(string(m))
+
+	// FIXME: check response for success
+	_ = response
+
 	return subscription, nil
 }
 
