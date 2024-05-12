@@ -17,18 +17,14 @@ func (conn *Conn) Start() {
 			return
 		}
 
-		base := BaseResultMessage{
-			// default to true for messages that don't include "success" at all
-			Success: true,
+		var msg Message
+		if err := json.Unmarshal(b, &msg); err != nil {
+			slog.Error("Error parsing JSON message from websocket:", err)
+			return
 		}
-		json.Unmarshal(b, &base)
-		if !base.Success {
-			slog.Warn("Received unsuccessful response", "response", string(b))
-		}
-		msg := Message{
-			BaseMessage: base.BaseMessage,
-			Raw:         b,
-		}
+		// We've only deserialized part of the message, so store the
+		// raw bytes as well, so that the listeners can handle them.
+		msg.Raw = b
 
 		if subscriber, ok := conn.getSubscriber(msg.ID); ok {
 			subscriber(msg)
