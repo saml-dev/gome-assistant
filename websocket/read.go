@@ -11,7 +11,7 @@ import (
 // there is an error reading from `conn`, log it and return.
 func (conn *Conn) Start() {
 	for {
-		bytes, err := conn.readMessage()
+		b, err := conn.readMessage()
 		if err != nil {
 			slog.Error("Error reading from websocket:", err)
 			return
@@ -21,13 +21,13 @@ func (conn *Conn) Start() {
 			// default to true for messages that don't include "success" at all
 			Success: true,
 		}
-		json.Unmarshal(bytes, &base)
+		json.Unmarshal(b, &base)
 		if !base.Success {
-			slog.Warn("Received unsuccessful response", "response", string(bytes))
+			slog.Warn("Received unsuccessful response", "response", string(b))
 		}
 		msg := Message{
 			BaseMessage: base.BaseMessage,
-			Raw:         bytes,
+			Raw:         b,
 		}
 
 		if subscriber, ok := conn.getSubscriber(msg.ID); ok {
