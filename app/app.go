@@ -356,7 +356,7 @@ func (app *App) Start(ctx context.Context) error {
 		return fmt.Errorf("subscribing to 'state_changed' events: %w", err)
 	}
 
-	defer app.unwatchEvents(stateChangedSubscription)
+	defer app.UnsubscribeEvents(stateChangedSubscription)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
@@ -467,36 +467,6 @@ func (app *App) requeueScheduledAction(action scheduledAction) {
 	app.scheduledActions.Insert(action, float64(action.getNextRunTime().Unix()))
 }
 
-type UnsubEvent struct {
-	websocket.BaseMessage
-	Subscription int64 `json:"subscription"`
-}
-
-// unwatchEvents unsubscribes to events with the given `subscriptionID`. This does
-// not remove the subscriber.
-func (app *App) unwatchEvents(subscription websocket.Subscription) error {
-	e := UnsubEvent{
-		BaseMessage: websocket.BaseMessage{
-			Type: "unsubscribe_events",
-		},
-		Subscription: subscription.ID(),
-	}
-
-	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
-		lc.Unsubscribe(subscription)
-
-		e.ID = lc.NextID()
-		return lc.SendMessage(e)
-	})
-	if err != nil {
-		return fmt.Errorf("unsubscribing from ID %d: %w", subscription.ID(), err)
-	}
-
-	// m, _ := ReadMessage(conn, ctx)
-	// log.Default().Println(string(m))
-	return nil
-}
-
 type subscribeEventsRequest struct {
 	websocket.BaseMessage
 	EventType string `json:"event_type"`
@@ -536,4 +506,36 @@ func (app *App) SubscribeStateChangedEvents(
 	subscriber websocket.Subscriber,
 ) (websocket.Subscription, error) {
 	return app.SubscribeEvents("state_changed", subscriber)
+}
+
+type unsubscribeEventsRequest struct {
+	websocket.BaseMessage
+	Subscription int64 `json:"subscription"`
+}
+
+// UnsubscribeEvents unsubscribes, at the server, from events that
+// were subscribed to via the specified `subscription`.
+func (app *App) UnsubscribeEvents(subscription websocket.Subscription) error {
+	ctx := context.TODO()
+
+	req := unsubscribeEventsRequest{
+		BaseMessage: websocket.BaseMessage{
+			Type: "unsubscribe_events",
+		},
+		Subscription: subscription.ID(),
+	}
+
+	var result any
+	rs := newResultSubscriber(app, &result)
+	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
+		lc.Unsubscribe(subscription)
+		// Subscribe, so that we receive the result of the unsubscribe
+		// command itself:
+		return rs.subscribe(lc, &req)
+	})
+	if err != nil {
+		return fmt.Errorf("unsubscribing from ID %d: %w", subscription.ID(), err)
+	}
+
+	return rs.wait(ctx)
 }

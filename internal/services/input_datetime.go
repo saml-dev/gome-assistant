@@ -6,7 +6,6 @@ import (
 	"time"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -23,20 +22,30 @@ func NewInputDatetime(service Service) *InputDatetime {
 
 /* Public API */
 
-func (ib InputDatetime) Set(target ga.Target, value time.Time) (websocket.Message, error) {
+func (ib InputDatetime) Set(target ga.Target, value time.Time) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_datetime", "set_datetime",
 		map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputDatetime) Reload() (websocket.Message, error) {
+func (ib InputDatetime) Reload() (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
-		ctx, "input_datetime", "reload", nil, ga.Target{},
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_datetime", "reload", nil, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

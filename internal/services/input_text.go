@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -21,20 +20,30 @@ func NewInputText(service Service) *InputText {
 
 /* Public API */
 
-func (ib InputText) Set(target ga.Target, value string) (websocket.Message, error) {
+func (ib InputText) Set(target ga.Target, value string) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_text", "set_value",
 		map[string]any{
 			"value": value,
 		},
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputText) Reload() (websocket.Message, error) {
+func (ib InputText) Reload() (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
-		ctx, "input_text", "reload", nil, ga.Target{},
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_text", "reload", nil, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

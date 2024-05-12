@@ -2,58 +2,41 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/websocket"
 )
 
-// Call invokes an RPC service corresponding to `req` via websockets
-// and waits for and returns a single `result`. `msg` must be
-// serializable to JSON. It shouldn't have its ID filled in yet; that
-// will be done within this method. The response is not analyzed at
-// all, even to check for errors.
+// Call invokes an RPC and processes the result as follows:
+//  1. Generate a message ID.
+//  2. Subscribe to that ID.
+//  3. Send `req` over the websocket
+//  4. Waits for a single "result" message
+//  5. Unsubscribe from ID
+//  6. Unmarshal the result into `result`.
+//
+// `msg` must be serializable to JSON. It shouldn't have its ID filled
+// in yet; that will be done within this method. `result` must be
+// something that `json.Unmarshal()` can deserialize into; typically,
+// it is a pointer. If the result indicates a failure
+// (success==false), then return that as an error.
 func (app *App) Call(
-	ctx context.Context, req websocket.Request,
-) (websocket.Message, error) {
+	ctx context.Context, req websocket.Request, result any,
+) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	responseCh := make(chan websocket.Message, 1)
-
-	var subscription websocket.Subscription
-
-	// Receive a single message, sent it to `responseCh`, then
-	// unsubscribe:
-	subscriber := func(msg websocket.Message) {
-		defer close(responseCh)
-		responseCh <- msg
-		_ = app.wsConn.Send(func(lc websocket.LockedConn) error {
-			lc.Unsubscribe(subscription)
-			return nil
-		})
-	}
-
+	rs := newResultSubscriber(app, result)
 	err := app.wsConn.Send(func(lc websocket.LockedConn) error {
-		subscription = lc.Subscribe(subscriber)
-		req.SetID(subscription.ID())
-		if err := lc.SendMessage(req); err != nil {
-			lc.Unsubscribe(subscription)
-			return fmt.Errorf("error writing to websocket: %w", err)
-		}
-		return nil
+		return rs.subscribe(lc, req)
 	})
-
 	if err != nil {
-		return websocket.Message{}, err
+		return err
 	}
-
-	select {
-	case response := <-responseCh:
-		return response, nil
-	case <-ctx.Done():
-		return websocket.Message{}, ctx.Err()
-	}
+	return rs.wait(ctx)
 }
 
 type CallServiceRequest struct {
@@ -68,12 +51,14 @@ type CallServiceRequest struct {
 }
 
 // CallService invokes a service using a `call_service` message, then
-// waits for and returns the response.
-//
-// FIXME: can the response be parsed into a result-style message?
+// waits for the response. The response is evaluated; if it indicates
+// an error, then this method returns that error. Otherwise, the
+// "result" field is stored to `result`, which must be something that
+// `json.Unmarshal()` can serialize into (typically a pointer).
 func (app *App) CallService(
 	ctx context.Context, domain string, service string, serviceData any, target ga.Target,
-) (websocket.Message, error) {
+	result any,
+) error {
 	req := CallServiceRequest{
 		BaseMessage: websocket.BaseMessage{
 			Type: "call_service",
@@ -84,7 +69,15 @@ func (app *App) CallService(
 		Target:      target,
 	}
 
-	return app.Call(ctx, &req)
+	if err := app.Call(ctx, &req, result); err != nil {
+		switch target {
+		case ga.Target{}:
+			return fmt.Errorf("calling '%s.%s': %w", domain, service, err)
+		default:
+			return fmt.Errorf("calling '%s.%s' for %s: %w", domain, service, target, err)
+		}
+	}
+	return nil
 }
 
 // Subscribe subscribes to some events via `req`, waits for a single
@@ -102,28 +95,40 @@ func (app *App) CallService(
 // cleanup to the caller.
 func (app *App) Subscribe(
 	ctx context.Context, req websocket.Request, subscriber websocket.Subscriber,
-) (websocket.Message, websocket.Subscription, error) {
+) (websocket.ResultMessage, websocket.Subscription, error) {
 	// The result of the attempt to subscribe (i.e., the first
 	// message) will be sent to this channel.
 	resultReceived := false
-	resultCh := make(chan websocket.Message, 1)
+	var resultMsg websocket.ResultMessage
+	var resultErr error
+	done := make(chan struct{})
 
 	var subscription websocket.Subscription
 
-	// Receive a single message, sent it to `responseCh`, then
-	// unsubscribe:
+	// Receive a single "result" message, send it to `responseCh`,
+	// then unsubscribe:
 	dualSubscriber := func(msg websocket.Message) {
-		if !resultReceived {
-			// This is the first message. We send it to the channel so
-			// that it can be returned from the outer function.
-			defer close(resultCh)
-			resultCh <- msg
+		if msg.Type == "result" {
+			if resultReceived {
+				slog.Warn(
+					"Error: multiple responses received for one 'subscribe' request (ignored)",
+				)
+				return
+			}
 			resultReceived = true
+
+			defer close(done)
+
+			resultErr = json.Unmarshal(msg.Raw, &resultMsg)
+			if resultErr != nil {
+				return
+			}
+			// FIXME: turn non-success responses into errors.
 			return
 		}
 
-		// The result has already been processed. Subsequent events
-		// get forwarded to `subscriber`:
+		// Forward other responses (i.e., the events themselves) to
+		// `subscriber`:
 		subscriber(msg)
 	}
 
@@ -138,13 +143,14 @@ func (app *App) Subscribe(
 	})
 
 	if err != nil {
-		return websocket.Message{}, websocket.Subscription{}, err
+		return websocket.ResultMessage{}, websocket.Subscription{}, err
 	}
 
 	select {
-	case response := <-resultCh:
-		return response, subscription, nil
+	case <-done:
+		return resultMsg, subscription, nil
 	case <-ctx.Done():
-		return websocket.Message{}, websocket.Subscription{}, ctx.Err()
+		// FIXME: unsubscribe
+		return websocket.ResultMessage{}, websocket.Subscription{}, ctx.Err()
 	}
 }

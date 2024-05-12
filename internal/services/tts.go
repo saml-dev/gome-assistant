@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -22,28 +21,43 @@ func NewTTS(service Service) *TTS {
 /* Public API */
 
 // Remove all text-to-speech cache files and RAM cache.
-func (tts TTS) ClearCache() (websocket.Message, error) {
+func (tts TTS) ClearCache() (any, error) {
 	ctx := context.TODO()
-	return tts.service.CallService(
-		ctx, "tts", "clear_cache", nil, ga.Target{},
+	var result any
+	err := tts.service.CallService(
+		ctx, "tts", "clear_cache", nil, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Say something using text-to-speech on a media player with cloud.
-func (tts TTS) CloudSay(target ga.Target, serviceData any) (websocket.Message, error) {
+func (tts TTS) CloudSay(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return tts.service.CallService(
+	var result any
+	err := tts.service.CallService(
 		ctx, "tts", "cloud_say",
-		serviceData, target,
+		serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Say something using text-to-speech on a media player with
 // google_translate.
-func (tts TTS) GoogleTranslateSay(target ga.Target, serviceData any) (websocket.Message, error) {
+func (tts TTS) GoogleTranslateSay(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return tts.service.CallService(
+	var result any
+	err := tts.service.CallService(
 		ctx, "tts", "google_translate_say",
-		serviceData, target,
+		serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

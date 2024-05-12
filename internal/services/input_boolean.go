@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -21,33 +20,53 @@ func NewInputBoolean(service Service) *InputBoolean {
 
 /* Public API */
 
-func (ib InputBoolean) TurnOn(target ga.Target) (websocket.Message, error) {
+func (ib InputBoolean) TurnOn(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_boolean", "turn_on",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputBoolean) Toggle(target ga.Target) (websocket.Message, error) {
+func (ib InputBoolean) Toggle(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_boolean", "toggle",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputBoolean) TurnOff(target ga.Target) (websocket.Message, error) {
+func (ib InputBoolean) TurnOff(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_boolean", "turn_off",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputBoolean) Reload() (websocket.Message, error) {
+func (ib InputBoolean) Reload() (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
-		ctx, "input_boolean", "reload", nil, ga.Target{},
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_boolean", "reload", nil, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

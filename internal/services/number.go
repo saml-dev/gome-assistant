@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -21,11 +20,16 @@ func NewNumber(service Service) *Number {
 
 /* Public API */
 
-func (ib Number) SetValue(target ga.Target, value float32) (websocket.Message, error) {
+func (ib Number) SetValue(target ga.Target, value float32) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "number", "set_value",
 		map[string]any{"value": value},
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

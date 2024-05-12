@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -21,26 +20,41 @@ func NewSwitch(service Service) *Switch {
 
 /* Public API */
 
-func (s Switch) TurnOn(target ga.Target) (websocket.Message, error) {
+func (s Switch) TurnOn(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return s.service.CallService(
+	var result any
+	err := s.service.CallService(
 		ctx, "switch", "turn_on",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (s Switch) Toggle(target ga.Target) (websocket.Message, error) {
+func (s Switch) Toggle(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return s.service.CallService(
+	var result any
+	err := s.service.CallService(
 		ctx, "switch", "toggle",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (s Switch) TurnOff(target ga.Target) (websocket.Message, error) {
+func (s Switch) TurnOff(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return s.service.CallService(
+	var result any
+	err := s.service.CallService(
 		ctx, "switch", "turn_off",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

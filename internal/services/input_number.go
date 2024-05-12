@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -21,34 +20,54 @@ func NewInputNumber(service Service) *InputNumber {
 
 /* Public API */
 
-func (ib InputNumber) Set(target ga.Target, value float32) (websocket.Message, error) {
+func (ib InputNumber) Set(target ga.Target, value float32) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_number", "set_value",
 		map[string]any{"value": value},
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputNumber) Increment(target ga.Target) (websocket.Message, error) {
+func (ib InputNumber) Increment(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_number", "increment",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputNumber) Decrement(target ga.Target) (websocket.Message, error) {
+func (ib InputNumber) Decrement(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_number", "decrement",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputNumber) Reload() (websocket.Message, error) {
+func (ib InputNumber) Reload() (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
-		ctx, "input_number", "reload", nil, ga.Target{},
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_number", "reload", nil, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

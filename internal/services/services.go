@@ -9,10 +9,11 @@ import (
 
 type Service interface {
 	Call(
-		ctx context.Context, req websocket.Request,
-	) (websocket.Message, error)
+		ctx context.Context, req websocket.Request, result any,
+	) error
 
 	CallService(
 		ctx context.Context, domain string, service string, serviceData any, target ga.Target,
-	) (websocket.Message, error)
+		result any,
+	) error
 }

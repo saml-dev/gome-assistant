@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 type HomeAssistant struct {
@@ -19,28 +18,43 @@ func NewHomeAssistant(service Service) *HomeAssistant {
 
 // TurnOn a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (ha *HomeAssistant) TurnOn(target ga.Target, serviceData any) (websocket.Message, error) {
+func (ha *HomeAssistant) TurnOn(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return ha.service.CallService(
+	var result any
+	err := ha.service.CallService(
 		ctx, "homeassistant", "turn_on",
-		serviceData, target,
+		serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Toggle a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (ha *HomeAssistant) Toggle(target ga.Target, serviceData any) (websocket.Message, error) {
+func (ha *HomeAssistant) Toggle(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return ha.service.CallService(
+	var result any
+	err := ha.service.CallService(
 		ctx, "homeassistant", "toggle",
-		serviceData, target,
+		serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ha *HomeAssistant) TurnOff(target ga.Target) (websocket.Message, error) {
+func (ha *HomeAssistant) TurnOff(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ha.service.CallService(
+	var result any
+	err := ha.service.CallService(
 		ctx, "homeassistant", "turn_off",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

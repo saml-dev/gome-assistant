@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -19,15 +18,18 @@ func NewClimate(service Service) *Climate {
 	}
 }
 
-func (c Climate) SetFanMode(
-	target ga.Target, fanMode string,
-) (websocket.Message, error) {
+func (c Climate) SetFanMode(target ga.Target, fanMode string) (any, error) {
 	ctx := context.TODO()
-	return c.service.CallService(
+	var result any
+	err := c.service.CallService(
 		ctx, "climate", "set_fan_mode",
 		map[string]any{"fan_mode": fanMode},
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 type SetTemperatureRequest struct {
@@ -56,11 +58,16 @@ func (r *SetTemperatureRequest) ToJSON() map[string]any {
 
 func (c Climate) SetTemperature(
 	target ga.Target, setTemperatureRequest SetTemperatureRequest,
-) (websocket.Message, error) {
+) (any, error) {
 	ctx := context.TODO()
-	return c.service.CallService(
+	var result any
+	err := c.service.CallService(
 		ctx, "climate", "set_temperature",
 		setTemperatureRequest.ToJSON(),
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

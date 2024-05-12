@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 type Notify struct {
@@ -26,7 +25,7 @@ type NotifyRequest struct {
 }
 
 // Send a notification.
-func (ha *Notify) Notify(reqData NotifyRequest) (websocket.Message, error) {
+func (ha *Notify) Notify(reqData NotifyRequest) (any, error) {
 	ctx := context.TODO()
 	serviceData := map[string]any{
 		"message": reqData.Message,
@@ -36,8 +35,13 @@ func (ha *Notify) Notify(reqData NotifyRequest) (websocket.Message, error) {
 		serviceData["data"] = reqData.Data
 	}
 
-	return ha.service.CallService(
+	var result any
+	err := ha.service.CallService(
 		ctx, "notify", reqData.ServiceName,
-		serviceData, ga.Target{},
+		serviceData, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

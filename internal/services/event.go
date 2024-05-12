@@ -27,7 +27,7 @@ type FireEventRequest struct {
 
 // Fire an event. Takes an event type and an optional map that is sent
 // as `event_data`.
-func (e Event) Fire(eventType string, eventData map[string]any) (websocket.Message, error) {
+func (e Event) Fire(eventType string, eventData map[string]any) error {
 	ctx := context.TODO()
 
 	req := FireEventRequest{
@@ -39,5 +39,6 @@ func (e Event) Fire(eventType string, eventData map[string]any) (websocket.Messa
 	req.EventType = eventType
 	req.EventData = eventData
 
-	return e.service.Call(ctx, &req)
+	var result any
+	return e.service.Call(ctx, &req, &result)
 }

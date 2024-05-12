@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -22,24 +21,39 @@ func NewLight(service Service) *Light {
 /* Public API */
 
 // TurnOn a light entity.
-func (l Light) TurnOn(target ga.Target, serviceData any) (websocket.Message, error) {
+func (l Light) TurnOn(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return l.service.CallService(
-		ctx, "light", "turn_on", serviceData, target,
+	var result any
+	err := l.service.CallService(
+		ctx, "light", "turn_on", serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Toggle a light entity.
-func (l Light) Toggle(target ga.Target, serviceData any) (websocket.Message, error) {
+func (l Light) Toggle(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return l.service.CallService(
-		ctx, "light", "toggle", serviceData, target,
+	var result any
+	err := l.service.CallService(
+		ctx, "light", "toggle", serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (l Light) TurnOff(target ga.Target) (websocket.Message, error) {
+func (l Light) TurnOff(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return l.service.CallService(
-		ctx, "light", "turn_off", nil, target,
+	var result any
+	err := l.service.CallService(
+		ctx, "light", "turn_off", nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

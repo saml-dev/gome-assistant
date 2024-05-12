@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -24,14 +23,19 @@ func NewZWaveJS(service Service) *ZWaveJS {
 // ZWaveJS bulk_set_partial_config_parameters service.
 func (zw ZWaveJS) BulkSetPartialConfigParam(
 	target ga.Target, parameter int, value any,
-) (websocket.Message, error) {
+) (any, error) {
 	ctx := context.TODO()
-	return zw.service.CallService(
+	var result any
+	err := zw.service.CallService(
 		ctx, "zwave_js", "bulk_set_partial_config_parameters",
 		map[string]any{
 			"parameter": parameter,
 			"value":     value,
 		},
-		target,
+		target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

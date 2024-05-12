@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -21,17 +20,27 @@ func NewInputButton(service Service) *InputButton {
 
 /* Public API */
 
-func (ib InputButton) Press(target ga.Target) (websocket.Message, error) {
+func (ib InputButton) Press(target ga.Target) (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
+	var result any
+	err := ib.service.CallService(
 		ctx, "input_button", "press",
-		nil, target,
+		nil, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputButton) Reload() (websocket.Message, error) {
+func (ib InputButton) Reload() (any, error) {
 	ctx := context.TODO()
-	return ib.service.CallService(
-		ctx, "input_button", "reload", nil, ga.Target{},
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_button", "reload", nil, ga.Target{}, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

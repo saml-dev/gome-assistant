@@ -4,7 +4,6 @@ import (
 	"context"
 
 	ga "saml.dev/gome-assistant"
-	"saml.dev/gome-assistant/websocket"
 )
 
 /* Structs */
@@ -22,19 +21,29 @@ func NewLock(service Service) *Lock {
 /* Public API */
 
 // Lock a lock entity.
-func (l Lock) Lock(target ga.Target, serviceData any) (websocket.Message, error) {
+func (l Lock) Lock(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return l.service.CallService(
+	var result any
+	err := l.service.CallService(
 		ctx, "lock", "lock",
-		serviceData, target,
+		serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Unlock a lock entity.
-func (l Lock) Unlock(target ga.Target, serviceData any) (websocket.Message, error) {
+func (l Lock) Unlock(target ga.Target, serviceData any) (any, error) {
 	ctx := context.TODO()
-	return l.service.CallService(
+	var result any
+	err := l.service.CallService(
 		ctx, "lock", "unlock",
-		serviceData, target,
+		serviceData, target, &result,
 	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
