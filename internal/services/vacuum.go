@@ -3,131 +3,173 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type Vacuum struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewVacuum(service Service) *Vacuum {
+	return &Vacuum{
+		service: service,
+	}
 }
 
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.
-// Takes an entityId.
-func (v Vacuum) CleanSpot(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "clean_spot"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) CleanSpot(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "clean_spot",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Locate the vacuum cleaner robot.
-// Takes an entityId.
-func (v Vacuum) Locate(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "locate"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) Locate(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "locate",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Pause the cleaning task.
-// Takes an entityId.
-func (v Vacuum) Pause(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "pause"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) Pause(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "pause",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Tell the vacuum cleaner to return to its dock.
-// Takes an entityId.
-func (v Vacuum) ReturnToBase(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "return_to_base"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) ReturnToBase(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "return_to_base",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-// Send a raw command to the vacuum cleaner. Takes an entityId and an optional
-// map that is translated into service_data.
-func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "send_command"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send a raw command to the vacuum cleaner.
+func (v Vacuum) SendCommand(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "send_command",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	v.conn.WriteMessage(req, v.ctx)
+	return result, nil
 }
 
-// Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
-// map that is translated into service_data.
-func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "set_fan_speed"
-
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Set the fan speed of the vacuum cleaner.
+func (v Vacuum) SetFanSpeed(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "set_fan_speed",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	v.conn.WriteMessage(req, v.ctx)
+	return result, nil
 }
 
 // Start or resume the cleaning task.
-// Takes an entityId.
-func (v Vacuum) Start(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "start"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) Start(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "start",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Start, pause, or resume the cleaning task.
-// Takes an entityId.
-func (v Vacuum) StartPause(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "start_pause"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) StartPause(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "start_pause",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Stop the current cleaning task.
-// Takes an entityId.
-func (v Vacuum) Stop(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "stop"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) Stop(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "stop",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Stop the current cleaning task and return to home.
-// Takes an entityId.
-func (v Vacuum) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "turn_off"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) TurnOff(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "turn_off",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Start a new cleaning task.
-// Takes an entityId.
-func (v Vacuum) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "vacuum"
-	req.Service = "turn_on"
-
-	v.conn.WriteMessage(req, v.ctx)
+func (v Vacuum) TurnOn(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := v.service.CallService(
+		ctx, "vacuum", "turn_on",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

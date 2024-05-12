@@ -3,46 +3,71 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type InputNumber struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewInputNumber(service Service) *InputNumber {
+	return &InputNumber{
+		service: service,
+	}
 }
 
 /* Public API */
 
-func (ib InputNumber) Set(entityId string, value float32) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_number"
-	req.Service = "set_value"
-	req.ServiceData = map[string]any{"value": value}
-
-	ib.conn.WriteMessage(req, ib.ctx)
+func (ib InputNumber) Set(target ga.Target, value float32) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_number", "set_value",
+		map[string]any{"value": value},
+		target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputNumber) Increment(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_number"
-	req.Service = "increment"
-
-	ib.conn.WriteMessage(req, ib.ctx)
+func (ib InputNumber) Increment(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_number", "increment",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputNumber) Decrement(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_number"
-	req.Service = "decrement"
-
-	ib.conn.WriteMessage(req, ib.ctx)
+func (ib InputNumber) Decrement(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_number", "decrement",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (ib InputNumber) Reload() {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_number"
-	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+func (ib InputNumber) Reload() (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_number", "reload", nil, ga.Target{}, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

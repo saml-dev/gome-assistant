@@ -1,15 +1,14 @@
-package gomeassistant
+package app
 
 import (
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal"
 )
 
-type ScheduleCallback func(*Service, State)
+type ScheduleCallback func()
 
 type DailySchedule struct {
 	// 0-23
@@ -31,25 +30,25 @@ type DailySchedule struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-func (s DailySchedule) Hash() string {
+func (s *DailySchedule) Hash() string {
 	return fmt.Sprint(s.hour, s.minute, s.callback)
 }
 
 type scheduleBuilder struct {
-	schedule DailySchedule
+	schedule *DailySchedule
 }
 
 type scheduleBuilderCall struct {
-	schedule DailySchedule
+	schedule *DailySchedule
 }
 
 type scheduleBuilderEnd struct {
-	schedule DailySchedule
+	schedule *DailySchedule
 }
 
 func NewDailySchedule() scheduleBuilder {
 	return scheduleBuilder{
-		DailySchedule{
+		&DailySchedule{
 			hour:      0,
 			minute:    0,
 			sunOffset: "0s",
@@ -57,7 +56,7 @@ func NewDailySchedule() scheduleBuilder {
 	}
 }
 
-func (s DailySchedule) String() string {
+func (s *DailySchedule) String() string {
 	return fmt.Sprintf("Schedule{ call %q daily at %s }",
 		internal.GetFunctionName(s.callback),
 		stringHourMinute(s.hour, s.minute),
@@ -113,16 +112,22 @@ func (sb scheduleBuilderEnd) OnlyOnDates(t time.Time, tl ...time.Time) scheduleB
 	return sb
 }
 
-/*
-Enable this schedule only when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
-*/
-func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+// Enable this schedule only when the current state of {entityID}
+// matches {state}. If there is a network error while retrieving
+// state, the schedule runs if {runOnNetworkError} is true.
+func (sb scheduleBuilderEnd) EnabledWhen(
+	entityID, state string, runOnNetworkError bool,
+) scheduleBuilderEnd {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -130,16 +135,22 @@ func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 	return sb
 }
 
-/*
-Disable this schedule when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
-*/
-func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+// Disable this schedule when the current state of {entityID} matches
+// {state}. If there is a network error while retrieving state, the
+// schedule runs if {runOnNetworkError} is true.
+func (sb scheduleBuilderEnd) DisabledWhen(
+	entityID, state string, runOnNetworkError bool,
+) scheduleBuilderEnd {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -147,69 +158,64 @@ func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 	return sb
 }
 
-func (sb scheduleBuilderEnd) Build() DailySchedule {
+func (sb scheduleBuilderEnd) Build() *DailySchedule {
 	return sb.schedule
 }
 
-// app.Start() functions
-func runSchedules(a *App) {
-	if a.schedules.Len() == 0 {
+func (s *DailySchedule) initializeNextRunTime(app *App) {
+	// realStartTime already set for sunset/sunrise
+	if s.isSunrise || s.isSunset {
+		s.nextRunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset).Carbon2Time()
 		return
 	}
 
-	for {
-		sched := popSchedule(a)
+	now := carbon.Now()
+	startTime := carbon.Now().SetTimeMilli(s.hour, s.minute, 0, 0)
 
-		// run callback for all schedules before now in case they overlap
-		for sched.nextRunTime.Before(time.Now()) {
-			sched.maybeRunCallback(a)
-			requeueSchedule(a, sched)
-
-			sched = popSchedule(a)
-		}
-
-		slog.Info("Next schedule", "start_time", sched.nextRunTime)
-		time.Sleep(time.Until(sched.nextRunTime))
-		sched.maybeRunCallback(a)
-		requeueSchedule(a, sched)
+	// advance first scheduled time by frequency until it is in the future
+	if startTime.Lt(now) {
+		startTime = startTime.AddDay()
 	}
+
+	s.nextRunTime = startTime.Carbon2Time()
 }
 
-func (s DailySchedule) maybeRunCallback(a *App) {
+func (s *DailySchedule) getNextRunTime() time.Time {
+	return s.nextRunTime
+}
+
+func (s *DailySchedule) shouldRun(app *App) bool {
 	if c := checkExceptionDates(s.exceptionDates); c.fail {
-		return
+		return false
 	}
 	if c := checkAllowlistDates(s.allowlistDates); c.fail {
-		return
+		return false
 	}
-	if c := checkEnabledEntity(a.state, s.enabledEntities); c.fail {
-		return
+	if c := checkEnabledEntity(app.State, s.enabledEntities); c.fail {
+		return false
 	}
-	if c := checkDisabledEntity(a.state, s.disabledEntities); c.fail {
-		return
+	if c := checkDisabledEntity(app.State, s.disabledEntities); c.fail {
+		return false
 	}
-	go s.callback(a.service, a.state)
+	return true
 }
 
-func popSchedule(a *App) DailySchedule {
-	_sched, _ := a.schedules.Pop()
-	return _sched.(DailySchedule)
+func (s *DailySchedule) run(app *App) {
+	s.callback()
 }
 
-func requeueSchedule(a *App, s DailySchedule) {
+func (s *DailySchedule) updateNextRunTime(app *App) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
 		if s.sunOffset != "0s" {
-			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset)
+			nextSunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset)
 		} else {
-			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise)
+			nextSunTime = getNextSunRiseOrSet(app, s.isSunrise)
 		}
 
 		s.nextRunTime = nextSunTime.Carbon2Time()
 	} else {
 		s.nextRunTime = carbon.Time2Carbon(s.nextRunTime).AddDay().Carbon2Time()
 	}
-
-	a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
 }

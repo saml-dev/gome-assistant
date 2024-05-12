@@ -1,13 +1,14 @@
-package gomeassistant
+package app
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 
 	"saml.dev/gome-assistant/internal"
 )
 
-type IntervalCallback func(*Service, State)
+type IntervalCallback func()
 
 type Interval struct {
 	frequency   time.Duration
@@ -23,28 +24,30 @@ type Interval struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-func (i Interval) Hash() string {
-	return fmt.Sprint(i.startTime, i.endTime, i.frequency, i.callback, i.exceptionDates, i.exceptionRanges)
+func (i *Interval) Hash() string {
+	return fmt.Sprint(
+		i.startTime, i.endTime, i.frequency, i.callback, i.exceptionDates, i.exceptionRanges,
+	)
 }
 
 // Call
 type intervalBuilder struct {
-	interval Interval
+	interval *Interval
 }
 
 // Every
 type intervalBuilderCall struct {
-	interval Interval
+	interval *Interval
 }
 
 // Offset, ExceptionDates, ExceptionRange
 type intervalBuilderEnd struct {
-	interval Interval
+	interval *Interval
 }
 
 func NewInterval() intervalBuilder {
 	return intervalBuilder{
-		Interval{
+		&Interval{
 			frequency: 0,
 			startTime: "00:00",
 			endTime:   "00:00",
@@ -52,7 +55,7 @@ func NewInterval() intervalBuilder {
 	}
 }
 
-func (i Interval) String() string {
+func (i *Interval) String() string {
 	return fmt.Sprintf("Interval{ call %q every %s%s%s }",
 		internal.GetFunctionName(i.callback),
 		i.frequency,
@@ -106,16 +109,22 @@ func (ib intervalBuilderEnd) ExceptionRange(start, end time.Time) intervalBuilde
 	return ib
 }
 
-/*
-Enable this interval only when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
-*/
-func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+// Enable this interval only when the current state of {entityID}
+// matches {state}. If there is a network error while retrieving
+// state, the interval runs if {runOnNetworkError} is true.
+func (ib intervalBuilderEnd) EnabledWhen(
+	entityID, state string, runOnNetworkError bool,
+) intervalBuilderEnd {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -123,16 +132,22 @@ func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 	return ib
 }
 
-/*
-Disable this interval when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
-*/
-func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+// Disable this interval when the current state of {entityID} matches
+// {state}. If there is a network error while retrieving state, the
+// interval runs if {runOnNetworkError} is true.
+func (ib intervalBuilderEnd) DisabledWhen(
+	entityID, state string, runOnNetworkError bool,
+) intervalBuilderEnd {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -140,62 +155,53 @@ func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 	return ib
 }
 
-func (sb intervalBuilderEnd) Build() Interval {
+func (sb intervalBuilderEnd) Build() *Interval {
 	return sb.interval
 }
 
-// app.Start() functions
-func runIntervals(a *App) {
-	if a.intervals.Len() == 0 {
-		return
+func (i *Interval) initializeNextRunTime(app *App) {
+	if i.frequency == 0 {
+		slog.Error("A schedule must use either set frequency via Every()")
+		panic(ErrInvalidArgs)
 	}
 
-	for {
-		i := popInterval(a)
-
-		// run callback for all intervals before now in case they overlap
-		for i.nextRunTime.Before(time.Now()) {
-			i.maybeRunCallback(a)
-			requeueInterval(a, i)
-
-			i = popInterval(a)
-		}
-
-		time.Sleep(time.Until(i.nextRunTime))
-		i.maybeRunCallback(a)
-		requeueInterval(a, i)
+	i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
+	now := time.Now()
+	for i.nextRunTime.Before(now) {
+		i.nextRunTime = i.nextRunTime.Add(i.frequency)
 	}
 }
 
-func (i Interval) maybeRunCallback(a *App) {
+func (i *Interval) getNextRunTime() time.Time {
+	return i.nextRunTime
+}
+
+func (i Interval) shouldRun(app *App) bool {
 	if c := checkStartEndTime(i.startTime /* isStart = */, true); c.fail {
-		return
+		return false
 	}
 	if c := checkStartEndTime(i.endTime /* isStart = */, false); c.fail {
-		return
+		return false
 	}
 	if c := checkExceptionDates(i.exceptionDates); c.fail {
-		return
+		return false
 	}
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
-		return
+		return false
 	}
-	if c := checkEnabledEntity(a.state, i.enabledEntities); c.fail {
-		return
+	if c := checkEnabledEntity(app.State, i.enabledEntities); c.fail {
+		return false
 	}
-	if c := checkDisabledEntity(a.state, i.disabledEntities); c.fail {
-		return
+	if c := checkDisabledEntity(app.State, i.disabledEntities); c.fail {
+		return false
 	}
-	go i.callback(a.service, a.state)
+	return true
 }
 
-func popInterval(a *App) Interval {
-	i, _ := a.intervals.Pop()
-	return i.(Interval)
+func (i *Interval) run(app *App) {
+	i.callback()
 }
 
-func requeueInterval(a *App, i Interval) {
+func (i *Interval) updateNextRunTime(app *App) {
 	i.nextRunTime = i.nextRunTime.Add(i.frequency)
-
-	a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
 }

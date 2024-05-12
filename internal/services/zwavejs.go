@@ -3,27 +3,39 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type ZWaveJS struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewZWaveJS(service Service) *ZWaveJS {
+	return &ZWaveJS{
+		service: service,
+	}
 }
 
 /* Public API */
 
 // ZWaveJS bulk_set_partial_config_parameters service.
-func (zw ZWaveJS) BulkSetPartialConfigParam(entityId string, parameter int, value any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "zwave_js"
-	req.Service = "bulk_set_partial_config_parameters"
-	req.ServiceData = map[string]any{
-		"parameter": parameter,
-		"value":     value,
+func (zw ZWaveJS) BulkSetPartialConfigParam(
+	target ga.Target, parameter int, value any,
+) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := zw.service.CallService(
+		ctx, "zwave_js", "bulk_set_partial_config_parameters",
+		map[string]any{
+			"parameter": parameter,
+			"value":     value,
+		},
+		target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	zw.conn.WriteMessage(req, zw.ctx)
+	return result, nil
 }

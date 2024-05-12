@@ -36,8 +36,8 @@ func ClientFromUri(uri, token string) *HttpClient {
 	}
 }
 
-func (c *HttpClient) GetState(entityId string) ([]byte, error) {
-	resp, err := get(c.url+"/states/"+entityId, c.token)
+func (c *HttpClient) GetState(entityID string) ([]byte, error) {
+	resp, err := get(c.url+"/states/"+entityID, c.token)
 	if err != nil {
 		return nil, err
 	}

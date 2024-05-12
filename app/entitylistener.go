@@ -1,4 +1,4 @@
-package gomeassistant
+package app
 
 import (
 	"encoding/json"
@@ -7,10 +7,11 @@ import (
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type EntityListener struct {
-	entityIds []string
+	entityIDs []string
 	callback  EntityListenerCallback
 	fromState string
 	toState   string
@@ -33,10 +34,10 @@ type EntityListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EntityListenerCallback func(*Service, State, EntityData)
+type EntityListenerCallback func(EntityData)
 
 type EntityData struct {
-	TriggerEntityId string
+	TriggerEntityID string
 	FromState       string
 	FromAttributes  map[string]any
 	ToState         string
@@ -45,8 +46,7 @@ type EntityData struct {
 }
 
 type stateChangedMsg struct {
-	ID    int    `json:"id"`
-	Type  string `json:"type"`
+	websocket.BaseMessage
 	Event struct {
 		Data struct {
 			EntityID string   `json:"entity_id"`
@@ -77,11 +77,11 @@ type elBuilder1 struct {
 	entityListener EntityListener
 }
 
-func (b elBuilder1) EntityIds(entityIds ...string) elBuilder2 {
-	if len(entityIds) == 0 {
-		panic("must pass at least one entityId to EntityIds()")
+func (b elBuilder1) EntityIDs(entityIDs ...string) elBuilder2 {
+	if len(entityIDs) == 0 {
+		panic("must pass at least one entityID to EntityIDs()")
 	} else {
-		b.entityListener.entityIds = entityIds
+		b.entityListener.entityIDs = entityIDs
 	}
 	return elBuilder2(b)
 }
@@ -143,7 +143,9 @@ func (b elBuilder3) ExceptionDates(t time.Time, tl ...time.Time) elBuilder3 {
 }
 
 func (b elBuilder3) ExceptionRange(start, end time.Time) elBuilder3 {
-	b.entityListener.exceptionRanges = append(b.entityListener.exceptionRanges, timeRange{start, end})
+	b.entityListener.exceptionRanges = append(
+		b.entityListener.exceptionRanges, timeRange{start, end},
+	)
 	return b
 }
 
@@ -152,16 +154,20 @@ func (b elBuilder3) RunOnStartup() elBuilder3 {
 	return b
 }
 
-/*
-Enable this listener only when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
-*/
-func (b elBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+// Enable this listener only when the current state of {entityID}
+// matches {state}. If there is a network error while retrieving
+// state, the listener runs if {runOnNetworkError} is true.
+func (b elBuilder3) EnabledWhen(entityID, state string, runOnNetworkError bool) elBuilder3 {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -169,16 +175,20 @@ func (b elBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) 
 	return b
 }
 
-/*
-Disable this listener when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
-*/
-func (b elBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) elBuilder3 {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+// Disable this listener when the current state of {entityID} matches
+// {state}. If there is a network error while retrieving state, the
+// listener runs if {runOnNetworkError} is true.
+func (b elBuilder3) DisabledWhen(entityID, state string, runOnNetworkError bool) elBuilder3 {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in EnabledWhen entityID='%s' state='%s'",
+				entityID, state,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -191,7 +201,8 @@ func (b elBuilder3) Build() EntityListener {
 }
 
 /* Functions */
-func callEntityListeners(app *App, msgBytes []byte) {
+func (app *App) callEntityListeners(chanMsg websocket.Message) {
+	msgBytes := chanMsg.Raw
 	msg := stateChangedMsg{}
 	json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
@@ -233,15 +244,15 @@ func callEntityListeners(app *App, msgBytes []byte) {
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
 			continue
 		}
-		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+		if c := checkEnabledEntity(app.State, l.enabledEntities); c.fail {
 			continue
 		}
-		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+		if c := checkDisabledEntity(app.State, l.disabledEntities); c.fail {
 			continue
 		}
 
 		entityData := EntityData{
-			TriggerEntityId: eid,
+			TriggerEntityID: eid,
 			FromState:       data.OldState.State,
 			FromAttributes:  data.OldState.Attributes,
 			ToState:         data.NewState.State,
@@ -252,14 +263,14 @@ func callEntityListeners(app *App, msgBytes []byte) {
 		if l.delay != 0 {
 			l := l
 			l.delayTimer = time.AfterFunc(l.delay, func() {
-				go l.callback(app.service, app.state, entityData)
+				go l.callback(entityData)
 				l.lastRan = carbon.Now()
 			})
 			continue
 		}
 
 		// run now if no delay set
-		go l.callback(app.service, app.state, entityData)
+		go l.callback(entityData)
 		l.lastRan = carbon.Now()
 	}
 }

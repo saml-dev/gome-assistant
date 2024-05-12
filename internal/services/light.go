@@ -3,47 +3,57 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type Light struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewLight(service Service) *Light {
+	return &Light{
+		service: service,
+	}
 }
 
 /* Public API */
 
-// TurnOn a light entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "light"
-	req.Service = "turn_on"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// TurnOn a light entity.
+func (l Light) TurnOn(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := l.service.CallService(
+		ctx, "light", "turn_on", serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	l.conn.WriteMessage(req, l.ctx)
+	return result, nil
 }
 
-// Toggle a light entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "light"
-	req.Service = "toggle"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Toggle a light entity.
+func (l Light) Toggle(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := l.service.CallService(
+		ctx, "light", "toggle", serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	l.conn.WriteMessage(req, l.ctx)
+	return result, nil
 }
 
-func (l Light) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "light"
-	req.Service = "turn_off"
-	l.conn.WriteMessage(req, l.ctx)
+func (l Light) TurnOff(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := l.service.CallService(
+		ctx, "light", "turn_off", nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

@@ -3,19 +3,22 @@ package services
 import (
 	"context"
 
-	"saml.dev/gome-assistant/internal"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type Event struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewEvent(service Service) *Event {
+	return &Event{
+		service: service,
+	}
 }
 
 // Fire an event
 type FireEventRequest struct {
-	Id        int64          `json:"id"`
-	Type      string         `json:"type"` // always set to "fire_event"
+	websocket.BaseMessage
 	EventType string         `json:"event_type"`
 	EventData map[string]any `json:"event_data,omitempty"`
 }
@@ -24,16 +27,18 @@ type FireEventRequest struct {
 
 // Fire an event. Takes an event type and an optional map that is sent
 // as `event_data`.
-func (e Event) Fire(eventType string, eventData ...map[string]any) {
+func (e Event) Fire(eventType string, eventData map[string]any) error {
+	ctx := context.TODO()
+
 	req := FireEventRequest{
-		Id:   internal.GetId(),
-		Type: "fire_event",
+		BaseMessage: websocket.BaseMessage{
+			Type: "fire_event",
+		},
 	}
 
 	req.EventType = eventType
-	if len(eventData) != 0 {
-		req.EventData = eventData[0]
-	}
+	req.EventData = eventData
 
-	e.conn.WriteMessage(req, e.ctx)
+	var result any
+	return e.service.Call(ctx, &req, &result)
 }

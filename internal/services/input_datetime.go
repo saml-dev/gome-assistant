@@ -5,32 +5,47 @@ import (
 	"fmt"
 	"time"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type InputDatetime struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewInputDatetime(service Service) *InputDatetime {
+	return &InputDatetime{
+		service: service,
+	}
 }
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityId string, value time.Time) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_datetime"
-	req.Service = "set_datetime"
-	req.ServiceData = map[string]any{
-		"timestamp": fmt.Sprint(value.Unix()),
+func (ib InputDatetime) Set(target ga.Target, value time.Time) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_datetime", "set_datetime",
+		map[string]any{
+			"timestamp": fmt.Sprint(value.Unix()),
+		},
+		target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	ib.conn.WriteMessage(req, ib.ctx)
+	return result, nil
 }
 
-func (ib InputDatetime) Reload() {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_datetime"
-	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+func (ib InputDatetime) Reload() (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_datetime", "reload", nil, ga.Target{}, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

@@ -3,112 +3,123 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type AlarmControlPanel struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
 }
 
 /* Public API */
 
-// Send the alarm the command for arm away.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmAway(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_arm_away"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func NewAlarmControlPanel(service Service) *AlarmControlPanel {
+	return &AlarmControlPanel{
+		service: service,
 	}
-
-	acp.conn.WriteMessage(req, acp.ctx)
 }
 
 // Send the alarm the command for arm away.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmWithCustomBypass(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_arm_custom_bypass"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (acp AlarmControlPanel) ArmAway(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_arm_away",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
+	return result, nil
+}
 
-	acp.conn.WriteMessage(req, acp.ctx)
+// Send the alarm the command for arm away.
+// Takes an entityID and an optional
+// map that is translated into service_data.
+func (acp AlarmControlPanel) ArmWithCustomBypass(
+	target ga.Target, serviceData any,
+) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_arm_custom_bypass",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Send the alarm the command for arm home.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmHome(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_arm_home"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (acp AlarmControlPanel) ArmHome(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_arm_home",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	acp.conn.WriteMessage(req, acp.ctx)
+	return result, nil
 }
 
 // Send the alarm the command for arm night.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmNight(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_arm_night"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (acp AlarmControlPanel) ArmNight(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_arm_night",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	acp.conn.WriteMessage(req, acp.ctx)
+	return result, nil
 }
 
 // Send the alarm the command for arm vacation.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmVacation(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_arm_vacation"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (acp AlarmControlPanel) ArmVacation(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_arm_vacation",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	acp.conn.WriteMessage(req, acp.ctx)
+	return result, nil
 }
 
 // Send the alarm the command for disarm.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) Disarm(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_disarm"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (acp AlarmControlPanel) Disarm(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_disarm",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	acp.conn.WriteMessage(req, acp.ctx)
+	return result, nil
 }
 
 // Send the alarm the command for trigger.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) Trigger(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "alarm_control_panel"
-	req.Service = "alarm_trigger"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (acp AlarmControlPanel) Trigger(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := acp.service.CallService(
+		ctx, "alarm_control_panel", "alarm_trigger",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	acp.conn.WriteMessage(req, acp.ctx)
+	return result, nil
 }

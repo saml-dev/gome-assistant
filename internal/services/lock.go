@@ -3,40 +3,47 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type Lock struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewLock(service Service) *Lock {
+	return &Lock{
+		service: service,
+	}
 }
 
 /* Public API */
 
-// Lock a lock entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Lock) Lock(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "lock"
-	req.Service = "lock"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Lock a lock entity.
+func (l Lock) Lock(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := l.service.CallService(
+		ctx, "lock", "lock",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	l.conn.WriteMessage(req, l.ctx)
+	return result, nil
 }
 
-// Unlock a lock entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (l Lock) Unlock(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "lock"
-	req.Service = "unlock"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Unlock a lock entity.
+func (l Lock) Unlock(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := l.service.CallService(
+		ctx, "lock", "unlock",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	l.conn.WriteMessage(req, l.ctx)
+	return result, nil
 }

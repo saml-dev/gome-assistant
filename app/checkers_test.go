@@ -1,4 +1,4 @@
-package gomeassistant
+package app
 
 import (
 	"errors"
@@ -13,6 +13,14 @@ type MockState struct {
 	EqualsError  bool
 	GetReturn    EntityState
 	GetError     bool
+}
+
+func (s MockState) Latitude() float64 {
+	return 0.0
+}
+
+func (s MockState) Longitude() float64 {
+	return 0.0
 }
 
 func (s MockState) AfterSunrise(_ ...DurationString) bool {

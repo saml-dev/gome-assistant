@@ -3,61 +3,74 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type Scene struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewScene(service Service) *Scene {
+	return &Scene{
+		service: service,
+	}
 }
 
 /* Public API */
 
 // Apply a scene. Takes map that is translated into service_data.
-func (s Scene) Apply(serviceData ...map[string]any) {
-	req := NewBaseServiceRequest("")
-	req.Domain = "scene"
-	req.Service = "apply"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (s Scene) Apply(serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "scene", "apply",
+		serviceData, ga.Target{}, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	s.conn.WriteMessage(req, s.ctx)
+	return result, nil
 }
 
-// Create a scene entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (s Scene) Create(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "scene"
-	req.Service = "create"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Create a scene entity.
+func (s Scene) Create(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "scene", "create",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	s.conn.WriteMessage(req, s.ctx)
+	return result, nil
 }
 
 // Reload the scenes.
-func (s Scene) Reload() {
-	req := NewBaseServiceRequest("")
-	req.Domain = "scene"
-	req.Service = "reload"
-
-	s.conn.WriteMessage(req, s.ctx)
+func (s Scene) Reload() (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "scene", "reload", nil, ga.Target{}, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-// TurnOn a scene entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "scene"
-	req.Service = "turn_on"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// TurnOn a scene entity.
+func (s Scene) TurnOn(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "scene", "turn_on",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	s.conn.WriteMessage(req, s.ctx)
+	return result, nil
 }

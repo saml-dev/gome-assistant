@@ -1,4 +1,4 @@
-package gomeassistant
+package app
 
 import (
 	"encoding/json"
@@ -8,15 +8,18 @@ import (
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type State interface {
+	Latitude() float64
+	Longitude() float64
 	AfterSunrise(...DurationString) bool
 	BeforeSunrise(...DurationString) bool
 	AfterSunset(...DurationString) bool
 	BeforeSunset(...DurationString) bool
-	Get(entityId string) (EntityState, error)
-	Equals(entityId, state string) (bool, error)
+	Get(entityID string) (EntityState, error)
+	Equals(entityID, state string) (bool, error)
 }
 
 // State is used to retrieve state from Home Assistant.
@@ -31,21 +34,28 @@ type EntityState struct {
 	State       string         `json:"state"`
 	Attributes  map[string]any `json:"attributes"`
 	LastChanged time.Time      `json:"last_changed"`
+
+	// The whole message, in JSON format:
+	Raw websocket.RawMessage `json:"-"`
 }
 
-func newState(c *http.HttpClient, homeZoneEntityId string) (*StateImpl, error) {
+func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
 	state := &StateImpl{httpClient: c}
-	err := state.getLatLong(c, homeZoneEntityId)
+	err := state.getLatLong(c, homeZoneEntityID)
 	if err != nil {
 		return nil, err
 	}
 	return state, nil
 }
 
-func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
-	resp, err := s.Get(homeZoneEntityId)
+func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityID string) error {
+	resp, err := s.Get(homeZoneEntityID)
 	if err != nil {
-		return fmt.Errorf("couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'", homeZoneEntityId)
+		return fmt.Errorf(
+			"couldn't get latitude/longitude from home assistant entity '%s'. "+
+				"Did you type it correctly? It should be a zone like 'zone.home'",
+			homeZoneEntityID,
+		)
 	}
 
 	if resp.Attributes["latitude"] != nil {
@@ -63,18 +73,27 @@ func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) erro
 	return nil
 }
 
-func (s *StateImpl) Get(entityId string) (EntityState, error) {
-	resp, err := s.httpClient.GetState(entityId)
+func (s *StateImpl) Latitude() float64 {
+	return s.latitude
+}
+
+func (s *StateImpl) Longitude() float64 {
+	return s.longitude
+}
+
+func (s *StateImpl) Get(entityID string) (EntityState, error) {
+	resp, err := s.httpClient.GetState(entityID)
 	if err != nil {
 		return EntityState{}, err
 	}
 	es := EntityState{}
 	json.Unmarshal(resp, &es)
+	es.Raw = resp
 	return es, nil
 }
 
-func (s *StateImpl) Equals(entityId string, expectedState string) (bool, error) {
-	currentState, err := s.Get(entityId)
+func (s *StateImpl) Equals(entityID string, expectedState string) (bool, error) {
+	currentState, err := s.Get(entityID)
 	if err != nil {
 		return false, err
 	}

@@ -3,32 +3,47 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type InputText struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewInputText(service Service) *InputText {
+	return &InputText{
+		service: service,
+	}
 }
 
 /* Public API */
 
-func (ib InputText) Set(entityId string, value string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_text"
-	req.Service = "set_value"
-	req.ServiceData = map[string]any{
-		"value": value,
+func (ib InputText) Set(target ga.Target, value string) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_text", "set_value",
+		map[string]any{
+			"value": value,
+		},
+		target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	ib.conn.WriteMessage(req, ib.ctx)
+	return result, nil
 }
 
-func (ib InputText) Reload() {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_text"
-	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+func (ib InputText) Reload() (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ib.service.CallService(
+		ctx, "input_text", "reload", nil, ga.Target{}, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

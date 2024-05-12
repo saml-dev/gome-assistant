@@ -3,112 +3,161 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type Cover struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewCover(service Service) *Cover {
+	return &Cover{
+		service: service,
+	}
 }
 
 /* Public API */
 
-// Close all or specified cover. Takes an entityId.
-func (c Cover) Close(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "close_cover"
-
-	c.conn.WriteMessage(req, c.ctx)
-}
-
-// Close all or specified cover tilt. Takes an entityId.
-func (c Cover) CloseTilt(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "close_cover_tilt"
-
-	c.conn.WriteMessage(req, c.ctx)
-}
-
-// Open all or specified cover. Takes an entityId.
-func (c Cover) Open(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "open_cover"
-
-	c.conn.WriteMessage(req, c.ctx)
-}
-
-// Open all or specified cover tilt. Takes an entityId.
-func (c Cover) OpenTilt(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "open_cover_tilt"
-
-	c.conn.WriteMessage(req, c.ctx)
-}
-
-// Move to specific position all or specified cover. Takes an entityId and an optional
-// map that is translated into service_data.
-func (c Cover) SetPosition(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "set_cover_position"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Close all or specified cover. Takes an entityID.
+func (c Cover) Close(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "close_cover",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	c.conn.WriteMessage(req, c.ctx)
+	return result, nil
 }
 
-// Move to specific position all or specified cover tilt. Takes an entityId and an optional
-// map that is translated into service_data.
-func (c Cover) SetTiltPosition(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "set_cover_tilt_position"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Close all or specified cover tilt. Takes an entityID.
+func (c Cover) CloseTilt(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "close_cover_tilt",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	c.conn.WriteMessage(req, c.ctx)
+	return result, nil
 }
 
-// Stop a cover entity. Takes an entityId.
-func (c Cover) Stop(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "stop_cover"
-
-	c.conn.WriteMessage(req, c.ctx)
+// Open all or specified cover. Takes an entityID.
+func (c Cover) Open(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "open_cover",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-// Stop a cover entity tilt. Takes an entityId.
-func (c Cover) StopTilt(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "stop_cover_tilt"
-
-	c.conn.WriteMessage(req, c.ctx)
+// Open all or specified cover tilt. Takes an entityID.
+func (c Cover) OpenTilt(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "open_cover_tilt",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-// Toggle a cover open/closed. Takes an entityId.
-func (c Cover) Toggle(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "toggle"
-
-	c.conn.WriteMessage(req, c.ctx)
+// Move to specific position all or specified cover. Takes an entityID and an optional
+// map that is translated into service_data.
+func (c Cover) SetPosition(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "set_cover_position",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-// Toggle a cover tilt open/closed. Takes an entityId.
-func (c Cover) ToggleTilt(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "cover"
-	req.Service = "toggle_cover_tilt"
+// Move to specific position all or specified cover tilt. Takes an entityID and an optional
+// map that is translated into service_data.
+func (c Cover) SetTiltPosition(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "set_cover_tilt_position",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
 
-	c.conn.WriteMessage(req, c.ctx)
+// Stop a cover entity. Takes an entityID.
+func (c Cover) Stop(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "stop_cover",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// Stop a cover entity tilt. Takes an entityID.
+func (c Cover) StopTilt(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "stop_cover_tilt",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// Toggle a cover open/closed. Takes an entityID.
+func (c Cover) Toggle(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "toggle",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// Toggle a cover tilt open/closed. Takes an entityID.
+func (c Cover) ToggleTilt(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := c.service.CallService(
+		ctx, "cover", "toggle_cover_tilt",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

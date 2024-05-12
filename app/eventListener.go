@@ -1,4 +1,4 @@
-package gomeassistant
+package app
 
 import (
 	"encoding/json"
@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
+
 	"saml.dev/gome-assistant/internal"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type EventListener struct {
@@ -25,7 +26,7 @@ type EventListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(*Service, State, EventData)
+type EventListenerCallback func(EventData)
 
 type EventData struct {
 	Type         string
@@ -84,26 +85,38 @@ func (b eventListenerBuilder3) Throttle(s DurationString) eventListenerBuilder3 
 	return b
 }
 
-func (b eventListenerBuilder3) ExceptionDates(t time.Time, tl ...time.Time) eventListenerBuilder3 {
+func (b eventListenerBuilder3) ExceptionDates(
+	t time.Time, tl ...time.Time,
+) eventListenerBuilder3 {
 	b.eventListener.exceptionDates = append(tl, t)
 	return b
 }
 
 func (b eventListenerBuilder3) ExceptionRange(start, end time.Time) eventListenerBuilder3 {
-	b.eventListener.exceptionRanges = append(b.eventListener.exceptionRanges, timeRange{start, end})
+	b.eventListener.exceptionRanges = append(
+		b.eventListener.exceptionRanges,
+		timeRange{start, end},
+	)
 	return b
 }
 
-/*
-Enable this listener only when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
-*/
-func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+// Enable this listener only when the current state of {entityID}
+// matches {state}. If there is a network error while retrieving
+// state, the listener runs if {runOnNetworkError} is true.
+func (b eventListenerBuilder3) EnabledWhen(
+	entityID, state string, runOnNetworkError bool,
+) eventListenerBuilder3 {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in eventListener EnabledWhen "+
+					"entityID='%s' state='%s' runOnNetworkError='%t'",
+				entityID, state, runOnNetworkError,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -111,16 +124,23 @@ func (b eventListenerBuilder3) EnabledWhen(entityId, state string, runOnNetworkE
 	return b
 }
 
-/*
-Disable this listener when the current state of {entityId} matches {state}.
-If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
-*/
-func (b eventListenerBuilder3) DisabledWhen(entityId, state string, runOnNetworkError bool) eventListenerBuilder3 {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in eventListener EnabledWhen entityId='%s' state='%s' runOnNetworkError='%t'", entityId, state, runOnNetworkError))
+// Disable this listener when the current state of {entityID} matches
+// {state}. If there is a network error while retrieving state, the
+// listener runs if {runOnNetworkError} is true.
+func (b eventListenerBuilder3) DisabledWhen(
+	entityID, state string, runOnNetworkError bool,
+) eventListenerBuilder3 {
+	if entityID == "" {
+		panic(
+			fmt.Sprintf(
+				"entityID is empty in eventListener EnabledWhen "+
+					"entityID='%s' state='%s' runOnNetworkError='%t'",
+				entityID, state, runOnNetworkError,
+			),
+		)
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -139,7 +159,7 @@ type BaseEventMsg struct {
 }
 
 /* Functions */
-func callEventListeners(app *App, msg ws.ChanMsg) {
+func (app *App) callEventListeners(msg websocket.Message) {
 	baseEventMsg := BaseEventMsg{}
 	json.Unmarshal(msg.Raw, &baseEventMsg)
 	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]
@@ -162,10 +182,10 @@ func callEventListeners(app *App, msg ws.ChanMsg) {
 		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
 			continue
 		}
-		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+		if c := checkEnabledEntity(app.State, l.enabledEntities); c.fail {
 			continue
 		}
-		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+		if c := checkDisabledEntity(app.State, l.disabledEntities); c.fail {
 			continue
 		}
 
@@ -173,7 +193,7 @@ func callEventListeners(app *App, msg ws.ChanMsg) {
 			Type:         baseEventMsg.Event.EventType,
 			RawEventJSON: msg.Raw,
 		}
-		go l.callback(app.service, app.state, eventData)
+		go l.callback(eventData)
 		l.lastRan = carbon.Now()
 	}
 }

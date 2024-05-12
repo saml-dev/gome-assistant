@@ -3,270 +3,328 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type MediaPlayer struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewMediaPlayer(service Service) *MediaPlayer {
+	return &MediaPlayer{
+		service: service,
+	}
 }
 
 /* Public API */
 
 // Send the media player the command to clear players playlist.
-// Takes an entityId.
-func (mp MediaPlayer) ClearPlaylist(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "clear_playlist"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) ClearPlaylist(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "clear_playlist",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Group players together. Only works on platforms with support for player groups.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "join"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) Join(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "join",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Send the media player the command for next track.
-// Takes an entityId.
-func (mp MediaPlayer) Next(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_next_track"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Next(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_next_track",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Send the media player the command for pause.
-// Takes an entityId.
-func (mp MediaPlayer) Pause(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_pause"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Pause(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_pause",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Send the media player the command for play.
-// Takes an entityId.
-func (mp MediaPlayer) Play(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_play"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Play(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_play",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Toggle media player play/pause state.
-// Takes an entityId.
-func (mp MediaPlayer) PlayPause(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_play_pause"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) PlayPause(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_play_pause",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Send the media player the command for previous track.
-// Takes an entityId.
-func (mp MediaPlayer) Previous(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_previous_track"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Previous(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_previous_track",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Send the media player the command to seek in current playing media.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_seek"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) Seek(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_seek",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Send the media player the stop command.
-// Takes an entityId.
-func (mp MediaPlayer) Stop(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "media_stop"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Stop(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "media_stop",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Send the media player the command for playing media.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "play_media"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) PlayMedia(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "play_media",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
-// Set repeat mode. Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "repeat_set"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Set repeat mode.
+func (mp MediaPlayer) RepeatSet(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "repeat_set",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Send the media player the command to change sound mode.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "select_sound_mode"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) SelectSoundMode(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "select_sound_mode",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Send the media player the command to change input source.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "select_source"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) SelectSource(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "select_source",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Set shuffling state.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "shuffle_set"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) Shuffle(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "shuffle_set",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Toggles a media player power state.
-// Takes an entityId.
-func (mp MediaPlayer) Toggle(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "toggle"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Toggle(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "toggle",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Turn a media player power off.
-// Takes an entityId.
-func (mp MediaPlayer) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "turn_off"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) TurnOff(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "turn_off",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Turn a media player power on.
-// Takes an entityId.
-func (mp MediaPlayer) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "turn_on"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) TurnOn(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "turn_on",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Unjoin the player from a group. Only works on
 // platforms with support for player groups.
-// Takes an entityId.
-func (mp MediaPlayer) Unjoin(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "unjoin"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) Unjoin(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "unjoin",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Turn a media player volume down.
-// Takes an entityId.
-func (mp MediaPlayer) VolumeDown(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "volume_down"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) VolumeDown(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "volume_down",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Mute a media player's volume.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "volume_mute"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) VolumeMute(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "volume_mute",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Set a media player's volume level.
-// Takes an entityId and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "volume_set"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (mp MediaPlayer) VolumeSet(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "volume_set",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	mp.conn.WriteMessage(req, mp.ctx)
+	return result, nil
 }
 
 // Turn a media player volume up.
-// Takes an entityId.
-func (mp MediaPlayer) VolumeUp(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "media_player"
-	req.Service = "volume_up"
-
-	mp.conn.WriteMessage(req, mp.ctx)
+func (mp MediaPlayer) VolumeUp(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := mp.service.CallService(
+		ctx, "media_player", "volume_up",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

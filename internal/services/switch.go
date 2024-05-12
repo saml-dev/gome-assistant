@@ -3,37 +3,58 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 /* Structs */
 
 type Switch struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
+}
+
+func NewSwitch(service Service) *Switch {
+	return &Switch{
+		service: service,
+	}
 }
 
 /* Public API */
 
-func (s Switch) TurnOn(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "switch"
-	req.Service = "turn_on"
-
-	s.conn.WriteMessage(req, s.ctx)
+func (s Switch) TurnOn(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "switch", "turn_on",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (s Switch) Toggle(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "switch"
-	req.Service = "toggle"
-
-	s.conn.WriteMessage(req, s.ctx)
+func (s Switch) Toggle(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "switch", "toggle",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func (s Switch) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "switch"
-	req.Service = "turn_off"
-	s.conn.WriteMessage(req, s.ctx)
+func (s Switch) TurnOff(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := s.service.CallService(
+		ctx, "switch", "turn_off",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

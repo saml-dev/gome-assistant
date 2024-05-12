@@ -102,7 +102,7 @@ func myFunc(se *ga.Service, st *ga.State) {
 Entity Listeners are used to respond to entities changing state. The simplest entity listener looks like:
 
 ```go
-etl := ga.NewEntityListener().EntityIds("binary_sensor.front_door").Call(myFunc).Build()
+etl := ga.NewEntityListener().EntityIDs("binary_sensor.front_door").Call(myFunc).Build()
 ```
 
 Entity listeners have other functions to change the behavior.
@@ -139,7 +139,7 @@ func myFunc(se *ga.Service, st *ga.State, e ga.EntityData) {
 Event Listeners are used to respond to entities changing state. The simplest event listener looks like:
 
 ```go
-evl := ga.NewEntityListener().EntityIds("binary_sensor.front_door").Call(myFunc).Build()
+evl := ga.NewEntityListener().EntityIDs("binary_sensor.front_door").Call(myFunc).Build()
 ```
 
 Event listeners have other functions to change the behavior.

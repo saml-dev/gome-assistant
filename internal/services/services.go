@@ -3,55 +3,17 @@ package services
 import (
 	"context"
 
-	"saml.dev/gome-assistant/internal"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
+	"saml.dev/gome-assistant/websocket"
 )
 
-func BuildService[
-	T AlarmControlPanel |
-		Climate |
-		Cover |
-		Light |
-		HomeAssistant |
-		Lock |
-		MediaPlayer |
-		Switch |
-		InputBoolean |
-		InputButton |
-		InputDatetime |
-		InputText |
-		InputNumber |
-		Event |
-		Notify |
-		Number |
-		Scene |
-		Script |
-		TTS |
-		Vacuum |
-		ZWaveJS,
-](conn *ws.WebsocketWriter, ctx context.Context) *T {
-	return &T{conn: conn, ctx: ctx}
-}
+type Service interface {
+	Call(
+		ctx context.Context, req websocket.Request, result any,
+	) error
 
-type BaseServiceRequest struct {
-	Id          int64          `json:"id"`
-	RequestType string         `json:"type"` // hardcoded "call_service"
-	Domain      string         `json:"domain"`
-	Service     string         `json:"service"`
-	ServiceData map[string]any `json:"service_data,omitempty"`
-	Target      struct {
-		EntityId string `json:"entity_id,omitempty"`
-	} `json:"target,omitempty"`
-}
-
-func NewBaseServiceRequest(entityId string) BaseServiceRequest {
-	id := internal.GetId()
-	bsr := BaseServiceRequest{
-		Id:          id,
-		RequestType: "call_service",
-	}
-	if entityId != "" {
-		bsr.Target.EntityId = entityId
-	}
-	return bsr
+	CallService(
+		ctx context.Context, domain string, service string, serviceData any, target ga.Target,
+		result any,
+	) error
 }

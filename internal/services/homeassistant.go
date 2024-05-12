@@ -3,44 +3,58 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	ga "saml.dev/gome-assistant"
 )
 
 type HomeAssistant struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
 }
 
-// TurnOn a Home Assistant entity. Takes an entityId and an optional
-// map that is translated into service_data.
-func (ha *HomeAssistant) TurnOn(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "homeassistant"
-	req.Service = "turn_on"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func NewHomeAssistant(service Service) *HomeAssistant {
+	return &HomeAssistant{
+		service: service,
 	}
-
-	ha.conn.WriteMessage(req, ha.ctx)
 }
 
-// Toggle a Home Assistant entity. Takes an entityId and an optional
+// TurnOn a Home Assistant entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (ha *HomeAssistant) Toggle(entityId string, serviceData ...map[string]any) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "homeassistant"
-	req.Service = "toggle"
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+func (ha *HomeAssistant) TurnOn(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ha.service.CallService(
+		ctx, "homeassistant", "turn_on",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
 	}
-
-	ha.conn.WriteMessage(req, ha.ctx)
+	return result, nil
 }
 
-func (ha *HomeAssistant) TurnOff(entityId string) {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "homeassistant"
-	req.Service = "turn_off"
+// Toggle a Home Assistant entity. Takes an entityID and an optional
+// map that is translated into service_data.
+func (ha *HomeAssistant) Toggle(target ga.Target, serviceData any) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ha.service.CallService(
+		ctx, "homeassistant", "toggle",
+		serviceData, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
 
-	ha.conn.WriteMessage(req, ha.ctx)
+func (ha *HomeAssistant) TurnOff(target ga.Target) (any, error) {
+	ctx := context.TODO()
+	var result any
+	err := ha.service.CallService(
+		ctx, "homeassistant", "turn_off",
+		nil, target, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

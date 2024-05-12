@@ -3,28 +3,45 @@ package services
 import (
 	"context"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
-	"saml.dev/gome-assistant/types"
+	ga "saml.dev/gome-assistant"
 )
 
 type Notify struct {
-	conn *ws.WebsocketWriter
-	ctx  context.Context
+	service Service
 }
 
-// Send a notification. Takes a types.NotifyRequest.
-func (ha *Notify) Notify(reqData types.NotifyRequest) {
-	req := NewBaseServiceRequest("")
-	req.Domain = "notify"
-	req.Service = reqData.ServiceName
+func NewNotify(service Service) *Notify {
+	return &Notify{
+		service: service,
+	}
+}
 
-	serviceData := map[string]any{}
-	serviceData["message"] = reqData.Message
-	serviceData["title"] = reqData.Title
+type NotifyRequest struct {
+	// Which notify service to call, such as mobile_app_sams_iphone
+	ServiceName string
+	Message     string
+	Title       string
+	Data        map[string]any
+}
+
+// Send a notification.
+func (ha *Notify) Notify(reqData NotifyRequest) (any, error) {
+	ctx := context.TODO()
+	serviceData := map[string]any{
+		"message": reqData.Message,
+		"title":   reqData.Title,
+	}
 	if reqData.Data != nil {
 		serviceData["data"] = reqData.Data
 	}
 
-	req.ServiceData = serviceData
-	ha.conn.WriteMessage(req, ha.ctx)
+	var result any
+	err := ha.service.CallService(
+		ctx, "notify", reqData.ServiceName,
+		serviceData, ga.Target{}, &result,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
