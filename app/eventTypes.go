@@ -1,7 +1,5 @@
 package app
 
-import "time"
-
 type ZWaveJSEventData struct {
 	Domain           string `json:"domain"`
 	NodeID           int    `json:"node_id"`
@@ -17,15 +15,4 @@ type ZWaveJSEventData struct {
 	PropertyKeyName  string `json:"property_key_name"`
 	Value            string `json:"value"`
 	ValueRaw         int    `json:"value_raw"`
-}
-
-type EventZWaveJSValueNotification struct {
-	ID    int    `json:"id"`
-	Type  string `json:"type"`
-	Event struct {
-		EventType string           `json:"event_type"`
-		Data      ZWaveJSEventData `json:"data"`
-		Origin    string           `json:"origin"`
-		TimeFired time.Time        `json:"time_fired"`
-	} `json:"event"`
 }

@@ -26,7 +26,7 @@ type EventListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(EventData)
+type EventListenerCallback func(websocket.Event)
 
 type EventData struct {
 	Type         string
@@ -152,17 +152,11 @@ func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
 
-type BaseEventMsg struct {
-	Event struct {
-		EventType string `json:"event_type"`
-	} `json:"event"`
-}
-
 /* Functions */
 func (app *App) callEventListeners(msg websocket.Message) {
-	baseEventMsg := BaseEventMsg{}
-	json.Unmarshal(msg.Raw, &baseEventMsg)
-	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]
+	var eventMessage websocket.EventMessage
+	json.Unmarshal(msg.Raw, &eventMessage)
+	listeners, ok := app.eventListeners[eventMessage.Event.EventType]
 	if !ok {
 		// no listeners registered for this event type
 		return
@@ -189,11 +183,7 @@ func (app *App) callEventListeners(msg websocket.Message) {
 			continue
 		}
 
-		eventData := EventData{
-			Type:         baseEventMsg.Event.EventType,
-			RawEventJSON: msg.Raw,
-		}
-		go l.callback(eventData)
+		go l.callback(eventMessage.Event)
 		l.lastRan = carbon.Now()
 	}
 }

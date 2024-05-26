@@ -10,6 +10,7 @@ import (
 	ga "saml.dev/gome-assistant"
 	"saml.dev/gome-assistant/app"
 	gaapp "saml.dev/gome-assistant/app"
+	"saml.dev/gome-assistant/websocket"
 )
 
 func main() {
@@ -75,15 +76,14 @@ func pantryLights(app *app.App, sensor gaapp.EntityData) {
 	}
 }
 
-func onEvent(data gaapp.EventData) {
-	// Since the structure of the event changes depending
-	// on the event type, you can Unmarshal the raw json
-	// into a Go type. If a type for your event doesn't
-	// exist, you can write it yourself! PR's welcome to
-	// the eventTypes.go file :)
-	ev := gaapp.EventZWaveJSValueNotification{}
-	json.Unmarshal(data.RawEventJSON, &ev)
-	slog.Info("On event invoked", "event", ev)
+func onEvent(ev websocket.Event) {
+	// Since the structure of the event data changes depending on the
+	// event type, you can Unmarshal the data into a Go type. If a
+	// type for your event doesn't exist, you can write it yourself!
+	// PR's welcome to the eventTypes.go file :)
+	var data gaapp.ZWaveJSEventData
+	json.Unmarshal(ev.RawData, &data)
+	slog.Info("On event invoked", "data", data)
 }
 
 func lightsOut(app *app.App) {
