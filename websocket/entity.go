@@ -7,23 +7,23 @@ import (
 // "state_changed" events are compressed in a rather awkward way.
 // These types help pick them apart.
 
-type Entity struct {
+type Entity[AttributesT any] struct {
 	State       EntityState `json:"state"`
-	Attributes  RawObject   `json:"attributes"`
+	Attributes  AttributesT `json:"attributes"`
 	Context     RawMessage  `json:"context"`
 	LastChanged time.Time   `json:"last_changed"`
 }
 
-type EntityItem struct {
+type EntityItem[AttributesT any] struct {
 	EntityID string `json:"entity_id"`
-	Entity
+	Entity[AttributesT]
 }
 
 // CompressedEntity is similar to `Entity` except that the JSON field
 // names are abbreviated.
-type CompressedEntity struct {
+type CompressedEntity[AttributesT any] struct {
 	State       EntityState `json:"s"`
-	Attributes  RawObject   `json:"a"`
+	Attributes  AttributesT `json:"a"`
 	Context     RawMessage  `json:"c"`
 	LastChanged time.Time   `json:"lc"`
 }

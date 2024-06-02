@@ -11,7 +11,7 @@ import (
 // CompressedEntityChange keeps tracks of fields added and removed as
 // part of a change. Fields that are mutated appear as "additions".
 type CompressedEntityChange struct {
-	Additions CompressedEntity `json:"+,omitempty"`
+	Additions CompressedEntity[RawObject] `json:"+,omitempty"`
 	Removals  struct {
 		Attributes []string `json:"a"`
 		Context    []string `json:"c"`
@@ -21,22 +21,23 @@ type CompressedEntityChange struct {
 type CompressedStateChangedMessage struct {
 	BaseMessage
 	Event struct {
-		Added   map[string]CompressedEntity       `json:"a,omitempty"`
-		Changed map[string]CompressedEntityChange `json:"c,omitempty"`
-		Removed []string                          `json:"r,omitempty"`
+		Added   map[string]CompressedEntity[RawObject] `json:"a,omitempty"`
+		Changed map[string]CompressedEntityChange      `json:"c,omitempty"`
+		Removed []string                               `json:"r,omitempty"`
 	} `json:"event"`
 }
 
 // Apply applies the changes indicated in `msg` to the entity with the
 // specified `entityID` whose old state was `oldState`, returning the
-// new state.
+// new state. If the entity was removed altogether, the return value
+// is an empty entity.
 func (msg CompressedStateChangedMessage) Apply(
-	entityID string, oldState Entity,
-) (Entity, error) {
+	entityID string, oldState Entity[RawObject],
+) (Entity[RawObject], error) {
 	if state, ok := msg.Event.Added[entityID]; ok {
 		// This entityID was added. The new state was right there in
 		// the message.
-		return Entity(state), nil
+		return Entity[RawObject](state), nil
 	}
 	if change, ok := msg.Event.Changed[entityID]; ok {
 		state := oldState.State
@@ -44,7 +45,7 @@ func (msg CompressedStateChangedMessage) Apply(
 			state = change.Additions.State
 		}
 		// The existing entry has had some fields changed.
-		return Entity{
+		return Entity[RawObject]{
 			State: state,
 			Attributes: mergeMaps(
 				oldState.Attributes,
@@ -62,7 +63,7 @@ func (msg CompressedStateChangedMessage) Apply(
 	}
 	for _, eid := range msg.Event.Removed {
 		if eid == entityID {
-			return Entity{}, nil
+			return Entity[RawObject]{}, nil
 		}
 	}
 	return oldState, nil
