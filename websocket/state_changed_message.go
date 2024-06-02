@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"log/slog"
+	"time"
 )
 
 // "state_changed" events are compressed in a rather awkward way.
@@ -12,7 +13,7 @@ type EntityState struct {
 	State       RawMessage            `json:"state"`
 	Attributes  map[string]RawMessage `json:"attributes"`
 	Context     RawMessage            `json:"context"`
-	LastChanged RawMessage            `json:"last_changed"`
+	LastChanged time.Time             `json:"last_changed"`
 }
 
 type EntityStateItem struct {
@@ -27,7 +28,7 @@ type CompressedEntityState struct {
 	State       RawMessage            `json:"s"`
 	Attributes  map[string]RawMessage `json:"a"`
 	Context     RawMessage            `json:"c"`
-	LastChanged RawMessage            `json:"lc"`
+	LastChanged time.Time             `json:"lc"`
 }
 
 // CompressedEntityChange keeps tracks of fields added and removed as
