@@ -8,10 +8,10 @@ import (
 // These types help pick them apart.
 
 type Entity struct {
-	State       EntityState           `json:"state"`
-	Attributes  map[string]RawMessage `json:"attributes"`
-	Context     RawMessage            `json:"context"`
-	LastChanged time.Time             `json:"last_changed"`
+	State       EntityState `json:"state"`
+	Attributes  RawObject   `json:"attributes"`
+	Context     RawMessage  `json:"context"`
+	LastChanged time.Time   `json:"last_changed"`
 }
 
 type EntityItem struct {
@@ -22,10 +22,10 @@ type EntityItem struct {
 // CompressedEntity is similar to `Entity` except that the JSON field
 // names are abbreviated.
 type CompressedEntity struct {
-	State       EntityState           `json:"s"`
-	Attributes  map[string]RawMessage `json:"a"`
-	Context     RawMessage            `json:"c"`
-	LastChanged time.Time             `json:"lc"`
+	State       EntityState `json:"s"`
+	Attributes  RawObject   `json:"a"`
+	Context     RawMessage  `json:"c"`
+	LastChanged time.Time   `json:"lc"`
 }
 
 // EntityState is the state of an entity ( // E.g., "on", "off",

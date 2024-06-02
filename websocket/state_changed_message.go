@@ -68,8 +68,8 @@ func (msg CompressedStateChangedMessage) Apply(
 	return oldState, nil
 }
 
-func mergeMaps(old, additions map[string]RawMessage, removals []string) map[string]RawMessage {
-	new := make(map[string]RawMessage, len(old)+len(additions)-len(removals))
+func mergeMaps(old, additions RawObject, removals []string) RawObject {
+	new := make(RawObject, len(old)+len(additions)-len(removals))
 	for k, v := range old {
 		new[k] = v
 	}
@@ -94,7 +94,7 @@ func mergeContexts(old, additions RawMessage, removals []string) RawMessage {
 		return old
 	case old[0] == '{':
 		// The context is an object.
-		var contextMap map[string]RawMessage
+		var contextMap RawObject
 		if err := json.Unmarshal(old, &contextMap); err != nil {
 			slog.Error("cannot unmarshal old context",
 				"old", string(old),
@@ -102,7 +102,7 @@ func mergeContexts(old, additions RawMessage, removals []string) RawMessage {
 			)
 			return additions
 		}
-		var addMap map[string]RawMessage
+		var addMap RawObject
 		if len(additions) != 0 {
 			if err := json.Unmarshal(additions, &addMap); err != nil {
 				slog.Error("cannot unmarshal additions",

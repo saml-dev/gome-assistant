@@ -24,3 +24,6 @@ func (m *RawMessage) UnmarshalJSON(data []byte) error {
 func (rm RawMessage) String() string {
 	return string(rm)
 }
+
+// RawObject is a minimally-parsed representation of a JSON object.
+type RawObject map[string]RawMessage
