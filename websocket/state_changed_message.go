@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
+	"fmt"
 	"log/slog"
 )
 
@@ -27,46 +28,86 @@ type CompressedStateChangedMessage struct {
 	} `json:"event"`
 }
 
-// Apply applies the changes indicated in `msg` to the entity with the
-// specified `entityID` whose old state was `oldState`, returning the
-// new state. If the entity was removed altogether, the return value
-// is an empty entity.
-func (msg CompressedStateChangedMessage) Apply(
-	entityID string, oldState Entity[RawObject],
-) (Entity[RawObject], error) {
-	if state, ok := msg.Event.Added[entityID]; ok {
-		// This entityID was added. The new state was right there in
-		// the message.
-		return Entity[RawObject](state), nil
-	}
-	if change, ok := msg.Event.Changed[entityID]; ok {
-		state := oldState.State
-		if len(change.Additions.State) != 0 {
-			state = change.Additions.State
-		}
-		// The existing entry has had some fields changed.
-		return Entity[RawObject]{
-			State: state,
-			Attributes: mergeMaps(
-				oldState.Attributes,
-				change.Additions.Attributes,
-				change.Removals.Attributes,
-			),
-			// FIXME: apparently, context can also be a single string.
-			Context: mergeContexts(
-				oldState.Context,
-				change.Additions.Context,
-				change.Removals.Context,
-			),
-			LastChanged: change.Additions.LastChanged,
-		}, nil
-	}
+// ApplyChange applies the changes indicated in `msg` to the entity with the
+// specified `entityID` and whose old state was `oldEntity`, returning the
+// new entity. If the entity was removed altogether, return an empty
+// entity.
+//
+// Because the entity being changed might not store its attributes as
+// a generic `RawObject`, we have to do the conversion in an awkward
+// way to avoiding needing specialized code for each `AttributeT`:
+
+//  1. Convert the old attributes from an `AttributeT` into a
+//     `RawObject`;
+//  2. Apply the attribute changes to the `RawObject`;
+//  3. Convert the updated `RawObject` back into an `AttributeT`.
+func ApplyChange[AttributeT any](
+	msg CompressedStateChangedMessage,
+	entityID string, oldEntity Entity[AttributeT],
+) (Entity[AttributeT], error) {
 	for _, eid := range msg.Event.Removed {
 		if eid == entityID {
-			return Entity[RawObject]{}, nil
+			return Entity[AttributeT]{}, nil
 		}
 	}
-	return oldState, nil
+
+	if entity, ok := msg.Event.Added[entityID]; ok {
+		// This entityID was added. The new state was right there in
+		// the message.
+		var newAttributes AttributeT
+		if err := convertTypes(&newAttributes, entity.Attributes); err != nil {
+			return Entity[AttributeT]{}, fmt.Errorf(
+				"converting the added attributes: %w", err,
+			)
+		}
+		return Entity[AttributeT]{
+			State:      entity.State,
+			Attributes: newAttributes,
+			// FIXME: apparently, context can also be a single string.
+			Context:     entity.Context,
+			LastChanged: entity.LastChanged,
+		}, nil
+	}
+
+	change, ok := msg.Event.Changed[entityID]
+	if !ok {
+		// There were no changes.
+		return oldEntity, nil
+	}
+
+	// The existing entry has had some fields changed. Apply them to
+	// `entity` to produce the new entity:
+
+	newEntity := Entity[AttributeT]{
+		State: oldEntity.State,
+		Context: mergeContexts(
+			oldEntity.Context,
+			change.Additions.Context,
+			change.Removals.Context,
+		),
+		LastChanged: change.Additions.LastChanged,
+	}
+
+	if change.Additions.State != "" {
+		newEntity.State = change.Additions.State
+	}
+
+	var oldAttributes RawObject
+	if err := convertTypes(&oldAttributes, oldEntity.Attributes); err != nil {
+		return Entity[AttributeT]{}, fmt.Errorf("converting the old attributes: %w", err)
+	}
+
+	attributes := mergeMaps(
+		oldAttributes,
+		change.Additions.Attributes,
+		change.Removals.Attributes,
+	)
+
+	if err := convertTypes(&newEntity.Attributes, attributes); err != nil {
+		return Entity[AttributeT]{}, fmt.Errorf("converting the new attributes: %w", err)
+	}
+
+	return newEntity, nil
 }
 
 func mergeMaps(old, additions RawObject, removals []string) RawObject {
@@ -126,4 +167,22 @@ func mergeContexts(old, additions RawMessage, removals []string) RawMessage {
 	default:
 		return old
 	}
+}
+
+// Convert `src` to `dst` (which can be of two different types) by
+// serializing to JSON then deserializing. `src` must be something
+// that can be passed to `json.Marshal()`, and `dst` must be something
+// that can be passed to `json.Unmarshal()` (i.e., typically a
+// pointer).
+func convertTypes(dst any, src any) error {
+	b, err := json.Marshal(src)
+	if err != nil {
+		return fmt.Errorf("serializing src: %w", err)
+	}
+
+	if err := json.Unmarshal(b, dst); err != nil {
+		return fmt.Errorf("deserializing to dst: %w", err)
+	}
+
+	return nil
 }
