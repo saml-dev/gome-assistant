@@ -9,22 +9,21 @@ import (
 // "state_changed" events are compressed in a rather awkward way.
 // These types help pick them apart.
 
-type EntityState struct {
+type Entity struct {
 	State       RawMessage            `json:"state"`
 	Attributes  map[string]RawMessage `json:"attributes"`
 	Context     RawMessage            `json:"context"`
 	LastChanged time.Time             `json:"last_changed"`
 }
 
-type EntityStateItem struct {
+type EntityItem struct {
 	EntityID string `json:"entity_id"`
-	EntityState
+	Entity
 }
 
-// CompressedEntityState is similar to `EntityState` except that it
-// doesn't include the entity ID and the JSON field names are
-// abbreviated.
-type CompressedEntityState struct {
+// CompressedEntity is similar to `Entity` except that the JSON field
+// names are abbreviated.
+type CompressedEntity struct {
 	State       RawMessage            `json:"s"`
 	Attributes  map[string]RawMessage `json:"a"`
 	Context     RawMessage            `json:"c"`
@@ -34,7 +33,7 @@ type CompressedEntityState struct {
 // CompressedEntityChange keeps tracks of fields added and removed as
 // part of a change. Fields that are mutated appear as "additions".
 type CompressedEntityChange struct {
-	Additions CompressedEntityState `json:"+,omitempty"`
+	Additions CompressedEntity `json:"+,omitempty"`
 	Removals  struct {
 		Attributes []string `json:"a"`
 		Context    []string `json:"c"`
@@ -44,7 +43,7 @@ type CompressedEntityChange struct {
 type CompressedStateChangedMessage struct {
 	BaseMessage
 	Event struct {
-		Added   map[string]CompressedEntityState  `json:"a,omitempty"`
+		Added   map[string]CompressedEntity       `json:"a,omitempty"`
 		Changed map[string]CompressedEntityChange `json:"c,omitempty"`
 		Removed []string                          `json:"r,omitempty"`
 	} `json:"event"`
@@ -54,12 +53,12 @@ type CompressedStateChangedMessage struct {
 // specified `entityID` whose old state was `oldState`, returning the
 // new state.
 func (msg CompressedStateChangedMessage) Apply(
-	entityID string, oldState EntityState,
-) (EntityState, error) {
+	entityID string, oldState Entity,
+) (Entity, error) {
 	if state, ok := msg.Event.Added[entityID]; ok {
 		// This entityID was added. The new state was right there in
 		// the message.
-		return EntityState(state), nil
+		return Entity(state), nil
 	}
 	if change, ok := msg.Event.Changed[entityID]; ok {
 		state := oldState.State
@@ -67,7 +66,7 @@ func (msg CompressedStateChangedMessage) Apply(
 			state = change.Additions.State
 		}
 		// The existing entry has had some fields changed.
-		return EntityState{
+		return Entity{
 			State: state,
 			Attributes: mergeMaps(
 				oldState.Attributes,
@@ -85,7 +84,7 @@ func (msg CompressedStateChangedMessage) Apply(
 	}
 	for _, eid := range msg.Event.Removed {
 		if eid == entityID {
-			return EntityState{}, nil
+			return Entity{}, nil
 		}
 	}
 	return oldState, nil
