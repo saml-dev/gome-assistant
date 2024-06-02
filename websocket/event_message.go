@@ -1,7 +1,7 @@
 package websocket
 
 type EventContext struct {
-	ID       string  `json:"id"`
+	ID       *string `json:"id"`
 	UserID   *string `json:"user_id"`
 	ParentID *string `json:"parent_id"`
 }
