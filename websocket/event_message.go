@@ -1,5 +1,7 @@
 package websocket
 
+import "time"
+
 type EventContext struct {
 	ID       *string `json:"id"`
 	UserID   *string `json:"user_id"`
@@ -9,7 +11,7 @@ type EventContext struct {
 type BaseEvent struct {
 	EventType string       `json:"event_type"`
 	Origin    string       `json:"origin"`
-	TimeFired string       `json:"time_fired"`
+	TimeFired time.Time    `json:"time_fired"`
 	Context   EventContext `json:"context"`
 }
 
