@@ -10,7 +10,7 @@ import (
 type Entity[AttributesT any] struct {
 	State       EntityState `json:"state"`
 	Attributes  AttributesT `json:"attributes"`
-	Context     RawMessage  `json:"context"`
+	Context     Context     `json:"context"`
 	LastChanged time.Time   `json:"last_changed"`
 }
 
@@ -24,7 +24,7 @@ type EntityItem[AttributesT any] struct {
 type CompressedEntity[AttributesT any] struct {
 	State       EntityState `json:"s"`
 	Attributes  AttributesT `json:"a"`
-	Context     RawMessage  `json:"c"`
+	Context     Context     `json:"c"`
 	LastChanged time.Time   `json:"lc"`
 }
 

@@ -3,7 +3,6 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
 )
 
 // "state_changed" events are compressed in a rather awkward way.
@@ -124,49 +123,31 @@ func mergeMaps(old, additions RawObject, removals []string) RawObject {
 	return new
 }
 
-func mergeContexts(old, additions RawMessage, removals []string) RawMessage {
-	switch {
-	case len(old) == 0:
-		return additions
-	case old[0] == '"':
-		// The context is a single string.
-		if len(additions) != 0 {
-			return additions
-		}
-		return old
-	case old[0] == '{':
-		// The context is an object.
-		var contextMap RawObject
-		if err := json.Unmarshal(old, &contextMap); err != nil {
-			slog.Error("cannot unmarshal old context",
-				"old", string(old),
-				"error", err,
-			)
-			return additions
-		}
-		var addMap RawObject
-		if len(additions) != 0 {
-			if err := json.Unmarshal(additions, &addMap); err != nil {
-				slog.Error("cannot unmarshal additions",
-					"additions", string(additions),
-					"error", err,
-				)
-				return old
-			}
-		}
-		newMap := mergeMaps(contextMap, addMap, removals)
-		newContext, err := json.Marshal(newMap)
-		if err != nil {
-			slog.Error("cannot marshal new context",
-				"context", newMap,
-				"error", err,
-			)
-			return old
-		}
-		return newContext
-	default:
-		return old
+func mergeContexts(context, additions Context, removals []string) Context {
+	// Adjust context for any additions:
+	if additions.ID != nil {
+		context.ID = additions.ID
 	}
+	if additions.UserID != nil {
+		context.UserID = additions.UserID
+	}
+	if additions.ParentID != nil {
+		context.ParentID = additions.ParentID
+	}
+
+	// Adjust context for any removals:
+	for _, key := range removals {
+		switch key {
+		case "user_id":
+			context.UserID = nil
+		case "id":
+			context.ID = nil
+		case "parent_id":
+			context.ParentID = nil
+		}
+	}
+
+	return context
 }
 
 // Convert `src` to `dst` (which can be of two different types) by
