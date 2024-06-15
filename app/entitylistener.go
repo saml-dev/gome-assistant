@@ -42,7 +42,7 @@ type EntityData struct {
 	FromAttributes  map[string]any
 	ToState         string
 	ToAttributes    map[string]any
-	LastChanged     time.Time
+	LastChanged     websocket.TimeStamp
 }
 
 type stateChangedMsg struct {
@@ -59,10 +59,10 @@ type stateChangedMsg struct {
 }
 
 type msgState struct {
-	EntityID    string         `json:"entity_id"`
-	LastChanged time.Time      `json:"last_changed"`
-	State       string         `json:"state"`
-	Attributes  map[string]any `json:"attributes"`
+	EntityID    string              `json:"entity_id"`
+	LastChanged websocket.TimeStamp `json:"last_changed"`
+	State       string              `json:"state"`
+	Attributes  map[string]any      `json:"attributes"`
 }
 
 /* Methods */

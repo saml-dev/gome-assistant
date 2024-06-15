@@ -1,9 +1,5 @@
 package websocket
 
-import (
-	"time"
-)
-
 // "state_changed" events are compressed in a rather awkward way.
 // These types help pick them apart.
 
@@ -11,7 +7,7 @@ type Entity[AttributesT any] struct {
 	State       EntityState `json:"state"`
 	Attributes  AttributesT `json:"attributes"`
 	Context     Context     `json:"context"`
-	LastChanged time.Time   `json:"last_changed"`
+	LastChanged TimeStamp   `json:"last_changed"`
 }
 
 type EntityItem[AttributesT any] struct {
@@ -25,7 +21,7 @@ type CompressedEntity[AttributesT any] struct {
 	State       EntityState `json:"s"`
 	Attributes  AttributesT `json:"a"`
 	Context     Context     `json:"c"`
-	LastChanged time.Time   `json:"lc"`
+	LastChanged TimeStamp   `json:"lc"`
 }
 
 // EntityState is the state of an entity ( // E.g., "on", "off",

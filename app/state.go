@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/golang-module/carbon"
 	"saml.dev/gome-assistant/internal/http"
@@ -30,10 +29,10 @@ type StateImpl struct {
 }
 
 type EntityState struct {
-	EntityID    string         `json:"entity_id"`
-	State       string         `json:"state"`
-	Attributes  map[string]any `json:"attributes"`
-	LastChanged time.Time      `json:"last_changed"`
+	EntityID    string              `json:"entity_id"`
+	State       string              `json:"state"`
+	Attributes  map[string]any      `json:"attributes"`
+	LastChanged websocket.TimeStamp `json:"last_changed"`
 
 	// The whole message, in JSON format:
 	Raw websocket.RawMessage `json:"-"`
