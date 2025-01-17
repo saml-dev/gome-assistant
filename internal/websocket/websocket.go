@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+
 	i "saml.dev/gome-assistant/internal"
 )
 
@@ -29,19 +30,14 @@ type WebsocketWriter struct {
 	mutex sync.Mutex
 }
 
-func (w *WebsocketWriter) WriteMessage(msg interface{}, ctx context.Context) error {
+func (w *WebsocketWriter) WriteMessage(msg any) error {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 
-	err := w.Conn.WriteJSON(msg)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return w.Conn.WriteJSON(msg)
 }
 
-func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
+func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 	_, msg, err := conn.ReadMessage()
 	if err != nil {
 		return []byte{}, err
@@ -72,7 +68,7 @@ func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context,
 	}
 
 	// Read auth_required message
-	_, err = ReadMessage(conn, ctx)
+	_, err = ReadMessage(conn)
 	if err != nil {
 		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
@@ -112,7 +108,7 @@ type authResponse struct {
 }
 
 func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
-	msg, err := ReadMessage(conn, ctx)
+	msg, err := ReadMessage(conn)
 	if err != nil {
 		return err
 	}
@@ -149,7 +145,7 @@ func SubscribeToEventType(eventType string, conn *WebsocketWriter, ctx context.C
 		Type:      "subscribe_events",
 		EventType: eventType,
 	}
-	err := conn.WriteMessage(e, ctx)
+	err := conn.WriteMessage(e)
 	if err != nil {
 		wrappedErr := fmt.Errorf("error writing to websocket: %w", err)
 		slog.Error(wrappedErr.Error())

@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,12 +8,11 @@ import (
 
 type InputText struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
-func (ib InputText) Set(entityId string, value string) {
+func (ib InputText) Set(entityId string, value string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "input_text"
 	req.Service = "set_value"
@@ -23,12 +20,12 @@ func (ib InputText) Set(entityId string, value string) {
 		"value": value,
 	}
 
-	ib.conn.WriteMessage(req, ib.ctx)
+	return ib.conn.WriteMessage(req)
 }
 
-func (ib InputText) Reload() {
+func (ib InputText) Reload() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_text"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+	return ib.conn.WriteMessage(req)
 }

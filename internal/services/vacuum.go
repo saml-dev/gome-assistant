@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,54 +8,53 @@ import (
 
 type Vacuum struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.
 // Takes an entityId.
-func (v Vacuum) CleanSpot(entityId string) {
+func (v Vacuum) CleanSpot(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "clean_spot"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Locate the vacuum cleaner robot.
 // Takes an entityId.
-func (v Vacuum) Locate(entityId string) {
+func (v Vacuum) Locate(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "locate"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Pause the cleaning task.
 // Takes an entityId.
-func (v Vacuum) Pause(entityId string) {
+func (v Vacuum) Pause(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "pause"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Tell the vacuum cleaner to return to its dock.
 // Takes an entityId.
-func (v Vacuum) ReturnToBase(entityId string) {
+func (v Vacuum) ReturnToBase(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "return_to_base"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Send a raw command to the vacuum cleaner. Takes an entityId and an optional
 // map that is translated into service_data.
-func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
+func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "send_command"
@@ -65,12 +62,12 @@ func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
 // map that is translated into service_data.
-func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
+func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "set_fan_speed"
@@ -79,55 +76,55 @@ func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Start or resume the cleaning task.
 // Takes an entityId.
-func (v Vacuum) Start(entityId string) {
+func (v Vacuum) Start(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "start"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Start, pause, or resume the cleaning task.
 // Takes an entityId.
-func (v Vacuum) StartPause(entityId string) {
+func (v Vacuum) StartPause(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "start_pause"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Stop the current cleaning task.
 // Takes an entityId.
-func (v Vacuum) Stop(entityId string) {
+func (v Vacuum) Stop(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "stop"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Stop the current cleaning task and return to home.
 // Takes an entityId.
-func (v Vacuum) TurnOff(entityId string) {
+func (v Vacuum) TurnOff(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "turn_off"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }
 
 // Start a new cleaning task.
 // Takes an entityId.
-func (v Vacuum) TurnOn(entityId string) {
+func (v Vacuum) TurnOn(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "vacuum"
 	req.Service = "turn_on"
 
-	v.conn.WriteMessage(req, v.ctx)
+	return v.conn.WriteMessage(req)
 }

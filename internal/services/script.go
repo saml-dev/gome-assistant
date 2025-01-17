@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,43 +8,42 @@ import (
 
 type Script struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
 // Reload a script that was created in the HA UI.
-func (s Script) Reload(entityId string) {
+func (s Script) Reload(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "script"
 	req.Service = "reload"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
 // Toggle a script that was created in the HA UI.
-func (s Script) Toggle(entityId string) {
+func (s Script) Toggle(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "script"
 	req.Service = "toggle"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
-// Turn off a script that was created in the HA UI.
-func (s Script) TurnOff() {
+// TurnOff a script that was created in the HA UI.
+func (s Script) TurnOff() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "script"
 	req.Service = "turn_off"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
-// Turn on a script that was created in the HA UI.
-func (s Script) TurnOn(entityId string) {
+// TurnOn a script that was created in the HA UI.
+func (s Script) TurnOn(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "script"
 	req.Service = "turn_on"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }

@@ -1,19 +1,16 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 	"saml.dev/gome-assistant/types"
 )
 
 type Notify struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
-// Send a notification. Takes a types.NotifyRequest.
-func (ha *Notify) Notify(reqData types.NotifyRequest) {
+// Notify sends a notification. Takes a types.NotifyRequest.
+func (ha *Notify) Notify(reqData types.NotifyRequest) error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "notify"
 	req.Service = reqData.ServiceName
@@ -26,5 +23,5 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) {
 	}
 
 	req.ServiceData = serviceData
-	ha.conn.WriteMessage(req, ha.ctx)
+	return ha.conn.WriteMessage(req)
 }

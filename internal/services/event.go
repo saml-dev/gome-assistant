@@ -1,15 +1,12 @@
 package services
 
 import (
-	"context"
-
 	"saml.dev/gome-assistant/internal"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
 type Event struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 // Fire an event
@@ -24,7 +21,7 @@ type FireEventRequest struct {
 
 // Fire an event. Takes an event type and an optional map that is sent
 // as `event_data`.
-func (e Event) Fire(eventType string, eventData ...map[string]any) {
+func (e Event) Fire(eventType string, eventData ...map[string]any) error {
 	req := FireEventRequest{
 		Id:   internal.GetId(),
 		Type: "fire_event",
@@ -35,5 +32,5 @@ func (e Event) Fire(eventType string, eventData ...map[string]any) {
 		req.EventData = eventData[0]
 	}
 
-	e.conn.WriteMessage(req, e.ctx)
+	return e.conn.WriteMessage(req)
 }
