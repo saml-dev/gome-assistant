@@ -1,6 +1,6 @@
 module example
 
-go 1.21
+go 1.23
 
 require (
 	github.com/golang-cz/devslog v0.0.8

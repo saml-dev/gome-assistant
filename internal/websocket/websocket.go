@@ -10,10 +10,12 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
+
 	i "saml.dev/gome-assistant/internal"
 )
 
@@ -49,25 +51,24 @@ func ReadMessage(conn *websocket.Conn, ctx context.Context) ([]byte, error) {
 	return msg, nil
 }
 
-func SetupConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
-	uri := fmt.Sprintf("ws://%s:%s/api/websocket", ip, port)
-	return ConnectionFromUri(uri, authToken)
-}
-
-func SetupSecureConnection(ip, port, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
-	uri := fmt.Sprintf("wss://%s:%s/api/websocket", ip, port)
-	return ConnectionFromUri(uri, authToken)
-}
-
-func ConnectionFromUri(uri, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
+func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
+
+	// Shallow copy the URL to avoid modifying the original
+	urlWebsockets := *baseURL
+	if baseURL.Scheme == "http" {
+		urlWebsockets.Scheme = "ws"
+	}
+	if baseURL.Scheme == "https" {
+		urlWebsockets.Scheme = "wss"
+	}
 
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.DialContext(ctx, uri, nil)
+	conn, _, err := dialer.DialContext(ctx, urlWebsockets.String(), nil)
 	if err != nil {
 		ctxCancel()
-		slog.Error("Failed to connect to websocket. Check URI\n", "uri", uri)
+		slog.Error("Failed to connect to websocket. Check URI\n", "url", urlWebsockets)
 		return nil, nil, nil, err
 	}
 

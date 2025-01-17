@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	"encoding/json"
@@ -11,12 +11,12 @@ import (
 
 func main() {
 	app, err := ga.NewApp(ga.NewAppRequest{
-		IpAddress:        "192.168.86.67", // Replace with your Home Assistant IP Address
+		URL:              "http://192.168.86.67:8123", // Replace with your Home Assistant IP Address
 		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
 		HomeZoneEntityId: "zone.home",
 	})
 	if err != nil {
-		slog.Error("Error connecting to HASS:", err)
+		slog.Error("Error connecting to HASS:", "error", err)
 		os.Exit(1)
 	}
 

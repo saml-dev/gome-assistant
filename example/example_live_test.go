@@ -1,4 +1,4 @@
-package example
+package main
 
 import (
 	"log/slog"
@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gopkg.in/yaml.v3"
+
 	ga "saml.dev/gome-assistant"
 )
 
@@ -52,13 +53,13 @@ func (s *MySuite) SetupSuite() {
 
 	configFile, err := os.ReadFile("./config.yaml")
 	if err != nil {
-		slog.Error("Error reading config file", err)
+		slog.Error("Error reading config file", "error", err)
 	}
 	s.config = &Config{}
 	// either env var or config file can be used to set HA auth. token
 	s.config.Hass.HAAuthToken = os.Getenv("HA_AUTH_TOKEN")
 	if err := yaml.Unmarshal(configFile, s.config); err != nil {
-		slog.Error("Error unmarshalling config file", err)
+		slog.Error("Error unmarshalling config file", "error", err)
 	}
 
 	s.app, err = ga.NewApp(ga.NewAppRequest{
@@ -67,7 +68,7 @@ func (s *MySuite) SetupSuite() {
 		HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
 	})
 	if err != nil {
-		slog.Error("Failed to createw new app", err)
+		slog.Error("Failed to create new app", "error", err)
 		s.T().FailNow()
 	}
 
@@ -135,7 +136,7 @@ func (s *MySuite) dailyScheduleCallback(se *ga.Service, st ga.State) {
 func getEntityState(s *MySuite, entityId string) string {
 	state, err := s.app.GetState().Get(entityId)
 	if err != nil {
-		slog.Error("Error getting entity state", err)
+		slog.Error("Error getting entity state", "error", err)
 		s.T().FailNow()
 	}
 	slog.Info("State of entity", "state", state.State)

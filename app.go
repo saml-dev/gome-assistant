@@ -5,19 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"time"
 
 	"github.com/golang-module/carbon"
 	"github.com/gorilla/websocket"
 	sunriseLib "github.com/nathan-osman/go-sunrise"
+
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
 	pq "saml.dev/gome-assistant/internal/priorityqueue"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
-
-// Returned by NewApp() if authentication fails
-var ErrInvalidToken = ws.ErrInvalidToken
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
 
@@ -41,15 +40,11 @@ type App struct {
 	eventListeners    map[string][]*EventListener
 }
 
-/*
-DurationString represents a duration, such as "2s" or "24h".
-See https://pkg.go.dev/time#ParseDuration for all valid time units.
-*/
+// DurationString represents a duration, such as "2s" or "24h".
+// See https://pkg.go.dev/time#ParseDuration for all valid time units.
 type DurationString string
 
-/*
-TimeString is a 24-hr format time "HH:MM" such as "07:30".
-*/
+// TimeString is a 24-hr format time "HH:MM" such as "07:30".
 type TimeString string
 
 type timeRange struct {
@@ -59,11 +54,16 @@ type timeRange struct {
 
 type NewAppRequest struct {
 	// Required
+	URL string
+
+	// Optional
+	// Deprecated: use URL instead
 	// IpAddress of your Home Assistant instance i.e. "localhost"
 	// or "192.168.86.59" etc.
 	IpAddress string
 
 	// Optional
+	// Deprecated: use URL instead
 	// Port number Home Assistant is running on. Defaults to 8123.
 	Port string
 
@@ -90,39 +90,37 @@ NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
 func NewApp(request NewAppRequest) (*App, error) {
-	if request.IpAddress == "" || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
-		slog.Error("IpAddress, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
+	if (request.URL == "" && request.IpAddress == "") || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
+		slog.Error("URL, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
 		return nil, ErrInvalidArgs
 	}
-	port := request.Port
-	if port == "" {
-		port = "8123"
-	}
 
-	var (
-		conn      *websocket.Conn
-		ctx       context.Context
-		ctxCancel context.CancelFunc
-		err       error
-	)
+	baseURL := &url.URL{}
 
-	if request.Secure {
-		conn, ctx, ctxCancel, err = ws.SetupSecureConnection(request.IpAddress, port, request.HAAuthToken)
+	if request.URL != "" {
+		var err error
+		baseURL, err = url.Parse(request.URL)
+		if err != nil {
+			return nil, ErrInvalidArgs
+		}
 	} else {
-		conn, ctx, ctxCancel, err = ws.SetupConnection(request.IpAddress, port, request.HAAuthToken)
+		// This is deprecated and will be removed in a future release
+		port := request.Port
+		if port == "" {
+			port = "8123"
+		}
+		baseURL.Host = request.IpAddress + ":" + port
 	}
 
+	conn, ctx, ctxCancel, err := ws.ConnectionFromUri(baseURL, request.HAAuthToken)
+	if err != nil {
+		return nil, err
+	}
 	if conn == nil {
 		return nil, err
 	}
 
-	var httpClient *http.HttpClient
-
-	if request.Secure {
-		httpClient = http.NewHttpsClient(request.IpAddress, port, request.HAAuthToken)
-	} else {
-		httpClient = http.NewHttpClient(request.IpAddress, port, request.HAAuthToken)
-	}
+	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
 	service := newService(wsWriter, ctx, httpClient)

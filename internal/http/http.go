@@ -5,9 +5,9 @@ package http
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 type HttpClient struct {
@@ -15,24 +15,19 @@ type HttpClient struct {
 	token string
 }
 
-func NewHttpClient(ip, port, token string) *HttpClient {
-	return ClientFromUri(
-		fmt.Sprintf("http://%s:%s/api", ip, port),
-		token,
-	)
-}
+func NewHttpClient(url *url.URL, token string) *HttpClient {
+	// Shallow copy the URL to avoid modifying the original
+	u := *url
+	if u.Scheme == "ws" {
+		u.Scheme = "http"
+	}
+	if u.Scheme == "wss" {
+		u.Scheme = "https"
+	}
 
-func NewHttpsClient(ip, port, token string) *HttpClient {
-	return ClientFromUri(
-		fmt.Sprintf("https://%s:%s/api", ip, port),
-		token,
-	)
-}
-
-func ClientFromUri(uri, token string) *HttpClient {
 	return &HttpClient{
-		uri,
-		token,
+		url:   u.String(),
+		token: token,
 	}
 }
 
