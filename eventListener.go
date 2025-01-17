@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
+
 	"saml.dev/gome-assistant/internal"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
@@ -141,7 +142,7 @@ type BaseEventMsg struct {
 /* Functions */
 func callEventListeners(app *App, msg ws.ChanMsg) {
 	baseEventMsg := BaseEventMsg{}
-	json.Unmarshal(msg.Raw, &baseEventMsg)
+	_ = json.Unmarshal(msg.Raw, &baseEventMsg)
 	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]
 	if !ok {
 		// no listeners registered for this event type

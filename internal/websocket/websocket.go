@@ -114,8 +114,10 @@ func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
 	}
 
 	var authResp authResponse
-	json.Unmarshal(msg, &authResp)
-	// log.Println(authResp.MsgType)
+	err = json.Unmarshal(msg, &authResp)
+	if err != nil {
+		return err
+	}
 	if authResp.MsgType != "auth_ok" {
 		return ErrInvalidToken
 	}
