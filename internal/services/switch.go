@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,30 +8,30 @@ import (
 
 type Switch struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
-func (s Switch) TurnOn(entityId string) {
+func (s Switch) TurnOn(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "switch"
 	req.Service = "turn_on"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
-func (s Switch) Toggle(entityId string) {
+func (s Switch) Toggle(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "switch"
 	req.Service = "toggle"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
-func (s Switch) TurnOff(entityId string) {
+func (s Switch) TurnOff(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "switch"
 	req.Service = "turn_off"
-	s.conn.WriteMessage(req, s.ctx)
+
+	return s.conn.WriteMessage(req)
 }

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -12,12 +11,11 @@ import (
 
 type InputDatetime struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityId string, value time.Time) {
+func (ib InputDatetime) Set(entityId string, value time.Time) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "input_datetime"
 	req.Service = "set_datetime"
@@ -25,12 +23,12 @@ func (ib InputDatetime) Set(entityId string, value time.Time) {
 		"timestamp": fmt.Sprint(value.Unix()),
 	}
 
-	ib.conn.WriteMessage(req, ib.ctx)
+	return ib.conn.WriteMessage(req)
 }
 
-func (ib InputDatetime) Reload() {
+func (ib InputDatetime) Reload() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_datetime"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+	return ib.conn.WriteMessage(req)
 }

@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,14 +8,13 @@ import (
 
 type Light struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
 // TurnOn a light entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
+func (l Light) TurnOn(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "light"
 	req.Service = "turn_on"
@@ -25,12 +22,12 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(req, l.ctx)
+	return l.conn.WriteMessage(req)
 }
 
 // Toggle a light entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
+func (l Light) Toggle(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "light"
 	req.Service = "toggle"
@@ -38,12 +35,12 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	l.conn.WriteMessage(req, l.ctx)
+	return l.conn.WriteMessage(req)
 }
 
-func (l Light) TurnOff(entityId string) {
+func (l Light) TurnOff(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "light"
 	req.Service = "turn_off"
-	l.conn.WriteMessage(req, l.ctx)
+	return l.conn.WriteMessage(req)
 }

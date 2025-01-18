@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,24 +8,23 @@ import (
 
 type TTS struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
 // Remove all text-to-speech cache files and RAM cache.
-func (tts TTS) ClearCache() {
+func (tts TTS) ClearCache() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "tts"
 	req.Service = "clear_cache"
 
-	tts.conn.WriteMessage(req, tts.ctx)
+	return tts.conn.WriteMessage(req)
 }
 
 // Say something using text-to-speech on a media player with cloud.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
+func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "tts"
 	req.Service = "cloud_say"
@@ -35,13 +32,13 @@ func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	tts.conn.WriteMessage(req, tts.ctx)
+	return tts.conn.WriteMessage(req)
 }
 
 // Say something using text-to-speech on a media player with google_translate.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any) {
+func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "tts"
 	req.Service = "google_translate_say"
@@ -49,5 +46,5 @@ func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any
 		req.ServiceData = serviceData[0]
 	}
 
-	tts.conn.WriteMessage(req, tts.ctx)
+	return tts.conn.WriteMessage(req)
 }

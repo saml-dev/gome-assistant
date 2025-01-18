@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,22 +8,21 @@ import (
 
 type InputButton struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
-func (ib InputButton) Press(entityId string) {
+func (ib InputButton) Press(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "input_button"
 	req.Service = "press"
 
-	ib.conn.WriteMessage(req, ib.ctx)
+	return ib.conn.WriteMessage(req)
 }
 
-func (ib InputButton) Reload() {
+func (ib InputButton) Reload() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_button"
 	req.Service = "reload"
-	ib.conn.WriteMessage(req, ib.ctx)
+	return ib.conn.WriteMessage(req)
 }

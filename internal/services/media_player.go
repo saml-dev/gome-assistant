@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,25 +8,24 @@ import (
 
 type MediaPlayer struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
 // Send the media player the command to clear players playlist.
 // Takes an entityId.
-func (mp MediaPlayer) ClearPlaylist(entityId string) {
+func (mp MediaPlayer) ClearPlaylist(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "clear_playlist"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Group players together. Only works on platforms with support for player groups.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "join"
@@ -36,63 +33,63 @@ func (mp MediaPlayer) Join(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command for next track.
 // Takes an entityId.
-func (mp MediaPlayer) Next(entityId string) {
+func (mp MediaPlayer) Next(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_next_track"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command for pause.
 // Takes an entityId.
-func (mp MediaPlayer) Pause(entityId string) {
+func (mp MediaPlayer) Pause(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_pause"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command for play.
 // Takes an entityId.
-func (mp MediaPlayer) Play(entityId string) {
+func (mp MediaPlayer) Play(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_play"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Toggle media player play/pause state.
 // Takes an entityId.
-func (mp MediaPlayer) PlayPause(entityId string) {
+func (mp MediaPlayer) PlayPause(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_play_pause"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command for previous track.
 // Takes an entityId.
-func (mp MediaPlayer) Previous(entityId string) {
+func (mp MediaPlayer) Previous(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_previous_track"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command to seek in current playing media.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_seek"
@@ -100,23 +97,23 @@ func (mp MediaPlayer) Seek(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the stop command.
 // Takes an entityId.
-func (mp MediaPlayer) Stop(entityId string) {
+func (mp MediaPlayer) Stop(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "media_stop"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command for playing media.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "play_media"
@@ -124,12 +121,12 @@ func (mp MediaPlayer) PlayMedia(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Set repeat mode. Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "repeat_set"
@@ -137,13 +134,13 @@ func (mp MediaPlayer) RepeatSet(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command to change sound mode.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "select_sound_mode"
@@ -151,13 +148,13 @@ func (mp MediaPlayer) SelectSoundMode(entityId string, serviceData ...map[string
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Send the media player the command to change input source.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "select_source"
@@ -165,13 +162,13 @@ func (mp MediaPlayer) SelectSource(entityId string, serviceData ...map[string]an
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Set shuffling state.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "shuffle_set"
@@ -179,64 +176,64 @@ func (mp MediaPlayer) Shuffle(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Toggles a media player power state.
 // Takes an entityId.
-func (mp MediaPlayer) Toggle(entityId string) {
+func (mp MediaPlayer) Toggle(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "toggle"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Turn a media player power off.
 // Takes an entityId.
-func (mp MediaPlayer) TurnOff(entityId string) {
+func (mp MediaPlayer) TurnOff(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "turn_off"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Turn a media player power on.
 // Takes an entityId.
-func (mp MediaPlayer) TurnOn(entityId string) {
+func (mp MediaPlayer) TurnOn(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "turn_on"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Unjoin the player from a group. Only works on
 // platforms with support for player groups.
 // Takes an entityId.
-func (mp MediaPlayer) Unjoin(entityId string) {
+func (mp MediaPlayer) Unjoin(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "unjoin"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Turn a media player volume down.
 // Takes an entityId.
-func (mp MediaPlayer) VolumeDown(entityId string) {
+func (mp MediaPlayer) VolumeDown(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "volume_down"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Mute a media player's volume.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "volume_mute"
@@ -244,13 +241,13 @@ func (mp MediaPlayer) VolumeMute(entityId string, serviceData ...map[string]any)
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Set a media player's volume level.
 // Takes an entityId and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) {
+func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "volume_set"
@@ -258,15 +255,15 @@ func (mp MediaPlayer) VolumeSet(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }
 
 // Turn a media player volume up.
 // Takes an entityId.
-func (mp MediaPlayer) VolumeUp(entityId string) {
+func (mp MediaPlayer) VolumeUp(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "media_player"
 	req.Service = "volume_up"
 
-	mp.conn.WriteMessage(req, mp.ctx)
+	return mp.conn.WriteMessage(req)
 }

@@ -123,7 +123,7 @@ func NewApp(request NewAppRequest) (*App, error) {
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
-	service := newService(wsWriter, ctx, httpClient)
+	service := newService(wsWriter)
 	state, err := newState(httpClient, request.HomeZoneEntityId)
 	if err != nil {
 		return nil, err

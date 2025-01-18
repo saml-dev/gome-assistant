@@ -1,9 +1,6 @@
 package gomeassistant
 
 import (
-	"context"
-
-	"saml.dev/gome-assistant/internal/http"
 	"saml.dev/gome-assistant/internal/services"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
@@ -32,28 +29,28 @@ type Service struct {
 	ZWaveJS           *services.ZWaveJS
 }
 
-func newService(conn *ws.WebsocketWriter, ctx context.Context, httpClient *http.HttpClient) *Service {
+func newService(conn *ws.WebsocketWriter) *Service {
 	return &Service{
-		AlarmControlPanel: services.BuildService[services.AlarmControlPanel](conn, ctx),
-		Climate:           services.BuildService[services.Climate](conn, ctx),
-		Cover:             services.BuildService[services.Cover](conn, ctx),
-		Light:             services.BuildService[services.Light](conn, ctx),
-		HomeAssistant:     services.BuildService[services.HomeAssistant](conn, ctx),
-		Lock:              services.BuildService[services.Lock](conn, ctx),
-		MediaPlayer:       services.BuildService[services.MediaPlayer](conn, ctx),
-		Switch:            services.BuildService[services.Switch](conn, ctx),
-		InputBoolean:      services.BuildService[services.InputBoolean](conn, ctx),
-		InputButton:       services.BuildService[services.InputButton](conn, ctx),
-		InputText:         services.BuildService[services.InputText](conn, ctx),
-		InputDatetime:     services.BuildService[services.InputDatetime](conn, ctx),
-		InputNumber:       services.BuildService[services.InputNumber](conn, ctx),
-		Event:             services.BuildService[services.Event](conn, ctx),
-		Notify:            services.BuildService[services.Notify](conn, ctx),
-		Number:            services.BuildService[services.Number](conn, ctx),
-		Scene:             services.BuildService[services.Scene](conn, ctx),
-		Script:            services.BuildService[services.Script](conn, ctx),
-		TTS:               services.BuildService[services.TTS](conn, ctx),
-		Vacuum:            services.BuildService[services.Vacuum](conn, ctx),
-		ZWaveJS:           services.BuildService[services.ZWaveJS](conn, ctx),
+		AlarmControlPanel: services.BuildService[services.AlarmControlPanel](conn),
+		Climate:           services.BuildService[services.Climate](conn),
+		Cover:             services.BuildService[services.Cover](conn),
+		Light:             services.BuildService[services.Light](conn),
+		HomeAssistant:     services.BuildService[services.HomeAssistant](conn),
+		Lock:              services.BuildService[services.Lock](conn),
+		MediaPlayer:       services.BuildService[services.MediaPlayer](conn),
+		Switch:            services.BuildService[services.Switch](conn),
+		InputBoolean:      services.BuildService[services.InputBoolean](conn),
+		InputButton:       services.BuildService[services.InputButton](conn),
+		InputText:         services.BuildService[services.InputText](conn),
+		InputDatetime:     services.BuildService[services.InputDatetime](conn),
+		InputNumber:       services.BuildService[services.InputNumber](conn),
+		Event:             services.BuildService[services.Event](conn),
+		Notify:            services.BuildService[services.Notify](conn),
+		Number:            services.BuildService[services.Number](conn),
+		Scene:             services.BuildService[services.Scene](conn),
+		Script:            services.BuildService[services.Script](conn),
+		TTS:               services.BuildService[services.TTS](conn),
+		Vacuum:            services.BuildService[services.Vacuum](conn),
+		ZWaveJS:           services.BuildService[services.ZWaveJS](conn),
 	}
 }

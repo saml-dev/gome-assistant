@@ -1,8 +1,6 @@
 package services
 
 import (
-	"context"
-
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -10,13 +8,12 @@ import (
 
 type Scene struct {
 	conn *ws.WebsocketWriter
-	ctx  context.Context
 }
 
 /* Public API */
 
 // Apply a scene. Takes map that is translated into service_data.
-func (s Scene) Apply(serviceData ...map[string]any) {
+func (s Scene) Apply(serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "scene"
 	req.Service = "apply"
@@ -24,12 +21,12 @@ func (s Scene) Apply(serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
 // Create a scene entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (s Scene) Create(entityId string, serviceData ...map[string]any) {
+func (s Scene) Create(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "scene"
 	req.Service = "create"
@@ -37,21 +34,21 @@ func (s Scene) Create(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
 // Reload the scenes.
-func (s Scene) Reload() {
+func (s Scene) Reload() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "scene"
 	req.Service = "reload"
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
 
 // TurnOn a scene entity. Takes an entityId and an optional
 // map that is translated into service_data.
-func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) {
+func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "scene"
 	req.Service = "turn_on"
@@ -59,5 +56,5 @@ func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) {
 		req.ServiceData = serviceData[0]
 	}
 
-	s.conn.WriteMessage(req, s.ctx)
+	return s.conn.WriteMessage(req)
 }
