@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 
@@ -21,7 +20,7 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
-func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) {
+func ListenWebsocket(conn *websocket.Conn, c chan ChanMsg) {
 	for {
 		bytes, err := ReadMessage(conn)
 		if err != nil {
@@ -34,7 +33,7 @@ func ListenWebsocket(conn *websocket.Conn, ctx context.Context, c chan ChanMsg) 
 			// default to true for messages that don't include "success" at all
 			Success: true,
 		}
-		json.Unmarshal(bytes, &base)
+		_ = json.Unmarshal(bytes, &base)
 		if !base.Success {
 			slog.Warn("Received unsuccessful response", "response", string(bytes))
 		}

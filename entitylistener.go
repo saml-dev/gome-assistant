@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
+
 	"saml.dev/gome-assistant/internal"
 )
 
@@ -193,7 +194,7 @@ func (b elBuilder3) Build() EntityListener {
 /* Functions */
 func callEntityListeners(app *App, msgBytes []byte) {
 	msg := stateChangedMsg{}
-	json.Unmarshal(msgBytes, &msg)
+	_ = json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
 	eid := data.EntityID
 	listeners, ok := app.entityListeners[eid]

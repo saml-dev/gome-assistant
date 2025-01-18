@@ -70,8 +70,8 @@ func (s *StateImpl) Get(entityId string) (EntityState, error) {
 		return EntityState{}, err
 	}
 	es := EntityState{}
-	json.Unmarshal(resp, &es)
-	return es, nil
+	err = json.Unmarshal(resp, &es)
+	return es, err
 }
 
 func (s *StateImpl) Equals(entityId string, expectedState string) (bool, error) {
