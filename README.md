@@ -40,7 +40,11 @@ The general flow is
 import ga "saml.dev/gome-assistant"
 
 // replace with IP and port of your Home Assistant installation
-app, err := ga.NewApp("0.0.0.0:8123")
+	app, err := ga.NewApp(ga.NewAppRequest{
+		URL:              "http://192.168.1.123:8123",
+		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
+		HomeZoneEntityId: "zone.home",
+	})
 
 // create automations here (see next sections)
 
