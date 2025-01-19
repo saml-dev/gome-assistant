@@ -203,3 +203,13 @@ func myFunc(se *ga.Service, st *ga.State) {
   // ...
 }
 ```
+
+## Compatibility
+
+Latest changes tested with HAOS:
+```
+Core 2025.1.2
+Supervisor 2024.12.3
+Operating System 14.1
+Frontend 20250109.0
+```
