@@ -112,7 +112,8 @@ func NewApp(request NewAppRequest) (*App, error) {
 		baseURL.Host = request.IpAddress + ":" + port
 	}
 
-	conn, ctx, ctxCancel, err := ws.ConnectionFromUri(baseURL, request.HAAuthToken)
+	wsAddr := baseURL.ResolveReference(&url.URL{Path: "/api/websocket"})
+	conn, ctx, ctxCancel, err := ws.ConnectionFromUri(wsAddr, request.HAAuthToken)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,8 @@ func NewApp(request NewAppRequest) (*App, error) {
 		return nil, err
 	}
 
-	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
+	apiUrl := baseURL.ResolveReference(&url.URL{Path: "/api"})
+	httpClient := http.NewHttpClient(apiUrl, request.HAAuthToken)
 
 	wsWriter := &ws.WebsocketWriter{Conn: conn}
 	service := newService(wsWriter)
