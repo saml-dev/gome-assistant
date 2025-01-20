@@ -51,6 +51,7 @@ func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, con
 
 	// Shallow copy the URL to avoid modifying the original
 	urlWebsockets := *baseURL
+	urlWebsockets.Path = "/api/websocket"
 	if baseURL.Scheme == "http" {
 		urlWebsockets.Scheme = "ws"
 	}

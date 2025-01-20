@@ -109,6 +109,10 @@ func NewApp(request NewAppRequest) (*App, error) {
 		if port == "" {
 			port = "8123"
 		}
+		baseURL.Scheme = "http"
+		if request.Secure {
+			baseURL.Scheme = "https"
+		}
 		baseURL.Host = request.IpAddress + ":" + port
 	}
 
