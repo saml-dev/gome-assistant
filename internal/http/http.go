@@ -18,6 +18,7 @@ type HttpClient struct {
 func NewHttpClient(url *url.URL, token string) *HttpClient {
 	// Shallow copy the URL to avoid modifying the original
 	u := *url
+	u.Path = "/api"
 	if u.Scheme == "ws" {
 		u.Scheme = "http"
 	}
