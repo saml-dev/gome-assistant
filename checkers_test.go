@@ -13,6 +13,7 @@ type MockState struct {
 	EqualsError  bool
 	GetReturn    EntityState
 	GetError     bool
+	AllEntities  []EntityState
 }
 
 func (s MockState) AfterSunrise(_ ...DurationString) bool {
@@ -32,6 +33,9 @@ func (s MockState) Get(eid string) (EntityState, error) {
 		return EntityState{}, errors.New("some error")
 	}
 	return s.GetReturn, nil
+}
+func (s MockState) List() ([]EntityState, error) {
+	return s.AllEntities, nil
 }
 func (s MockState) Equals(eid, state string) (bool, error) {
 	if s.EqualsError {
