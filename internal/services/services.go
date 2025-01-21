@@ -6,7 +6,8 @@ import (
 )
 
 func BuildService[
-	T AlarmControlPanel |
+	T AdaptiveLighting |
+		AlarmControlPanel |
 		Climate |
 		Cover |
 		Light |

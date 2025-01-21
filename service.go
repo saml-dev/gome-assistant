@@ -6,6 +6,7 @@ import (
 )
 
 type Service struct {
+	AdaptiveLighting  *services.AdaptiveLighting
 	AlarmControlPanel *services.AlarmControlPanel
 	Climate           *services.Climate
 	Cover             *services.Cover
@@ -31,6 +32,7 @@ type Service struct {
 
 func newService(conn *ws.WebsocketWriter) *Service {
 	return &Service{
+		AdaptiveLighting:  services.BuildService[services.AdaptiveLighting](conn),
 		AlarmControlPanel: services.BuildService[services.AlarmControlPanel](conn),
 		Climate:           services.BuildService[services.Climate](conn),
 		Cover:             services.BuildService[services.Cover](conn),
