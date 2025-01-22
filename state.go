@@ -16,7 +16,7 @@ type State interface {
 	BeforeSunrise(...DurationString) bool
 	AfterSunset(...DurationString) bool
 	BeforeSunset(...DurationString) bool
-	List() ([]EntityState, error)
+	ListEntities() ([]EntityState, error)
 	Get(entityId string) (EntityState, error)
 	Equals(entityId, state string) (bool, error)
 }
@@ -75,7 +75,9 @@ func (s *StateImpl) Get(entityId string) (EntityState, error) {
 	return es, err
 }
 
-func (s *StateImpl) List() ([]EntityState, error) {
+// ListEntities returns a list of all entities in Home Assistant.
+// see rest documentation for more details: https://developers.home-assistant.io/docs/api/rest/#actions
+func (s *StateImpl) ListEntities() ([]EntityState, error) {
 	resp, err := s.httpClient.States()
 	if err != nil {
 		return nil, err

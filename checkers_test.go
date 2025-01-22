@@ -33,7 +33,7 @@ func (s MockState) Get(eid string) (EntityState, error) {
 	}
 	return s.GetReturn, nil
 }
-func (s MockState) List() ([]EntityState, error) {
+func (s MockState) ListEntities() ([]EntityState, error) {
 	return []EntityState{}, nil
 }
 func (s MockState) Equals(eid, state string) (bool, error) {
