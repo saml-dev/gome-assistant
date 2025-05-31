@@ -25,6 +25,7 @@ type Service struct {
 	Number            *services.Number
 	Scene             *services.Scene
 	Script            *services.Script
+	Timer             *services.Timer
 	TTS               *services.TTS
 	Vacuum            *services.Vacuum
 	ZWaveJS           *services.ZWaveJS
@@ -51,6 +52,7 @@ func newService(conn *ws.WebsocketWriter) *Service {
 		Number:            services.BuildService[services.Number](conn),
 		Scene:             services.BuildService[services.Scene](conn),
 		Script:            services.BuildService[services.Script](conn),
+		Timer:             services.BuildService[services.Timer](conn),
 		TTS:               services.BuildService[services.TTS](conn),
 		Vacuum:            services.BuildService[services.Vacuum](conn),
 		ZWaveJS:           services.BuildService[services.ZWaveJS](conn),

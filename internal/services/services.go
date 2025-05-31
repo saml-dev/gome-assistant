@@ -26,6 +26,7 @@ func BuildService[
 		Scene |
 		Script |
 		TTS |
+		Timer |
 		Vacuum |
 		ZWaveJS,
 ](conn *ws.WebsocketWriter) *T {
