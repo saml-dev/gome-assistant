@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -85,14 +86,45 @@ type NewAppRequest struct {
 	Secure bool
 }
 
+// validateHomeZone verifies that the home zone entity exists and has latitude/longitude
+func validateHomeZone(state State, entityID string) error {
+	entity, err := state.Get(entityID)
+	if err != nil {
+		return fmt.Errorf("home zone entity '%s' not found: %w", entityID, err)
+	}
+
+	// Ensure it's a zone entity
+	if !strings.HasPrefix(entityID, "zone.") {
+		return fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", entityID)
+	}
+
+	// Verify it has latitude and longitude
+	if entity.Attributes == nil {
+		return fmt.Errorf("home zone entity '%s' has no attributes", entityID)
+	}
+	if entity.Attributes["latitude"] == nil {
+		return fmt.Errorf("home zone entity '%s' missing latitude attribute", entityID)
+	}
+	if entity.Attributes["longitude"] == nil {
+		return fmt.Errorf("home zone entity '%s' missing longitude attribute", entityID)
+	}
+
+	return nil
+}
+
 /*
 NewApp establishes the websocket connection and returns an object
 you can use to register schedules and listeners.
 */
 func NewApp(request NewAppRequest) (*App, error) {
-	if (request.URL == "" && request.IpAddress == "") || request.HAAuthToken == "" || request.HomeZoneEntityId == "" {
-		slog.Error("URL, HAAuthToken, and HomeZoneEntityId are all required arguments in NewAppRequest")
+	if (request.URL == "" && request.IpAddress == "") || request.HAAuthToken == "" {
+		slog.Error("URL and HAAuthToken are required arguments in NewAppRequest")
 		return nil, ErrInvalidArgs
+	}
+
+	// Set default home zone if not provided
+	if request.HomeZoneEntityId == "" {
+		request.HomeZoneEntityId = "zone.home"
 	}
 
 	baseURL := &url.URL{}
@@ -130,6 +162,11 @@ func NewApp(request NewAppRequest) (*App, error) {
 	service := newService(wsWriter)
 	state, err := newState(httpClient, request.HomeZoneEntityId)
 	if err != nil {
+		return nil, err
+	}
+
+	// Validate home zone
+	if err := validateHomeZone(state, request.HomeZoneEntityId); err != nil {
 		return nil, err
 	}
 

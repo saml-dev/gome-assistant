@@ -1,3 +1,3 @@
 url: "http://192.168.4.67:8123"  # Replace with your Home Assistant URL
-ha_auth_token: "<token>"         # Your auth token 
-home_zone_entity_id: "zone.home"
+ha_auth_token: "<token>"         # Your auth token or set HA_AUTH_TOKEN env var
+home_zone_entity_id: "zone.home" # Optional: defaults to zone.home

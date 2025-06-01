@@ -16,7 +16,7 @@ import (
 type Config struct {
 	URL              string `yaml:"url"`
 	HAAuthToken      string `yaml:"ha_auth_token"`
-	HomeZoneEntityId string `yaml:"home_zone_entity_id"`
+	HomeZoneEntityId string `yaml:"home_zone_entity_id,omitempty"` // Now optional
 }
 
 type Domain struct {
@@ -64,8 +64,38 @@ func toCamelCase(s string) string {
 	return result.String()
 }
 
+// validateHomeZone verifies that the home zone entity exists and is valid
+func validateHomeZone(state ga.State, entityID string) error {
+	entity, err := state.Get(entityID)
+	if err != nil {
+		return fmt.Errorf("home zone entity '%s' not found: %w", entityID, err)
+	}
+
+	// Ensure it's a zone entity
+	if !strings.HasPrefix(entityID, "zone.") {
+		return fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", entityID)
+	}
+
+	// Verify it has latitude and longitude
+	if entity.Attributes == nil {
+		return fmt.Errorf("home zone entity '%s' has no attributes", entityID)
+	}
+	if entity.Attributes["latitude"] == nil {
+		return fmt.Errorf("home zone entity '%s' missing latitude attribute", entityID)
+	}
+	if entity.Attributes["longitude"] == nil {
+		return fmt.Errorf("home zone entity '%s' missing longitude attribute", entityID)
+	}
+
+	return nil
+}
+
 // generate creates the entities.go file with constants for all Home Assistant entities
 func generate(config Config) error {
+	if config.HomeZoneEntityId == "" {
+		config.HomeZoneEntityId = "zone.home"
+	}
+
 	app, err := ga.NewApp(ga.NewAppRequest{
 		URL:              config.URL,
 		HAAuthToken:      config.HAAuthToken,
@@ -75,6 +105,11 @@ func generate(config Config) error {
 		return fmt.Errorf("failed to create app: %w", err)
 	}
 	defer app.Cleanup()
+
+	// Validate that the home zone exists before proceeding
+	if err := validateHomeZone(app.GetState(), config.HomeZoneEntityId); err != nil {
+		return fmt.Errorf("invalid home zone: %w", err)
+	}
 
 	entities, err := app.GetState().ListEntities()
 	if err != nil {
@@ -178,8 +213,8 @@ func main() {
 		config.HAAuthToken = os.Getenv("HA_AUTH_TOKEN")
 	}
 
-	if config.URL == "" || config.HAAuthToken == "" || config.HomeZoneEntityId == "" {
-		fmt.Println("Error: url, ha_auth_token and home_zone_entity_id are required in config")
+	if config.URL == "" || config.HAAuthToken == "" {
+		fmt.Println("Error: url and ha_auth_token are required in config")
 		os.Exit(1)
 	}
 
