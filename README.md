@@ -14,6 +14,48 @@ Gome-Assistant is a new library, and I'm opening it up early to get some user fe
 go get saml.dev/gome-assistant
 ```
 
+### Generate Entity Constants
+
+You can generate type-safe constants for all your Home Assistant entities using `go generate`. This makes it easier to reference entities in your code.
+
+1. Create a `gen.yaml` file in your project root:
+
+```yaml
+url: "http://192.168.1.123:8123"  
+ha_auth_token: "your_auth_token"  # Or set HA_AUTH_TOKEN env var
+home_zone_entity_id: "zone.home"
+```
+
+2. Add a `//go:generate` comment in your project:
+
+```go
+//go:generate go run saml.dev/gome-assistant/cmd/generate
+```
+
+Optionally use the `-config` flag to customize the file path of the config file.
+
+3. Run the generator:
+
+```
+go generate
+```
+
+This will create an `entities` package with type-safe constants for all your Home Assistant entities, organized by domain. For example:
+
+```go
+import "your_project/entities"
+
+// Instead of writing "light.living_room" as a string:
+entities.Light.LivingRoom // Type-safe constant
+
+// All your entities are organized by domain
+entities.Switch.Kitchen
+entities.Climate.Bedroom
+entities.MediaPlayer.TVRoom
+```
+
+The constants are based on the entity ID itself, not the name of the entity in Home Assistant.
+
 ### Write your automations
 
 Check out [`example/example.go`](./example/example.go) for an example of the 3 types of automations — schedules, entity listeners, and event listeners.
