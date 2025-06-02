@@ -1,3 +1,13 @@
 url: "http://192.168.4.67:8123"  # Replace with your Home Assistant URL
 ha_auth_token: "<token>"         # Your auth token or set HA_AUTH_TOKEN env var
 home_zone_entity_id: "zone.home" # Optional: defaults to zone.home
+
+# Optional: List of domains to include when generating constants
+# If provided, only these domains will be processed
+# Example: ["light", "switch", "climate"]
+include_domains: []
+
+# Optional: List of domains to exclude when generating constants
+# Only used if include_domains is empty
+# Example: ["device_tracker", "person"]
+exclude_domains: []

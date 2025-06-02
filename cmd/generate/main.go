@@ -14,9 +14,11 @@ import (
 )
 
 type Config struct {
-	URL              string `yaml:"url"`
-	HAAuthToken      string `yaml:"ha_auth_token"`
-	HomeZoneEntityId string `yaml:"home_zone_entity_id,omitempty"` // Now optional
+	URL              string   `yaml:"url"`
+	HAAuthToken      string   `yaml:"ha_auth_token"`
+	HomeZoneEntityId string   `yaml:"home_zone_entity_id,omitempty"` // Now optional
+	IncludeDomains   []string `yaml:"include_domains,omitempty"`     // Optional list of domains to include
+	ExcludeDomains   []string `yaml:"exclude_domains,omitempty"`     // Optional list of domains to exclude
 }
 
 type Domain struct {
@@ -129,6 +131,35 @@ func generate(config Config) error {
 		}
 
 		domain := parts[0]
+
+		// Filter domains based on include/exclude lists
+		if len(config.IncludeDomains) > 0 {
+			// If include list is specified, only process listed domains
+			found := false
+			for _, includeDomain := range config.IncludeDomains {
+				if domain == includeDomain {
+					found = true
+					break
+				}
+			}
+			if !found {
+				continue
+			}
+		} else {
+			// If only exclude list is specified, skip excluded domains
+			excluded := false
+			for _, excludeDomain := range config.ExcludeDomains {
+				if domain == excludeDomain {
+					println("skipping excluded domain:", domain)
+					excluded = true
+					break
+				}
+			}
+			if excluded {
+				continue
+			}
+		}
+
 		if _, exists := domainMap[domain]; !exists {
 			domainMap[domain] = &Domain{
 				Name: toCamelCase(domain),
