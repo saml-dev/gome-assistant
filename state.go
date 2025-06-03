@@ -2,8 +2,8 @@ package gomeassistant
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -37,32 +37,36 @@ type EntityState struct {
 
 func newState(c *http.HttpClient, homeZoneEntityId string) (*StateImpl, error) {
 	state := &StateImpl{httpClient: c}
-	err := state.getLatLong(c, homeZoneEntityId)
+
+	// Ensure the zone exists and has required attributes
+	entity, err := state.Get(homeZoneEntityId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("home zone entity '%s' not found: %w", homeZoneEntityId, err)
 	}
+
+	// Ensure it's a zone entity
+	if !strings.HasPrefix(homeZoneEntityId, "zone.") {
+		return nil, fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", homeZoneEntityId)
+	}
+
+	// Verify and extract latitude and longitude
+	if entity.Attributes == nil {
+		return nil, fmt.Errorf("home zone entity '%s' has no attributes", homeZoneEntityId)
+	}
+
+	if lat, ok := entity.Attributes["latitude"].(float64); ok {
+		state.latitude = lat
+	} else {
+		return nil, fmt.Errorf("home zone entity '%s' missing valid latitude attribute", homeZoneEntityId)
+	}
+
+	if long, ok := entity.Attributes["longitude"].(float64); ok {
+		state.longitude = long
+	} else {
+		return nil, fmt.Errorf("home zone entity '%s' missing valid longitude attribute", homeZoneEntityId)
+	}
+
 	return state, nil
-}
-
-func (s *StateImpl) getLatLong(c *http.HttpClient, homeZoneEntityId string) error {
-	resp, err := s.Get(homeZoneEntityId)
-	if err != nil {
-		return fmt.Errorf("couldn't get latitude/longitude from home assistant entity '%s'. Did you type it correctly? It should be a zone like 'zone.home'", homeZoneEntityId)
-	}
-
-	if resp.Attributes["latitude"] != nil {
-		s.latitude = resp.Attributes["latitude"].(float64)
-	} else {
-		return errors.New("server returned nil latitude")
-	}
-
-	if resp.Attributes["longitude"] != nil {
-		s.longitude = resp.Attributes["longitude"].(float64)
-	} else {
-		return errors.New("server returned nil longitude")
-	}
-
-	return nil
 }
 
 func (s *StateImpl) Get(entityId string) (EntityState, error) {

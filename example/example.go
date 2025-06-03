@@ -6,12 +6,16 @@ import (
 	"os"
 	"time"
 
+	// "example/entities" // Optional import generated entities
+
 	ga "saml.dev/gome-assistant"
 )
 
+//go:generate go run saml.dev/gome-assistant/cmd/generate
+
 func main() {
 	app, err := ga.NewApp(ga.NewAppRequest{
-		URL:              "http://192.168.86.67:8123", // Replace with your Home Assistant IP Address
+		URL:              "http://192.168.86.67:8123", // Replace with your Home Assistant URL
 		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
 		HomeZoneEntityId: "zone.home",
 	})
@@ -24,7 +28,7 @@ func main() {
 
 	pantryDoor := ga.
 		NewEntityListener().
-		EntityIds("binary_sensor.pantry_door").
+		EntityIds(entities.BinarySensor.PantryDoor). // Use generated entity constant
 		Call(pantryLights).
 		Build()
 
@@ -55,6 +59,7 @@ func main() {
 
 func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
 	l := "light.pantry"
+	// l := entities.Light.Pantry // Or use generated entity constant
 	if sensor.ToState == "on" {
 		service.HomeAssistant.TurnOn(l)
 	} else {
@@ -75,8 +80,8 @@ func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
 
 func lightsOut(service *ga.Service, state ga.State) {
 	// always turn off outside lights
-	service.Light.TurnOff("light.outside_lights")
-	s, err := state.Get("binary_sensor.living_room_motion")
+	service.Light.TurnOff(entities.Light.OutsideLights)
+	s, err := state.Get(entities.BinarySensor.LivingRoomMotion)
 	if err != nil {
 		slog.Warn("couldnt get living room motion state, doing nothing")
 		return
@@ -84,11 +89,11 @@ func lightsOut(service *ga.Service, state ga.State) {
 
 	// if no motion detected in living room for 30mins
 	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
-		service.Light.TurnOff("light.main_lights")
+		service.Light.TurnOff(entities.Light.MainLights)
 	}
 }
 
 func sunriseSched(service *ga.Service, state ga.State) {
-	service.Light.TurnOn("light.living_room_lamps")
-	service.Light.TurnOff("light.christmas_lights")
+	service.Light.TurnOn(entities.Light.LivingRoomLamps)
+	service.Light.TurnOff(entities.Light.ChristmasLights)
 }
