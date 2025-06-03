@@ -188,38 +188,44 @@ func myFunc(se *ga.Service, st *ga.State, e ga.EntityData) {
 }
 ```
 
-### Event Listener
+### Event Listeners
 
-Event Listeners are used to respond to entities changing state. The simplest event listener looks like:
+Event listeners allow you to respond to Home Assistant events in real-time. You can create an event listener using the builder pattern:
 
 ```go
-evl := ga.NewEntityListener().EntityIds("binary_sensor.front_door").Call(myFunc).Build()
+eventListener := ga.
+    NewEventListener().
+    EventTypes("zwave_js_value_notification"). // Specify one or more event types
+    Call(myCallbackFunc).                     // Specify the callback function
+    Build()
+
+// Register the listener with your app
+app.RegisterEventListeners(eventListener)
 ```
 
-Event listeners have other functions to change the behavior.
+Event listeners support several additional functions to customize the listener:
 
-| Function                                | Info                                                                                |
-| --------------------------------------- | ----------------------------------------------------------------------------------- |
-| Throttle("30s")                         | Minimum time between function calls.                                                |
-| OnlyAfter("03:00")                      | Only run after a specified time of day.                                             |
-| OnlyBefore("03:00")                     | Only run before a specified time of day.                                            |
-| OnlyBetween("03:00", "14:00")           | Only run between two specified times of day.                                        |
-| ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day.      |
-| ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. |
+| Method | Description |
+|--------|-------------|
+| `OnlyBetween(start, end string)` | Only trigger between specific times of day |
+| `OnlyAfter(start string)` | Only trigger after a specific time of day |
+| `OnlyBefore(end string)` | Only trigger before a specific time of day |
+| `Throttle(duration DurationString)` | Limit how frequently the listener can trigger |
+| `ExceptionDates(dates ...time.Time)` | Specify dates when the listener should not run |
+| `ExceptionRange(start, end time.Time)` | Specify date ranges when the listener should not run |
 
-#### Event Listener Callback function
-
-The function passed to `.Call()` must take
-
-- `*ga.Service` used to call home assistant services
-- `*ga.State` used to retrieve state from home assistant
-- `ga.EventData` containing the event data that triggered the listener
-
+The callback function receives three parameters:
 ```go
-func myFunc(se *ga.Service, st *ga.State, ed ga.EventData) {
-  // ...
+func myCallback(service *ga.Service, state ga.State, data ga.EventData) {
+    // You can unmarshal the raw JSON into a type-safe struct
+    ev := ga.EventZWaveJSValueNotification{}
+    json.Unmarshal(data.RawEventJSON, &ev)
+    
+    // Handle the event...
 }
 ```
+
+> 💡 Check `eventTypes.go` for pre-defined event types, or create your own struct type for custom events and contribute them back to gome-assistant with a PR.
 
 ### Interval
 
