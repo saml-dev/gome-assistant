@@ -203,16 +203,16 @@ eventListener := ga.
 app.RegisterEventListeners(eventListener)
 ```
 
-Event listeners support several additional functions to customize the listener:
+Event listeners have other functions to change the behavior.
 
-| Method | Description |
-|--------|-------------|
-| `OnlyBetween(start, end string)` | Only trigger between specific times of day |
-| `OnlyAfter(start string)` | Only trigger after a specific time of day |
-| `OnlyBefore(end string)` | Only trigger before a specific time of day |
-| `Throttle(duration DurationString)` | Limit how frequently the listener can trigger |
-| `ExceptionDates(dates ...time.Time)` | Specify dates when the listener should not run |
-| `ExceptionRange(start, end time.Time)` | Specify date ranges when the listener should not run |
+| Function                                | Info                                                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| OnlyBetween("03:00", "14:00")           | Only run your function between two specified times of day                                                         |
+| OnlyAfter("03:00")                      | Only run your function after a specified time of day                                                              |
+| OnlyBefore("03:00")                     | Only run your function before a specified time of day                                                             |
+| Throttle("30s")                         | Minimum time between function calls                                                                               |
+| ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day. Functions like a "blocklist"      |
+| ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. Functions like a "blocklist" |
 
 The callback function receives three parameters:
 ```go
