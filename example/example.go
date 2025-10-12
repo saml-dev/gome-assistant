@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	// "example/entities" // Optional import generated entities
+	"example/entities" // Optional import generated entities
 
 	ga "saml.dev/gome-assistant"
 )

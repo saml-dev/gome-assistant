@@ -1,13 +1,9 @@
-url: "http://192.168.4.67:8123"  # Replace with your Home Assistant URL
-ha_auth_token: "<token>"         # Your auth token or set HA_AUTH_TOKEN env var
-home_zone_entity_id: "zone.home" # Optional: defaults to zone.home
+# Example configuration for running `cmd/generate`. If you want to
+# adapt this example for your own setup, you should fill in your own
+# values here and run `go generate`. See `README.md` for more
+# information.
 
-# Optional: List of domains to include when generating constants
-# If provided, only these domains will be processed
-# Example: ["light", "switch", "climate"]
-include_domains: []
-
-# Optional: List of domains to exclude when generating constants
-# Only used if include_domains is empty
-# Example: ["device_tracker", "person"]
-exclude_domains: []
+url: "http://192.168.1.123:8123"
+ha_auth_token: ""
+home_zone_entity_id: "zone.home"
+include_domains: ["zone", "binary_sensor", "light"]
