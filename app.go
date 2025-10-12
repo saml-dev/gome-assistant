@@ -254,7 +254,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 			if elList, ok := a.eventListeners[eventType]; ok {
 				a.eventListeners[eventType] = append(elList, &evl)
 			} else {
-				ws.SubscribeToEventType(eventType, a.wsWriter, a.ctx)
+				ws.SubscribeToEventType(a.ctx, eventType, a.wsWriter)
 				a.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
@@ -314,7 +314,7 @@ func (a *App) Start() {
 
 	// subscribe to state_changed events
 	id := internal.GetId()
-	ws.SubscribeToStateChangedEvents(id, a.wsWriter, a.ctx)
+	ws.SubscribeToStateChangedEvents(a.ctx, id, a.wsWriter)
 	a.entityListenersId = id
 
 	// entity listeners runOnStartup
