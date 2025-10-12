@@ -12,7 +12,6 @@ import (
 	"log/slog"
 	"net/url"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 
@@ -46,9 +45,9 @@ func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 	return msg, nil
 }
 
-func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, context.Context, context.CancelFunc, error) {
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
-
+func ConnectionFromUri(
+	ctx context.Context, baseURL *url.URL, authToken string,
+) (*websocket.Conn, error) {
 	// Shallow copy the URL to avoid modifying the original
 	urlWebsockets := *baseURL
 	urlWebsockets.Path = "/api/websocket"
@@ -63,36 +62,32 @@ func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, con
 	dialer := websocket.DefaultDialer
 	conn, _, err := dialer.DialContext(ctx, urlWebsockets.String(), nil)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Failed to connect to websocket. Check URI\n", "url", urlWebsockets)
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Read auth_required message
 	_, err = ReadMessage(conn)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Send auth message
 	err = SendAuthMessage(ctx, conn, authToken)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Verify auth message was successful
 	err = VerifyAuthResponse(ctx, conn)
 	if err != nil {
-		ctxCancel()
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
-		return nil, nil, nil, err
+		return nil, err
 	}
 
-	return conn, ctx, ctxCancel, nil
+	return conn, nil
 }
 
 func SendAuthMessage(ctx context.Context, conn *websocket.Conn, token string) error {

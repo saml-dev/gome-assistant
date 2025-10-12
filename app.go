@@ -148,7 +148,9 @@ func NewApp(request NewAppRequest) (*App, error) {
 		baseURL.Host = request.IpAddress + ":" + port
 	}
 
-	conn, ctx, ctxCancel, err := ws.ConnectionFromUri(baseURL, request.HAAuthToken)
+	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
+
+	conn, err := ws.ConnectionFromUri(ctx, baseURL, request.HAAuthToken)
 	if err != nil {
 		return nil, err
 	}
