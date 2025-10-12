@@ -21,17 +21,22 @@ You can generate type-safe constants for all your Home Assistant entities using 
 1. Create a `gen.yaml` file in your project root:
 
 ```yaml
-url: "http://192.168.1.123:8123"  
-ha_auth_token: "your_auth_token"  # Or set HA_AUTH_TOKEN env var
-home_zone_entity_id: "zone.home"  # Optional: defaults to zone.home
+# Required: insert the URL of your Home Assistant here
+url: "http://192.168.1.123:8123"
+
+# Insert your auth token here, or set the HA_AUTH_TOKEN env var
+ha_auth_token: ""
+
+# Optional: defaults to zone.home
+home_zone_entity_id: "zone.home"
 
 # Optional: List of domains to include when generating constants
 # If provided, only these domains will be processed
-include_domains: ["light", "switch", "climate"]
+#include_domains: ["zone", "binary_sensor", "light"]
 
 # Optional: List of domains to exclude when generating constants
 # Only used if include_domains is empty
-exclude_domains: ["device_tracker", "person"]
+#exclude_domains: ["device_tracker", "person"]
 ```
 
 2. Add a `//go:generate` comment in your project:
