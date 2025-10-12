@@ -77,7 +77,7 @@ func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, con
 	}
 
 	// Send auth message
-	err = SendAuthMessage(conn, ctx, authToken)
+	err = SendAuthMessage(ctx, conn, authToken)
 	if err != nil {
 		ctxCancel()
 		slog.Error("Unknown error creating websocket client\n")
@@ -85,7 +85,7 @@ func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, con
 	}
 
 	// Verify auth message was successful
-	err = VerifyAuthResponse(conn, ctx)
+	err = VerifyAuthResponse(ctx, conn)
 	if err != nil {
 		ctxCancel()
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
@@ -95,7 +95,7 @@ func ConnectionFromUri(baseURL *url.URL, authToken string) (*websocket.Conn, con
 	return conn, ctx, ctxCancel, nil
 }
 
-func SendAuthMessage(conn *websocket.Conn, ctx context.Context, token string) error {
+func SendAuthMessage(ctx context.Context, conn *websocket.Conn, token string) error {
 	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ type authResponse struct {
 	Message string `json:"message"`
 }
 
-func VerifyAuthResponse(conn *websocket.Conn, ctx context.Context) error {
+func VerifyAuthResponse(ctx context.Context, conn *websocket.Conn) error {
 	msg, err := ReadMessage(conn)
 	if err != nil {
 		return err
@@ -132,11 +132,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(id int64, conn *WebsocketWriter, ctx context.Context) {
-	SubscribeToEventType("state_changed", conn, ctx, id)
+func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *WebsocketWriter) {
+	SubscribeToEventType(ctx, "state_changed", conn, id)
 }
 
-func SubscribeToEventType(eventType string, conn *WebsocketWriter, ctx context.Context, id ...int64) {
+func SubscribeToEventType(ctx context.Context, eventType string, conn *WebsocketWriter, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = i.GetId()
@@ -154,6 +154,6 @@ func SubscribeToEventType(eventType string, conn *WebsocketWriter, ctx context.C
 		slog.Error(wrappedErr.Error())
 		panic(wrappedErr)
 	}
-	// m, _ := ReadMessage(conn, ctx)
+	// m, _ := ReadMessage(ctx, conn)
 	// log.Default().Println(string(m))
 }
