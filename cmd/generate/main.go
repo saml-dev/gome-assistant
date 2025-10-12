@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+	"time"
 
 	"gopkg.in/yaml.v3"
 	ga "saml.dev/gome-assistant"
@@ -94,9 +95,7 @@ func validateHomeZone(state ga.State, entityID string) error {
 }
 
 // generate creates the entities.go file with constants for all Home Assistant entities
-func generate(config Config) error {
-	ctx := context.TODO()
-
+func generate(ctx context.Context, config Config) error {
 	if config.HomeZoneEntityId == "" {
 		config.HomeZoneEntityId = "zone.home"
 	}
@@ -224,6 +223,9 @@ var {{ .Name }} = {{ .Name }}Domain{
 }
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	println("Generating entities.go...")
 	configFile := flag.String("config", "gen.yaml", "Path to config file")
 	flag.Parse()
@@ -255,7 +257,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := generate(config); err != nil {
+	if err := generate(ctx, config); err != nil {
 		fmt.Printf("Error generating entities: %v\n", err)
 		os.Exit(1)
 	}
