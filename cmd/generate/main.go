@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -94,15 +95,20 @@ func validateHomeZone(state ga.State, entityID string) error {
 
 // generate creates the entities.go file with constants for all Home Assistant entities
 func generate(config Config) error {
+	ctx := context.TODO()
+
 	if config.HomeZoneEntityId == "" {
 		config.HomeZoneEntityId = "zone.home"
 	}
 
-	app, err := ga.NewApp(ga.NewAppRequest{
-		URL:              config.URL,
-		HAAuthToken:      config.HAAuthToken,
-		HomeZoneEntityId: config.HomeZoneEntityId,
-	})
+	app, err := ga.NewApp(
+		ctx,
+		ga.NewAppRequest{
+			URL:              config.URL,
+			HAAuthToken:      config.HAAuthToken,
+			HomeZoneEntityId: config.HomeZoneEntityId,
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("failed to create app: %w", err)
 	}

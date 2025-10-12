@@ -112,11 +112,9 @@ func validateHomeZone(state State, entityID string) error {
 	return nil
 }
 
-/*
-NewApp establishes the websocket connection and returns an object
-you can use to register schedules and listeners.
-*/
-func NewApp(request NewAppRequest) (*App, error) {
+// NewApp establishes the websocket connection and returns an object
+// you can use to register schedules and listeners.
+func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	if (request.URL == "" && request.IpAddress == "") || request.HAAuthToken == "" {
 		slog.Error("URL and HAAuthToken are required arguments in NewAppRequest")
 		return nil, ErrInvalidArgs
@@ -148,7 +146,7 @@ func NewApp(request NewAppRequest) (*App, error) {
 		baseURL.Host = request.IpAddress + ":" + port
 	}
 
-	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Second*3)
+	ctx, ctxCancel := context.WithTimeout(ctx, time.Second*3)
 
 	conn, err := ws.ConnectionFromUri(ctx, baseURL, request.HAAuthToken)
 	if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"os"
@@ -14,11 +15,16 @@ import (
 //go:generate go run saml.dev/gome-assistant/cmd/generate
 
 func main() {
-	app, err := ga.NewApp(ga.NewAppRequest{
-		URL:              "http://192.168.86.67:8123", // Replace with your Home Assistant URL
-		HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
-		HomeZoneEntityId: "zone.home",
-	})
+	ctx := context.TODO()
+
+	app, err := ga.NewApp(
+		ctx,
+		ga.NewAppRequest{
+			URL:              "http://192.168.86.67:8123", // Replace with your Home Assistant URL
+			HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
+			HomeZoneEntityId: "zone.home",
+		},
+	)
 	if err != nil {
 		slog.Error("Error connecting to HASS:", "error", err)
 		os.Exit(1)
