@@ -8,14 +8,14 @@ import (
 // PriorityQueue represents the queue
 type PriorityQueue struct {
 	itemHeap *itemHeap
-	lookup   map[any]*item
+	lookup   map[string]*item
 }
 
 // New initializes an empty priority queue.
 func New() PriorityQueue {
 	return PriorityQueue{
 		itemHeap: &itemHeap{},
-		lookup:   make(map[any]*item),
+		lookup:   make(map[string]*item),
 	}
 }
 
