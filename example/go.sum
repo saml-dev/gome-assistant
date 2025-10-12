@@ -96,5 +96,5 @@ gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-saml.dev/gome-assistant v0.2.0 h1:Clo5DrziTdsYydVUTQfroeBVmToMnNHoObr+k6HhbMY=
-saml.dev/gome-assistant v0.2.0/go.mod h1:jsZUtnxANCP0zB2B7iyy4j7sZohMGop8g+5EB2MER3o=
+saml.dev/gome-assistant v0.6.0 h1:Yk1G1tIzPUClczPeSirnqyBmFAtIQLjQxchJbiZBFjI=
+saml.dev/gome-assistant v0.6.0/go.mod h1:NAj56yKBq4PXmHIdrn9oeTmM5SHaNYoLfSWpzTpKjXY=
