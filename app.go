@@ -146,9 +146,10 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 		baseURL.Host = request.IpAddress + ":" + port
 	}
 
-	ctx, ctxCancel := context.WithTimeout(ctx, time.Second*3)
+	connCtx, connCancel := context.WithTimeout(ctx, time.Second*3)
+	defer connCancel()
 
-	conn, err := ws.ConnectionFromUri(ctx, baseURL, request.HAAuthToken)
+	conn, err := ws.ConnectionFromUri(connCtx, baseURL, request.HAAuthToken)
 	if err != nil {
 		return nil, err
 	}
@@ -170,11 +171,12 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 		return nil, err
 	}
 
+	ctx, cancel := context.WithCancel(ctx)
 	return &App{
 		conn:            conn,
 		wsWriter:        wsWriter,
 		ctx:             ctx,
-		ctxCancel:       ctxCancel,
+		ctxCancel:       cancel,
 		httpClient:      httpClient,
 		service:         service,
 		state:           state,
