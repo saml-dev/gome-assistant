@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"example/entities" // Optional import generated entities
@@ -15,7 +17,8 @@ import (
 //go:generate go run saml.dev/gome-assistant/cmd/generate
 
 func main() {
-	ctx := context.TODO()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
 
 	app, err := ga.NewApp(
 		ctx,
