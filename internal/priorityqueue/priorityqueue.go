@@ -8,14 +8,14 @@ import (
 // PriorityQueue represents the queue
 type PriorityQueue struct {
 	itemHeap *itemHeap
-	lookup   map[interface{}]*item
+	lookup   map[string]*item
 }
 
 // New initializes an empty priority queue.
 func New() PriorityQueue {
 	return PriorityQueue{
 		itemHeap: &itemHeap{},
-		lookup:   make(map[interface{}]*item),
+		lookup:   make(map[string]*item),
 	}
 }
 
@@ -41,7 +41,7 @@ func (p *PriorityQueue) Insert(v interface{ Hash() string }, priority float64) {
 
 // Pop removes the element with the highest priority from the queue and returns it.
 // In case of an empty queue, an error is returned.
-func (p *PriorityQueue) Pop() (interface{}, error) {
+func (p *PriorityQueue) Pop() (any, error) {
 	if len(*p.itemHeap) == 0 {
 		return nil, errors.New("empty queue")
 	}
@@ -54,7 +54,7 @@ func (p *PriorityQueue) Pop() (interface{}, error) {
 type itemHeap []*item
 
 type item struct {
-	value    interface{}
+	value    any
 	priority float64
 	index    int
 }
@@ -73,13 +73,13 @@ func (ih *itemHeap) Swap(i, j int) {
 	(*ih)[j].index = j
 }
 
-func (ih *itemHeap) Push(x interface{}) {
+func (ih *itemHeap) Push(x any) {
 	it := x.(*item)
 	it.index = len(*ih)
 	*ih = append(*ih, it)
 }
 
-func (ih *itemHeap) Pop() interface{} {
+func (ih *itemHeap) Pop() any {
 	old := *ih
 	item := old[len(old)-1]
 	*ih = old[0 : len(old)-1]
