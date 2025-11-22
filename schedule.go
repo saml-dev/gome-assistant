@@ -194,6 +194,13 @@ func (a *App) popSchedule() DailySchedule {
 }
 
 func (a *App) requeueSchedule(s DailySchedule) {
+	s.updateNextRunTime(a)
+	a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
+}
+
+// updateNextRunTime updates `s.nextRunTime` to the next time that `s`
+// should run.
+func (s DailySchedule) updateNextRunTime(a *App) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
@@ -207,6 +214,4 @@ func (a *App) requeueSchedule(s DailySchedule) {
 	} else {
 		s.nextRunTime = carbon.Time2Carbon(s.nextRunTime).AddDay().Carbon2Time()
 	}
-
-	a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
 }
