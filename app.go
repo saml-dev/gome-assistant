@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -19,6 +20,12 @@ import (
 )
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
+
+// scheduledAction represents an action that can schedule and run
+// itself, perhaps repeatedly.
+type scheduledAction interface {
+	run(ctx context.Context, app *App)
+}
 
 type App struct {
 	ctx       context.Context
@@ -33,8 +40,8 @@ type App struct {
 	service *Service
 	state   *StateImpl
 
-	schedules         []DailySchedule
-	intervals         []Interval
+	scheduledActions  []scheduledAction
+	scheduleCount     int
 	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
 	eventListeners    map[string][]*EventListener
@@ -195,7 +202,8 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 		// realStartTime already set for sunset/sunrise
 		if s.isSunrise || s.isSunset {
 			s.nextRunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset).Carbon2Time()
-			a.schedules = append(a.schedules, s)
+			a.scheduledActions = append(a.scheduledActions, s)
+			a.scheduleCount++
 			continue
 		}
 
@@ -208,7 +216,8 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 		}
 
 		s.nextRunTime = startTime.Carbon2Time()
-		a.schedules = append(a.schedules, s)
+		a.scheduledActions = append(a.scheduledActions, s)
+		a.scheduleCount++
 	}
 }
 
@@ -224,7 +233,7 @@ func (a *App) RegisterIntervals(intervals ...Interval) {
 		for i.nextRunTime.Before(now) {
 			i.nextRunTime = i.nextRunTime.Add(i.frequency)
 		}
-		a.intervals = append(a.intervals, i)
+		a.scheduledActions = append(a.scheduledActions, i)
 	}
 }
 
@@ -304,12 +313,11 @@ func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.
 }
 
 func (a *App) Start() {
-	slog.Info("Starting", "schedules", len(a.schedules))
+	slog.Info("Starting", "schedules", a.scheduleCount)
 	slog.Info("Starting", "entity listeners", len(a.entityListeners))
 	slog.Info("Starting", "event listeners", len(a.eventListeners))
 
-	go a.runSchedules(a.ctx)
-	go a.runIntervals(a.ctx)
+	go a.runScheduledActions(a.ctx)
 
 	// subscribe to state_changed events
 	id := internal.GetId()
@@ -354,6 +362,23 @@ func (a *App) Start() {
 		} else {
 			go callEventListeners(a, msg)
 		}
+	}
+}
+
+// runScheduledActions starts a goroutine to run each `DailySchedule`
+// and each `Interval` that has been configured. The `run()` method of
+// each of those instances takes care of deciding when to run and
+// invoking its callback.
+func (a *App) runScheduledActions(ctx context.Context) {
+	var wg sync.WaitGroup
+	defer wg.Wait()
+
+	for _, action := range a.scheduledActions {
+		wg.Add(1)
+		go func(action scheduledAction) {
+			defer wg.Done()
+			action.run(ctx, a)
+		}(action)
 	}
 }
 

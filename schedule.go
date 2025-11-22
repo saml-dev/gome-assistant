@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"sync"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -13,6 +12,7 @@ import (
 
 type ScheduleCallback func(*Service, State)
 
+// DailySchedule is a `scheduledAction` that runs once per day.
 type DailySchedule struct {
 	// 0-23
 	hour int
@@ -151,20 +151,6 @@ func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 
 func (sb scheduleBuilderEnd) Build() DailySchedule {
 	return sb.schedule
-}
-
-// app.Start() functions
-func (a *App) runSchedules(ctx context.Context) {
-	var wg sync.WaitGroup
-	defer wg.Wait()
-
-	for _, sched := range a.schedules {
-		wg.Add(1)
-		go func(sched DailySchedule) {
-			defer wg.Done()
-			sched.run(ctx, a)
-		}(sched)
-	}
 }
 
 // run invokes `s.maybeRunCallback()` based on its configured
