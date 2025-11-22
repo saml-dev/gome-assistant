@@ -1,6 +1,7 @@
 package gomeassistant
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -153,7 +154,7 @@ func (sb scheduleBuilderEnd) Build() DailySchedule {
 }
 
 // app.Start() functions
-func (a *App) runSchedules() {
+func (a *App) runSchedules(ctx context.Context) {
 	var wg sync.WaitGroup
 	defer wg.Wait()
 
@@ -161,18 +162,31 @@ func (a *App) runSchedules() {
 		wg.Add(1)
 		go func(sched DailySchedule) {
 			defer wg.Done()
-			sched.run(a)
+			sched.run(ctx, a)
 		}(sched)
 	}
 }
 
 // run invokes `s.maybeRunCallback()` based on its configured
-// schedule.
-func (s DailySchedule) run(a *App) {
-	for {
+// schedule. Terminate when `ctx` is canceled.
+func (s DailySchedule) run(ctx context.Context, a *App) {
+	// Create a new, but stopped, timer for sleeping on:
+	timer := time.NewTimer(1 * time.Hour)
+	if !timer.Stop() {
+		<-timer.C
+	}
+
+	for ctx.Err() == nil {
 		if s.nextRunTime.After(time.Now()) {
 			slog.Info("Next schedule", "start_time", s.nextRunTime)
-			time.Sleep(time.Until(s.nextRunTime))
+
+			timer.Reset(time.Until(s.nextRunTime))
+			select {
+			case <-timer.C:
+			case <-ctx.Done():
+				timer.Stop()
+				return
+			}
 		}
 
 		s.maybeRunCallback(a)

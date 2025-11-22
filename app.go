@@ -310,7 +310,7 @@ func (a *App) Start() {
 	slog.Info("Starting", "entity listeners", len(a.entityListeners))
 	slog.Info("Starting", "event listeners", len(a.eventListeners))
 
-	go a.runSchedules()
+	go a.runSchedules(a.ctx)
 	go a.runIntervals()
 
 	// subscribe to state_changed events
