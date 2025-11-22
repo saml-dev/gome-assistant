@@ -161,16 +161,13 @@ func (a *App) runSchedules() {
 		sched := a.popSchedule()
 
 		// run callback for all schedules before now in case they overlap
-		for sched.nextRunTime.Before(time.Now()) {
-			sched.maybeRunCallback(a)
-			a.requeueSchedule(sched)
-
-			sched = a.popSchedule()
+		if sched.nextRunTime.After(time.Now()) {
+			slog.Info("Next schedule", "start_time", sched.nextRunTime)
+			time.Sleep(time.Until(sched.nextRunTime))
 		}
 
-		slog.Info("Next schedule", "start_time", sched.nextRunTime)
-		time.Sleep(time.Until(sched.nextRunTime))
 		sched.maybeRunCallback(a)
+
 		a.requeueSchedule(sched)
 	}
 }
