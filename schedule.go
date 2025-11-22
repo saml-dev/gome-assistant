@@ -161,17 +161,22 @@ func (a *App) runSchedules() {
 		wg.Add(1)
 		go func(sched DailySchedule) {
 			defer wg.Done()
-
-			for {
-				if sched.nextRunTime.After(time.Now()) {
-					slog.Info("Next schedule", "start_time", sched.nextRunTime)
-					time.Sleep(time.Until(sched.nextRunTime))
-				}
-
-				sched.maybeRunCallback(a)
-				sched.updateNextRunTime(a)
-			}
+			sched.run(a)
 		}(sched)
+	}
+}
+
+// run invokes `s.maybeRunCallback()` based on its configured
+// schedule.
+func (s DailySchedule) run(a *App) {
+	for {
+		if s.nextRunTime.After(time.Now()) {
+			slog.Info("Next schedule", "start_time", s.nextRunTime)
+			time.Sleep(time.Until(s.nextRunTime))
+		}
+
+		s.maybeRunCallback(a)
+		s.updateNextRunTime(a)
 	}
 }
 
