@@ -152,26 +152,26 @@ func (sb scheduleBuilderEnd) Build() DailySchedule {
 }
 
 // app.Start() functions
-func runSchedules(a *App) {
+func (a *App) runSchedules() {
 	if a.schedules.Len() == 0 {
 		return
 	}
 
 	for {
-		sched := popSchedule(a)
+		sched := a.popSchedule()
 
 		// run callback for all schedules before now in case they overlap
 		for sched.nextRunTime.Before(time.Now()) {
 			sched.maybeRunCallback(a)
-			requeueSchedule(a, sched)
+			a.requeueSchedule(sched)
 
-			sched = popSchedule(a)
+			sched = a.popSchedule()
 		}
 
 		slog.Info("Next schedule", "start_time", sched.nextRunTime)
 		time.Sleep(time.Until(sched.nextRunTime))
 		sched.maybeRunCallback(a)
-		requeueSchedule(a, sched)
+		a.requeueSchedule(sched)
 	}
 }
 
@@ -191,12 +191,12 @@ func (s DailySchedule) maybeRunCallback(a *App) {
 	go s.callback(a.service, a.state)
 }
 
-func popSchedule(a *App) DailySchedule {
+func (a *App) popSchedule() DailySchedule {
 	_sched, _ := a.schedules.Pop()
 	return _sched.(DailySchedule)
 }
 
-func requeueSchedule(a *App, s DailySchedule) {
+func (a *App) requeueSchedule(s DailySchedule) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value

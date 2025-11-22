@@ -145,25 +145,25 @@ func (sb intervalBuilderEnd) Build() Interval {
 }
 
 // app.Start() functions
-func runIntervals(a *App) {
+func (a *App) runIntervals() {
 	if a.intervals.Len() == 0 {
 		return
 	}
 
 	for {
-		i := popInterval(a)
+		i := a.popInterval()
 
 		// run callback for all intervals before now in case they overlap
 		for i.nextRunTime.Before(time.Now()) {
 			i.maybeRunCallback(a)
-			requeueInterval(a, i)
+			a.requeueInterval(i)
 
-			i = popInterval(a)
+			i = a.popInterval()
 		}
 
 		time.Sleep(time.Until(i.nextRunTime))
 		i.maybeRunCallback(a)
-		requeueInterval(a, i)
+		a.requeueInterval(i)
 	}
 }
 
@@ -189,12 +189,12 @@ func (i Interval) maybeRunCallback(a *App) {
 	go i.callback(a.service, a.state)
 }
 
-func popInterval(a *App) Interval {
+func (a *App) popInterval() Interval {
 	i, _ := a.intervals.Pop()
 	return i.(Interval)
 }
 
-func requeueInterval(a *App, i Interval) {
+func (a *App) requeueInterval(i Interval) {
 	i.nextRunTime = i.nextRunTime.Add(i.frequency)
 
 	a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
