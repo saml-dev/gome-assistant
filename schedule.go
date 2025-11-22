@@ -167,8 +167,9 @@ func (a *App) runSchedules() {
 		}
 
 		sched.maybeRunCallback(a)
+		sched.updateNextRunTime(a)
 
-		a.requeueSchedule(sched)
+		a.schedules.Insert(sched, float64(sched.nextRunTime.Unix()))
 	}
 }
 
@@ -191,11 +192,6 @@ func (s DailySchedule) maybeRunCallback(a *App) {
 func (a *App) popSchedule() DailySchedule {
 	_sched, _ := a.schedules.Pop()
 	return _sched.(DailySchedule)
-}
-
-func (a *App) requeueSchedule(s DailySchedule) {
-	s.updateNextRunTime(a)
-	a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
 }
 
 // updateNextRunTime updates `s.nextRunTime` to the next time that `s`
