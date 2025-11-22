@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"os"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -17,9 +19,13 @@ import (
 type (
 	MySuite struct {
 		suite.Suite
-		app      *ga.App
-		config   *Config
-		suiteCtx map[string]any
+		app    *ga.App
+		config *Config
+
+		suiteCtx struct {
+			entityCallbackInvoked        atomic.Bool
+			dailyScheduleCallbackInvoked atomic.Bool
+		}
 	}
 
 	Config struct {
@@ -49,7 +55,6 @@ func setupLogging() {
 func (s *MySuite) SetupSuite() {
 	setupLogging()
 	slog.Debug("Setting up test suite...")
-	s.suiteCtx = make(map[string]any)
 
 	configFile, err := os.ReadFile("./config.yaml")
 	if err != nil {
@@ -78,12 +83,12 @@ func (s *MySuite) SetupSuite() {
 	// Register all automations
 	entityId := s.config.Entities.LightEntityId
 	if entityId != "" {
-		s.suiteCtx["entityCallbackInvoked"] = false
+		s.suiteCtx.entityCallbackInvoked.Store(false)
 		etl := ga.NewEntityListener().EntityIds(entityId).Call(s.entityCallback).Build()
 		s.app.RegisterEntityListeners(etl)
 	}
 
-	s.suiteCtx["dailyScheduleCallbackInvoked"] = false
+	s.suiteCtx.dailyScheduleCallbackInvoked.Store(false)
 	runTime := time.Now().Add(1 * time.Minute).Format("15:04")
 	dailySchedule := ga.NewDailySchedule().Call(s.dailyScheduleCallback).At(runTime).Build()
 	s.app.RegisterSchedules(dailySchedule)
@@ -110,7 +115,7 @@ func (s *MySuite) TestLightService() {
 		assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
 			newState := getEntityState(s, entityId)
 			assert.NotEqual(c, initState, newState)
-			assert.True(c, s.suiteCtx["entityCallbackInvoked"].(bool))
+			assert.True(c, s.suiteCtx.entityCallbackInvoked.Load())
 		}, 10*time.Second, 1*time.Second, "State of light entity did not change or callback was not invoked")
 	} else {
 		s.T().Skip("No light entity id provided")
@@ -120,20 +125,20 @@ func (s *MySuite) TestLightService() {
 // Basic test of daily schedule and callback
 func (s *MySuite) TestSchedule() {
 	assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
-		assert.True(c, s.suiteCtx["dailyScheduleCallbackInvoked"].(bool))
+		assert.True(c, s.suiteCtx.dailyScheduleCallbackInvoked.Load())
 	}, 2*time.Minute, 1*time.Second, "Daily schedule callback was not invoked")
 }
 
 // Capture event after light entity state has changed
 func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
 	slog.Info("Entity callback called.", "entity id", e.TriggerEntityId, "from state", e.FromState, "to state", e.ToState)
-	s.suiteCtx["entityCallbackInvoked"] = true
+	s.suiteCtx.entityCallbackInvoked.Store(true)
 }
 
 // Capture planned daily schedule
 func (s *MySuite) dailyScheduleCallback(se *ga.Service, st ga.State) {
 	slog.Info("Daily schedule callback called.")
-	s.suiteCtx["dailyScheduleCallbackInvoked"] = true
+	s.suiteCtx.dailyScheduleCallbackInvoked.Store(true)
 }
 
 func getEntityState(s *MySuite, entityId string) string {
