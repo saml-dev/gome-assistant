@@ -309,7 +309,7 @@ func (a *App) Start() {
 	slog.Info("Starting", "event listeners", len(a.eventListeners))
 
 	go a.runSchedules(a.ctx)
-	go a.runIntervals()
+	go a.runIntervals(a.ctx)
 
 	// subscribe to state_changed events
 	id := internal.GetId()
