@@ -1,6 +1,7 @@
 package gomeassistant
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -146,7 +147,7 @@ func (sb intervalBuilderEnd) Build() Interval {
 }
 
 // app.Start() functions
-func (a *App) runIntervals() {
+func (a *App) runIntervals(ctx context.Context) {
 	var wg sync.WaitGroup
 	defer wg.Wait()
 
@@ -155,17 +156,29 @@ func (a *App) runIntervals() {
 		go func(i Interval) {
 			defer wg.Done()
 
-			i.run(a)
+			i.run(ctx, a)
 		}(i)
 	}
 }
 
 // run invokes `i.maybeRunCallback()` based on its configured
 // frequency.
-func (i Interval) run(a *App) {
-	for {
+func (i Interval) run(ctx context.Context, a *App) {
+	// Create a new, but stopped, timer for sleeping on:
+	timer := time.NewTimer(1 * time.Hour)
+	if !timer.Stop() {
+		<-timer.C
+	}
+
+	for ctx.Err() == nil {
 		if i.nextRunTime.After(time.Now()) {
-			time.Sleep(time.Until(i.nextRunTime))
+			timer.Reset(time.Until(i.nextRunTime))
+			select {
+			case <-timer.C:
+			case <-ctx.Done():
+				timer.Stop()
+				return
+			}
 		}
 
 		i.maybeRunCallback(a)
