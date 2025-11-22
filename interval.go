@@ -158,8 +158,9 @@ func (a *App) runIntervals() {
 		}
 
 		i.maybeRunCallback(a)
+		i.nextRunTime = i.nextRunTime.Add(i.frequency)
 
-		a.requeueInterval(i)
+		a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
 	}
 }
 
@@ -188,10 +189,4 @@ func (i Interval) maybeRunCallback(a *App) {
 func (a *App) popInterval() Interval {
 	i, _ := a.intervals.Pop()
 	return i.(Interval)
-}
-
-func (a *App) requeueInterval(i Interval) {
-	i.nextRunTime = i.nextRunTime.Add(i.frequency)
-
-	a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
 }
