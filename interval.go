@@ -155,15 +155,21 @@ func (a *App) runIntervals() {
 		go func(i Interval) {
 			defer wg.Done()
 
-			for {
-				if i.nextRunTime.After(time.Now()) {
-					time.Sleep(time.Until(i.nextRunTime))
-				}
-
-				i.maybeRunCallback(a)
-				i.nextRunTime = i.nextRunTime.Add(i.frequency)
-			}
+			i.run(a)
 		}(i)
+	}
+}
+
+// run invokes `i.maybeRunCallback()` based on its configured
+// frequency.
+func (i Interval) run(a *App) {
+	for {
+		if i.nextRunTime.After(time.Now()) {
+			time.Sleep(time.Until(i.nextRunTime))
+		}
+
+		i.maybeRunCallback(a)
+		i.nextRunTime = i.nextRunTime.Add(i.frequency)
 	}
 }
 
