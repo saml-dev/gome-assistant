@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"saml.dev/gome-assistant/internal"
@@ -146,21 +147,23 @@ func (sb intervalBuilderEnd) Build() Interval {
 
 // app.Start() functions
 func (a *App) runIntervals() {
-	if a.intervals.Len() == 0 {
-		return
-	}
+	var wg sync.WaitGroup
+	defer wg.Wait()
 
-	for {
-		i := a.popInterval()
+	for _, i := range a.intervals {
+		wg.Add(1)
+		go func(i Interval) {
+			defer wg.Done()
 
-		if i.nextRunTime.After(time.Now()) {
-			time.Sleep(time.Until(i.nextRunTime))
-		}
+			for {
+				if i.nextRunTime.After(time.Now()) {
+					time.Sleep(time.Until(i.nextRunTime))
+				}
 
-		i.maybeRunCallback(a)
-		i.nextRunTime = i.nextRunTime.Add(i.frequency)
-
-		a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
+				i.maybeRunCallback(a)
+				i.nextRunTime = i.nextRunTime.Add(i.frequency)
+			}
+		}(i)
 	}
 }
 
@@ -184,9 +187,4 @@ func (i Interval) maybeRunCallback(a *App) {
 		return
 	}
 	go i.callback(a.service, a.state)
-}
-
-func (a *App) popInterval() Interval {
-	i, _ := a.intervals.Pop()
-	return i.(Interval)
 }

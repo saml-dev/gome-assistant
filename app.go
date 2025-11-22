@@ -15,7 +15,6 @@ import (
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
-	pq "saml.dev/gome-assistant/internal/priorityqueue"
 	ws "saml.dev/gome-assistant/internal/websocket"
 )
 
@@ -35,7 +34,7 @@ type App struct {
 	state   *StateImpl
 
 	schedules         []DailySchedule
-	intervals         pq.PriorityQueue
+	intervals         []Interval
 	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
 	eventListeners    map[string][]*EventListener
@@ -180,7 +179,6 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 		httpClient:      httpClient,
 		service:         service,
 		state:           state,
-		intervals:       pq.New(),
 		entityListeners: map[string][]*EntityListener{},
 		eventListeners:  map[string][]*EventListener{},
 	}, nil
@@ -226,7 +224,7 @@ func (a *App) RegisterIntervals(intervals ...Interval) {
 		for i.nextRunTime.Before(now) {
 			i.nextRunTime = i.nextRunTime.Add(i.frequency)
 		}
-		a.intervals.Insert(i, float64(i.nextRunTime.Unix()))
+		a.intervals = append(a.intervals, i)
 	}
 }
 
