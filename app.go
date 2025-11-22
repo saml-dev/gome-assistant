@@ -34,7 +34,7 @@ type App struct {
 	service *Service
 	state   *StateImpl
 
-	schedules         pq.PriorityQueue
+	schedules         []DailySchedule
 	intervals         pq.PriorityQueue
 	entityListeners   map[string][]*EntityListener
 	entityListenersId int64
@@ -180,7 +180,6 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 		httpClient:      httpClient,
 		service:         service,
 		state:           state,
-		schedules:       pq.New(),
 		intervals:       pq.New(),
 		entityListeners: map[string][]*EntityListener{},
 		eventListeners:  map[string][]*EventListener{},
@@ -198,7 +197,7 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 		// realStartTime already set for sunset/sunrise
 		if s.isSunrise || s.isSunset {
 			s.nextRunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset).Carbon2Time()
-			a.schedules.Insert(s, float64(s.nextRunTime.Unix()))
+			a.schedules = append(a.schedules, s)
 			continue
 		}
 
@@ -211,7 +210,7 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 		}
 
 		s.nextRunTime = startTime.Carbon2Time()
-		a.schedules.Insert(s, float64(startTime.Carbon2Time().Unix()))
+		a.schedules = append(a.schedules, s)
 	}
 }
 
@@ -307,7 +306,7 @@ func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.
 }
 
 func (a *App) Start() {
-	slog.Info("Starting", "schedules", a.schedules.Len())
+	slog.Info("Starting", "schedules", len(a.schedules))
 	slog.Info("Starting", "entity listeners", len(a.entityListeners))
 	slog.Info("Starting", "event listeners", len(a.eventListeners))
 

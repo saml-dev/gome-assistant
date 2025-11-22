@@ -3,6 +3,7 @@ package gomeassistant
 import (
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -153,23 +154,24 @@ func (sb scheduleBuilderEnd) Build() DailySchedule {
 
 // app.Start() functions
 func (a *App) runSchedules() {
-	if a.schedules.Len() == 0 {
-		return
-	}
+	var wg sync.WaitGroup
+	defer wg.Wait()
 
-	for {
-		sched := a.popSchedule()
+	for _, sched := range a.schedules {
+		wg.Add(1)
+		go func(sched DailySchedule) {
+			defer wg.Done()
 
-		// run callback for all schedules before now in case they overlap
-		if sched.nextRunTime.After(time.Now()) {
-			slog.Info("Next schedule", "start_time", sched.nextRunTime)
-			time.Sleep(time.Until(sched.nextRunTime))
-		}
+			for {
+				if sched.nextRunTime.After(time.Now()) {
+					slog.Info("Next schedule", "start_time", sched.nextRunTime)
+					time.Sleep(time.Until(sched.nextRunTime))
+				}
 
-		sched.maybeRunCallback(a)
-		sched.updateNextRunTime(a)
-
-		a.schedules.Insert(sched, float64(sched.nextRunTime.Unix()))
+				sched.maybeRunCallback(a)
+				sched.updateNextRunTime(a)
+			}
+		}(sched)
 	}
 }
 
@@ -187,11 +189,6 @@ func (s DailySchedule) maybeRunCallback(a *App) {
 		return
 	}
 	go s.callback(a.service, a.state)
-}
-
-func (a *App) popSchedule() DailySchedule {
-	_sched, _ := a.schedules.Pop()
-	return _sched.(DailySchedule)
 }
 
 // updateNextRunTime updates `s.nextRunTime` to the next time that `s`
