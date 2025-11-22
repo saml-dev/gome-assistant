@@ -3,7 +3,6 @@ package gomeassistant
 import (
 	"context"
 	"fmt"
-	"sync"
 	"time"
 
 	"saml.dev/gome-assistant/internal"
@@ -11,6 +10,8 @@ import (
 
 type IntervalCallback func(*Service, State)
 
+// Interval is a `scheduledAction` that runs repeatedly at a specified
+// frequency.
 type Interval struct {
 	frequency   time.Duration
 	callback    IntervalCallback
@@ -144,21 +145,6 @@ func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkEr
 
 func (sb intervalBuilderEnd) Build() Interval {
 	return sb.interval
-}
-
-// app.Start() functions
-func (a *App) runIntervals(ctx context.Context) {
-	var wg sync.WaitGroup
-	defer wg.Wait()
-
-	for _, i := range a.intervals {
-		wg.Add(1)
-		go func(i Interval) {
-			defer wg.Done()
-
-			i.run(ctx, a)
-		}(i)
-	}
 }
 
 // run invokes `i.maybeRunCallback()` based on its configured
