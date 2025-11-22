@@ -62,11 +62,14 @@ func (s *MySuite) SetupSuite() {
 		slog.Error("Error unmarshalling config file", "error", err)
 	}
 
-	s.app, err = ga.NewApp(ga.NewAppRequest{
-		HAAuthToken:      s.config.Hass.HAAuthToken,
-		IpAddress:        s.config.Hass.IpAddress,
-		HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
-	})
+	s.app, err = ga.NewApp(
+		context.Background(),
+		ga.NewAppRequest{
+			HAAuthToken:      s.config.Hass.HAAuthToken,
+			IpAddress:        s.config.Hass.IpAddress,
+			HomeZoneEntityId: s.config.Hass.HomeZoneEntityId,
+		},
+	)
 	if err != nil {
 		slog.Error("Failed to create new app", "error", err)
 		s.T().FailNow()
