@@ -155,7 +155,7 @@ func (sb scheduleBuilderEnd) Build() DailySchedule {
 
 // run invokes `s.maybeRunCallback()` based on its configured
 // schedule. Terminate when `ctx` is canceled.
-func (s DailySchedule) run(ctx context.Context, a *App) {
+func (s DailySchedule) run(ctx context.Context, app *App) {
 	// Create a new, but stopped, timer for sleeping on:
 	timer := time.NewTimer(1 * time.Hour)
 	if !timer.Stop() {
@@ -175,37 +175,37 @@ func (s DailySchedule) run(ctx context.Context, a *App) {
 			}
 		}
 
-		s.maybeRunCallback(a)
-		s.updateNextRunTime(a)
+		s.maybeRunCallback(app)
+		s.updateNextRunTime(app)
 	}
 }
 
-func (s DailySchedule) maybeRunCallback(a *App) {
+func (s DailySchedule) maybeRunCallback(app *App) {
 	if c := checkExceptionDates(s.exceptionDates); c.fail {
 		return
 	}
 	if c := checkAllowlistDates(s.allowlistDates); c.fail {
 		return
 	}
-	if c := checkEnabledEntity(a.state, s.enabledEntities); c.fail {
+	if c := checkEnabledEntity(app.state, s.enabledEntities); c.fail {
 		return
 	}
-	if c := checkDisabledEntity(a.state, s.disabledEntities); c.fail {
+	if c := checkDisabledEntity(app.state, s.disabledEntities); c.fail {
 		return
 	}
-	go s.callback(a.service, a.state)
+	go s.callback(app.service, app.state)
 }
 
 // updateNextRunTime updates `s.nextRunTime` to the next time that `s`
 // should run.
-func (s DailySchedule) updateNextRunTime(a *App) {
+func (s DailySchedule) updateNextRunTime(app *App) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
 		if s.sunOffset != "0s" {
-			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset)
+			nextSunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset)
 		} else {
-			nextSunTime = getNextSunRiseOrSet(a, s.isSunrise)
+			nextSunTime = getNextSunRiseOrSet(app, s.isSunrise)
 		}
 
 		s.nextRunTime = nextSunTime.Carbon2Time()

@@ -184,19 +184,19 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	}, nil
 }
 
-func (a *App) Cleanup() {
-	if a.ctxCancel != nil {
-		a.ctxCancel()
+func (app *App) Cleanup() {
+	if app.ctxCancel != nil {
+		app.ctxCancel()
 	}
 }
 
-func (a *App) RegisterSchedules(schedules ...DailySchedule) {
+func (app *App) RegisterSchedules(schedules ...DailySchedule) {
 	for _, s := range schedules {
 		// realStartTime already set for sunset/sunrise
 		if s.isSunrise || s.isSunset {
-			s.nextRunTime = getNextSunRiseOrSet(a, s.isSunrise, s.sunOffset).Carbon2Time()
-			a.scheduledActions = append(a.scheduledActions, s)
-			a.scheduleCount++
+			s.nextRunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset).Carbon2Time()
+			app.scheduledActions = append(app.scheduledActions, s)
+			app.scheduleCount++
 			continue
 		}
 
@@ -209,12 +209,12 @@ func (a *App) RegisterSchedules(schedules ...DailySchedule) {
 		}
 
 		s.nextRunTime = startTime.Carbon2Time()
-		a.scheduledActions = append(a.scheduledActions, s)
-		a.scheduleCount++
+		app.scheduledActions = append(app.scheduledActions, s)
+		app.scheduleCount++
 	}
 }
 
-func (a *App) RegisterIntervals(intervals ...Interval) {
+func (app *App) RegisterIntervals(intervals ...Interval) {
 	for _, i := range intervals {
 		if i.frequency == 0 {
 			slog.Error("A schedule must use either set frequency via Every()")
@@ -226,11 +226,11 @@ func (a *App) RegisterIntervals(intervals ...Interval) {
 		for i.nextRunTime.Before(now) {
 			i.nextRunTime = i.nextRunTime.Add(i.frequency)
 		}
-		a.scheduledActions = append(a.scheduledActions, i)
+		app.scheduledActions = append(app.scheduledActions, i)
 	}
 }
 
-func (a *App) RegisterEntityListeners(etls ...EntityListener) {
+func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
 		etl := etl
 		if etl.delay != 0 && etl.toState == "" {
@@ -239,24 +239,24 @@ func (a *App) RegisterEntityListeners(etls ...EntityListener) {
 		}
 
 		for _, entity := range etl.entityIds {
-			if elList, ok := a.entityListeners[entity]; ok {
-				a.entityListeners[entity] = append(elList, &etl)
+			if elList, ok := app.entityListeners[entity]; ok {
+				app.entityListeners[entity] = append(elList, &etl)
 			} else {
-				a.entityListeners[entity] = []*EntityListener{&etl}
+				app.entityListeners[entity] = []*EntityListener{&etl}
 			}
 		}
 	}
 }
 
-func (a *App) RegisterEventListeners(evls ...EventListener) {
+func (app *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
 		evl := evl
 		for _, eventType := range evl.eventTypes {
-			if elList, ok := a.eventListeners[eventType]; ok {
-				a.eventListeners[eventType] = append(elList, &evl)
+			if elList, ok := app.eventListeners[eventType]; ok {
+				app.eventListeners[eventType] = append(elList, &evl)
 			} else {
-				websocket.SubscribeToEventType(a.ctx, eventType, a.conn)
-				a.eventListeners[eventType] = []*EventListener{&evl}
+				websocket.SubscribeToEventType(app.ctx, eventType, app.conn)
+				app.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
 	}
@@ -295,41 +295,41 @@ func getSunriseSunset(s *StateImpl, sunrise bool, dateToUse carbon.Carbon, offse
 	return setOrRiseToday
 }
 
-func getNextSunRiseOrSet(a *App, sunrise bool, offset ...DurationString) carbon.Carbon {
-	sunriseOrSunset := getSunriseSunset(a.state, sunrise, carbon.Now(), offset...)
+func getNextSunRiseOrSet(app *App, sunrise bool, offset ...DurationString) carbon.Carbon {
+	sunriseOrSunset := getSunriseSunset(app.state, sunrise, carbon.Now(), offset...)
 	if sunriseOrSunset.Lt(carbon.Now()) {
 		// if we're past today's sunset or sunrise (accounting for offset) then get tomorrows
 		// as that's the next time the schedule will run
-		sunriseOrSunset = getSunriseSunset(a.state, sunrise, carbon.Tomorrow(), offset...)
+		sunriseOrSunset = getSunriseSunset(app.state, sunrise, carbon.Tomorrow(), offset...)
 	}
 	return sunriseOrSunset
 }
 
-func (a *App) Start() {
-	slog.Info("Starting", "schedules", a.scheduleCount)
-	slog.Info("Starting", "entity listeners", len(a.entityListeners))
-	slog.Info("Starting", "event listeners", len(a.eventListeners))
+func (app *App) Start() {
+	slog.Info("Starting", "schedules", app.scheduleCount)
+	slog.Info("Starting", "entity listeners", len(app.entityListeners))
+	slog.Info("Starting", "event listeners", len(app.eventListeners))
 
-	go a.runScheduledActions(a.ctx)
+	go app.runScheduledActions(app.ctx)
 
 	// subscribe to state_changed events
 	id := internal.GetId()
-	websocket.SubscribeToStateChangedEvents(a.ctx, id, a.conn)
-	a.entityListenersId = id
+	websocket.SubscribeToStateChangedEvents(app.ctx, id, app.conn)
+	app.entityListenersId = id
 
 	// entity listeners runOnStartup
-	for eid, etls := range a.entityListeners {
+	for eid, etls := range app.entityListeners {
 		for _, etl := range etls {
 			// ensure each ETL only runs once, even if
 			// it listens to multiple entities
 			if etl.runOnStartup && !etl.runOnStartupCompleted {
-				entityState, err := a.state.Get(eid)
+				entityState, err := app.state.Get(eid)
 				if err != nil {
 					slog.Warn("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
 				}
 
 				etl.runOnStartupCompleted = true
-				go etl.callback(a.service, a.state, EntityData{
+				go etl.callback(app.service, app.state, EntityData{
 					TriggerEntityId: eid,
 					FromState:       entityState.State,
 					FromAttributes:  entityState.Attributes,
@@ -343,17 +343,17 @@ func (a *App) Start() {
 
 	// entity listeners and event listeners
 	elChan := make(chan websocket.ChanMsg)
-	go a.conn.ListenWebsocket(elChan)
+	go app.conn.ListenWebsocket(elChan)
 
 	for {
 		msg, ok := <-elChan
 		if !ok {
 			break
 		}
-		if a.entityListenersId == msg.Id {
-			go callEntityListeners(a, msg.Raw)
+		if app.entityListenersId == msg.Id {
+			go callEntityListeners(app, msg.Raw)
 		} else {
-			go callEventListeners(a, msg)
+			go callEventListeners(app, msg)
 		}
 	}
 }
@@ -362,23 +362,23 @@ func (a *App) Start() {
 // and each `Interval` that has been configured. The `run()` method of
 // each of those instances takes care of deciding when to run and
 // invoking its callback.
-func (a *App) runScheduledActions(ctx context.Context) {
+func (app *App) runScheduledActions(ctx context.Context) {
 	var wg sync.WaitGroup
 	defer wg.Wait()
 
-	for _, action := range a.scheduledActions {
+	for _, action := range app.scheduledActions {
 		wg.Add(1)
 		go func(action scheduledAction) {
 			defer wg.Done()
-			action.run(ctx, a)
+			action.run(ctx, app)
 		}(action)
 	}
 }
 
-func (a *App) GetService() *Service {
-	return a.service
+func (app *App) GetService() *Service {
+	return app.service
 }
 
-func (a *App) GetState() State {
-	return a.state
+func (app *App) GetState() State {
+	return app.state
 }
