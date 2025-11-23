@@ -149,7 +149,7 @@ func (sb intervalBuilderEnd) Build() Interval {
 
 // run invokes `i.maybeRunCallback()` based on its configured
 // frequency.
-func (i Interval) run(ctx context.Context, a *App) {
+func (i Interval) run(ctx context.Context, app *App) {
 	// Create a new, but stopped, timer for sleeping on:
 	timer := time.NewTimer(1 * time.Hour)
 	if !timer.Stop() {
@@ -167,12 +167,12 @@ func (i Interval) run(ctx context.Context, a *App) {
 			}
 		}
 
-		i.maybeRunCallback(a)
+		i.maybeRunCallback(app)
 		i.nextRunTime = i.nextRunTime.Add(i.frequency)
 	}
 }
 
-func (i Interval) maybeRunCallback(a *App) {
+func (i Interval) maybeRunCallback(app *App) {
 	if c := checkStartEndTime(i.startTime /* isStart = */, true); c.fail {
 		return
 	}
@@ -185,11 +185,11 @@ func (i Interval) maybeRunCallback(a *App) {
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
 		return
 	}
-	if c := checkEnabledEntity(a.state, i.enabledEntities); c.fail {
+	if c := checkEnabledEntity(app.state, i.enabledEntities); c.fail {
 		return
 	}
-	if c := checkDisabledEntity(a.state, i.disabledEntities); c.fail {
+	if c := checkDisabledEntity(app.state, i.disabledEntities); c.fail {
 		return
 	}
-	go i.callback(a.service, a.state)
+	go i.callback(app.service, app.state)
 }
