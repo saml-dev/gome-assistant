@@ -15,7 +15,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	i "saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/internal"
 )
 
 var ErrInvalidToken = errors.New("invalid authentication token")
@@ -134,7 +134,7 @@ func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *Websocke
 func SubscribeToEventType(ctx context.Context, eventType string, conn *WebsocketWriter, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
-		finalId = i.GetId()
+		finalId = internal.GetId()
 	} else {
 		finalId = id[0]
 	}
