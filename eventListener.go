@@ -8,7 +8,7 @@ import (
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type EventListener struct {
@@ -140,7 +140,7 @@ type BaseEventMsg struct {
 }
 
 /* Functions */
-func callEventListeners(app *App, msg ws.ChanMsg) {
+func callEventListeners(app *App, msg websocket.ChanMsg) {
 	baseEventMsg := BaseEventMsg{}
 	_ = json.Unmarshal(msg.Raw, &baseEventMsg)
 	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]

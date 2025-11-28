@@ -11,12 +11,11 @@ import (
 	"time"
 
 	"github.com/golang-module/carbon"
-	"github.com/gorilla/websocket"
 	sunriseLib "github.com/nathan-osman/go-sunrise"
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
@@ -30,10 +29,9 @@ type scheduledAction interface {
 type App struct {
 	ctx       context.Context
 	ctxCancel context.CancelFunc
-	conn      *websocket.Conn
 
 	// Wraps the ws connection with added mutex locking
-	wsWriter *ws.WebsocketWriter
+	conn *websocket.Conn
 
 	httpClient *http.HttpClient
 
@@ -155,18 +153,14 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	connCtx, connCancel := context.WithTimeout(ctx, time.Second*3)
 	defer connCancel()
 
-	conn, err := ws.ConnectionFromUri(connCtx, baseURL, request.HAAuthToken)
+	conn, err := websocket.NewConn(connCtx, baseURL, request.HAAuthToken)
 	if err != nil {
-		return nil, err
-	}
-	if conn == nil {
 		return nil, err
 	}
 
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
-	wsWriter := &ws.WebsocketWriter{Conn: conn}
-	service := newService(wsWriter)
+	service := newService(conn)
 	state, err := newState(httpClient, request.HomeZoneEntityId)
 	if err != nil {
 		return nil, err
@@ -180,7 +174,6 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	return &App{
 		conn:            conn,
-		wsWriter:        wsWriter,
 		ctx:             ctx,
 		ctxCancel:       cancel,
 		httpClient:      httpClient,
@@ -262,7 +255,7 @@ func (a *App) RegisterEventListeners(evls ...EventListener) {
 			if elList, ok := a.eventListeners[eventType]; ok {
 				a.eventListeners[eventType] = append(elList, &evl)
 			} else {
-				ws.SubscribeToEventType(a.ctx, eventType, a.wsWriter)
+				websocket.SubscribeToEventType(a.ctx, eventType, a.conn)
 				a.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
@@ -321,7 +314,7 @@ func (a *App) Start() {
 
 	// subscribe to state_changed events
 	id := internal.GetId()
-	ws.SubscribeToStateChangedEvents(a.ctx, id, a.wsWriter)
+	websocket.SubscribeToStateChangedEvents(a.ctx, id, a.conn)
 	a.entityListenersId = id
 
 	// entity listeners runOnStartup
@@ -349,8 +342,8 @@ func (a *App) Start() {
 	}
 
 	// entity listeners and event listeners
-	elChan := make(chan ws.ChanMsg)
-	go ws.ListenWebsocket(a.conn, elChan)
+	elChan := make(chan websocket.ChanMsg)
+	go a.conn.ListenWebsocket(elChan)
 
 	for {
 		msg, ok := <-elChan

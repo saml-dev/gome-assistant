@@ -3,8 +3,6 @@ package websocket
 import (
 	"encoding/json"
 	"log/slog"
-
-	"github.com/gorilla/websocket"
 )
 
 type BaseMessage struct {
@@ -14,19 +12,22 @@ type BaseMessage struct {
 }
 
 type ChanMsg struct {
-	Id      int64
 	Type    string
+	Id      int64
 	Success bool
 	Raw     []byte
 }
 
-func ListenWebsocket(conn *websocket.Conn, c chan ChanMsg) {
+// ListenWebsocket reads JSON-formatted messages from `conn`, partly
+// deserializes them, and sends them to `c`. If there is an error,
+// close `c` and return.
+func (conn *Conn) ListenWebsocket(c chan<- ChanMsg) {
 	for {
-		bytes, err := ReadMessage(conn)
+		bytes, err := conn.readMessage()
 		if err != nil {
 			slog.Error("Error reading from websocket", "err", err)
 			close(c)
-			break
+			return
 		}
 
 		base := BaseMessage{
