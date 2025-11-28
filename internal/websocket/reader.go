@@ -20,6 +20,9 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
+// ListenWebsocket reads JSON-formatted messages from `conn`, partly
+// deserializes them, and sends them to `c`. If there is an error,
+// close `c` and return.
 func ListenWebsocket(conn *websocket.Conn, c chan ChanMsg) {
 	for {
 		bytes, err := ReadMessage(conn)
