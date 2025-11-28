@@ -29,7 +29,7 @@ func ListenWebsocket(conn *websocket.Conn, c chan<- ChanMsg) {
 		if err != nil {
 			slog.Error("Error reading from websocket", "err", err)
 			close(c)
-			break
+			return
 		}
 
 		base := BaseMessage{
