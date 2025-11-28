@@ -60,36 +60,38 @@ func NewConn(
 
 	// Init websocket connection
 	dialer := websocket.DefaultDialer
-	conn, _, err := dialer.DialContext(ctx, urlWebsockets.String(), nil)
+	gConn, _, err := dialer.DialContext(ctx, urlWebsockets.String(), nil)
 	if err != nil {
 		slog.Error("Failed to connect to websocket. Check URI\n", "url", urlWebsockets)
 		return nil, err
 	}
 
+	conn := Conn{
+		conn: gConn,
+	}
+
 	// Read auth_required message
-	_, err = ReadMessage(conn)
+	_, err = ReadMessage(gConn)
 	if err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
 	}
 
 	// Send auth message
-	err = SendAuthMessage(ctx, conn, authToken)
+	err = SendAuthMessage(ctx, gConn, authToken)
 	if err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
 	}
 
 	// Verify auth message was successful
-	err = VerifyAuthResponse(ctx, conn)
+	err = conn.verifyAuthResponse(ctx)
 	if err != nil {
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
 		return nil, err
 	}
 
-	return &Conn{
-		conn: conn,
-	}, nil
+	return &conn, nil
 }
 
 func (conn *Conn) Close() error {
@@ -109,8 +111,8 @@ type authResponse struct {
 	Message string `json:"message"`
 }
 
-func VerifyAuthResponse(ctx context.Context, conn *websocket.Conn) error {
-	msg, err := ReadMessage(conn)
+func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
+	msg, err := ReadMessage(conn.conn)
 	if err != nil {
 		return err
 	}
