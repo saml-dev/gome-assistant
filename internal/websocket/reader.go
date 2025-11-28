@@ -14,8 +14,8 @@ type BaseMessage struct {
 }
 
 type ChanMsg struct {
-	Id      int64
 	Type    string
+	Id      int64
 	Success bool
 	Raw     []byte
 }
