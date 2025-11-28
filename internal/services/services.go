@@ -2,7 +2,7 @@ package services
 
 import (
 	"saml.dev/gome-assistant/internal"
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 func BuildService[
@@ -29,7 +29,7 @@ func BuildService[
 		Timer |
 		Vacuum |
 		ZWaveJS,
-](conn *ws.WebsocketConn) *T {
+](conn *websocket.Conn) *T {
 	return &T{conn: conn}
 }
 

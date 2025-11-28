@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputDatetime struct {
-	conn *ws.WebsocketConn
+	conn *websocket.Conn
 }
 
 /* Public API */
