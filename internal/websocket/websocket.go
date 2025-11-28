@@ -26,7 +26,7 @@ type AuthMessage struct {
 }
 
 type WebsocketConn struct {
-	Conn  *websocket.Conn
+	conn  *websocket.Conn
 	mutex sync.Mutex
 }
 
@@ -34,7 +34,7 @@ func (conn *WebsocketConn) WriteMessage(msg any) error {
 	conn.mutex.Lock()
 	defer conn.mutex.Unlock()
 
-	return conn.Conn.WriteJSON(msg)
+	return conn.conn.WriteJSON(msg)
 }
 
 func ReadMessage(conn *websocket.Conn) ([]byte, error) {
@@ -88,12 +88,12 @@ func NewConn(
 	}
 
 	return &WebsocketConn{
-		Conn: conn,
+		conn: conn,
 	}, nil
 }
 
 func (conn *WebsocketConn) Close() error {
-	return conn.Conn.Close()
+	return conn.conn.Close()
 }
 
 func SendAuthMessage(ctx context.Context, conn *websocket.Conn, token string) error {
