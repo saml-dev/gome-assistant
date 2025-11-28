@@ -23,7 +23,7 @@ type ChanMsg struct {
 // close `c` and return.
 func (conn *Conn) ListenWebsocket(c chan<- ChanMsg) {
 	for {
-		bytes, err := ReadMessage(conn.conn)
+		bytes, err := conn.readMessage()
 		if err != nil {
 			slog.Error("Error reading from websocket", "err", err)
 			close(c)

@@ -37,8 +37,8 @@ func (conn *Conn) WriteMessage(msg any) error {
 	return conn.conn.WriteJSON(msg)
 }
 
-func ReadMessage(conn *websocket.Conn) ([]byte, error) {
-	_, msg, err := conn.ReadMessage()
+func (conn *Conn) readMessage() ([]byte, error) {
+	_, msg, err := conn.conn.ReadMessage()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -71,7 +71,7 @@ func NewConn(
 	}
 
 	// Read auth_required message
-	_, err = ReadMessage(gConn)
+	_, err = conn.readMessage()
 	if err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
@@ -112,7 +112,7 @@ type authResponse struct {
 }
 
 func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
-	msg, err := ReadMessage(conn.conn)
+	msg, err := conn.readMessage()
 	if err != nil {
 		return err
 	}
