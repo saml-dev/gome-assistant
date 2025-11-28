@@ -1,11 +1,11 @@
 package services
 
 import (
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type Number struct {
-	conn *ws.WebsocketConn
+	conn *websocket.Conn
 }
 
 func (ib Number) SetValue(entityId string, value float32) error {

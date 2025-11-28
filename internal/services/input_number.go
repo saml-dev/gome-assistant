@@ -1,13 +1,13 @@
 package services
 
 import (
-	ws "saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/internal/websocket"
 )
 
 /* Structs */
 
 type InputNumber struct {
-	conn *ws.WebsocketConn
+	conn *websocket.Conn
 }
 
 /* Public API */

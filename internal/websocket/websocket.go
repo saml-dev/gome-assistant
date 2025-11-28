@@ -25,12 +25,12 @@ type AuthMessage struct {
 	AccessToken string `json:"access_token"`
 }
 
-type WebsocketConn struct {
+type Conn struct {
 	conn  *websocket.Conn
 	mutex sync.Mutex
 }
 
-func (conn *WebsocketConn) WriteMessage(msg any) error {
+func (conn *Conn) WriteMessage(msg any) error {
 	conn.mutex.Lock()
 	defer conn.mutex.Unlock()
 
@@ -47,7 +47,7 @@ func ReadMessage(conn *websocket.Conn) ([]byte, error) {
 
 func NewConn(
 	ctx context.Context, baseURL *url.URL, authToken string,
-) (*WebsocketConn, error) {
+) (*Conn, error) {
 	// Shallow copy the URL to avoid modifying the original
 	urlWebsockets := *baseURL
 	urlWebsockets.Path = "/api/websocket"
@@ -87,12 +87,12 @@ func NewConn(
 		return nil, err
 	}
 
-	return &WebsocketConn{
+	return &Conn{
 		conn: conn,
 	}, nil
 }
 
-func (conn *WebsocketConn) Close() error {
+func (conn *Conn) Close() error {
 	return conn.conn.Close()
 }
 
@@ -133,11 +133,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *WebsocketConn) {
+func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *Conn) {
 	SubscribeToEventType(ctx, "state_changed", conn, id)
 }
 
-func SubscribeToEventType(ctx context.Context, eventType string, conn *WebsocketConn, id ...int64) {
+func SubscribeToEventType(ctx context.Context, eventType string, conn *Conn, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = internal.GetId()
