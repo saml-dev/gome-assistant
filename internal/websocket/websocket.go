@@ -78,7 +78,7 @@ func NewConn(
 	}
 
 	// Send auth message
-	err = SendAuthMessage(ctx, gConn, authToken)
+	err = conn.sendAuthMessage(ctx, authToken)
 	if err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
@@ -98,8 +98,8 @@ func (conn *Conn) Close() error {
 	return conn.conn.Close()
 }
 
-func SendAuthMessage(ctx context.Context, conn *websocket.Conn, token string) error {
-	err := conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
+func (conn *Conn) sendAuthMessage(ctx context.Context, token string) error {
+	err := conn.conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
 	if err != nil {
 		return err
 	}
