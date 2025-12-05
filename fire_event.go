@@ -1,14 +1,20 @@
 package gomeassistant
 
-func (app *App) FireEvent(eventType string, eventData map[string]any) error {
-	req := FireEventRequest{
-		Id:        app.conn.NextMessageID(),
-		Type:      "fire_event",
-		EventType: eventType,
-		EventData: eventData,
-	}
+import "saml.dev/gome-assistant/internal/websocket"
 
-	return app.conn.WriteMessage(req)
+func (app *App) FireEvent(eventType string, eventData map[string]any) error {
+	return app.conn.Send(
+		func(lc websocket.LockedConn) error {
+			req := FireEventRequest{
+				Id:        lc.NextMessageID(),
+				Type:      "fire_event",
+				EventType: eventType,
+				EventData: eventData,
+			}
+
+			return lc.SendMessage(req)
+		},
+	)
 }
 
 // Fire an event

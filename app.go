@@ -38,11 +38,11 @@ type App struct {
 	service *Service
 	state   *StateImpl
 
-	scheduledActions  []scheduledAction
-	scheduleCount     int
-	entityListeners   map[string][]*EntityListener
-	entityListenersId int64
-	eventListeners    map[string][]*EventListener
+	scheduledActions   []scheduledAction
+	scheduleCount      int
+	entityListeners    map[string][]*EntityListener
+	entitySubscription websocket.Subscription
+	eventListeners     map[string][]*EventListener
 }
 
 // DurationString represents a duration, such as "2s" or "24h".
@@ -316,9 +316,7 @@ func (app *App) Start() {
 	go app.runScheduledActions(app.ctx)
 
 	// subscribe to state_changed events
-	id := app.conn.NextMessageID()
-	websocket.SubscribeToStateChangedEvents(id, app.conn)
-	app.entityListenersId = id
+	app.entitySubscription = websocket.SubscribeToStateChangedEvents(app.conn)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
@@ -353,7 +351,7 @@ func (app *App) Start() {
 		if !ok {
 			break
 		}
-		if app.entityListenersId == msg.Id {
+		if app.entitySubscription.ID() == msg.Id {
 			go callEntityListeners(app, msg.Raw)
 		} else {
 			go callEventListeners(app, msg)
