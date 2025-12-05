@@ -9,31 +9,36 @@ type InputBoolean struct {
 /* Public API */
 
 func (ib InputBoolean) TurnOn(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_boolean"
-	req.Service = "turn_on"
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_boolean",
+		Service: "turn_on",
+		Target:  Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputBoolean) Toggle(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_boolean"
-	req.Service = "toggle"
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_boolean",
+		Service: "toggle",
+		Target:  Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputBoolean) TurnOff(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_boolean"
-	req.Service = "turn_off"
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_boolean",
+		Service: "turn_off",
+		Target:  Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputBoolean) Reload() error {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_boolean"
-	req.Service = "reload"
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_boolean",
+		Service: "reload",
+	}
+	return ib.api.Call(req)
 }

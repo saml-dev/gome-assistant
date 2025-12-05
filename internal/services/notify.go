@@ -10,17 +10,16 @@ type Notify struct {
 
 // Notify sends a notification. Takes a types.NotifyRequest.
 func (ha *Notify) Notify(reqData types.NotifyRequest) error {
-	req := NewBaseServiceRequest("")
-	req.Domain = "notify"
-	req.Service = reqData.ServiceName
-
+	req := BaseServiceRequest{
+		Domain:  "notify",
+		Service: reqData.ServiceName,
+	}
 	serviceData := map[string]any{}
 	serviceData["message"] = reqData.Message
 	serviceData["title"] = reqData.Title
 	if reqData.Data != nil {
 		serviceData["data"] = reqData.Data
 	}
-
 	req.ServiceData = serviceData
-	return ha.api.WriteMessage(req)
+	return ha.api.Call(req)
 }
