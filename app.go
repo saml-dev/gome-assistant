@@ -160,28 +160,31 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
-	service := newService(conn)
 	state, err := newState(httpClient, request.HomeZoneEntityId)
 	if err != nil {
 		return nil, err
 	}
+
+	ctx, cancel := context.WithCancel(ctx)
+
+	app := App{
+		conn:            conn,
+		ctx:             ctx,
+		ctxCancel:       cancel,
+		httpClient:      httpClient,
+		state:           state,
+		entityListeners: map[string][]*EntityListener{},
+		eventListeners:  map[string][]*EventListener{},
+	}
+
+	app.service = newService(&app)
 
 	// Validate home zone
 	if err := validateHomeZone(state, request.HomeZoneEntityId); err != nil {
 		return nil, err
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
-	return &App{
-		conn:            conn,
-		ctx:             ctx,
-		ctxCancel:       cancel,
-		httpClient:      httpClient,
-		service:         service,
-		state:           state,
-		entityListeners: map[string][]*EntityListener{},
-		eventListeners:  map[string][]*EventListener{},
-	}, nil
+	return &app, nil
 }
 
 func (app *App) Cleanup() {

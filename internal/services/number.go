@@ -5,12 +5,13 @@ type Number struct {
 }
 
 func (ib Number) SetValue(entityId string, value float32) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "number"
-	req.Service = "set_value"
-	req.ServiceData = map[string]any{"value": value}
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:      "number",
+		Service:     "set_value",
+		ServiceData: map[string]any{"value": value},
+		Target:      Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib Number) MustSetValue(entityId string, value float32) {

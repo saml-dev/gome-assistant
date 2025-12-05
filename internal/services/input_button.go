@@ -9,16 +9,19 @@ type InputButton struct {
 /* Public API */
 
 func (ib InputButton) Press(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_button"
-	req.Service = "press"
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_button",
+		Service: "press",
+		Target:  Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputButton) Reload() error {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_button"
-	req.Service = "reload"
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_button",
+		Service: "reload",
+		Target:  Entity(""),
+	}
+	return ib.api.Call(req)
 }

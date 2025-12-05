@@ -9,19 +9,21 @@ type InputText struct {
 /* Public API */
 
 func (ib InputText) Set(entityId string, value string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_text"
-	req.Service = "set_value"
-	req.ServiceData = map[string]any{
-		"value": value,
+	req := BaseServiceRequest{
+		Domain:  "input_text",
+		Service: "set_value",
+		ServiceData: map[string]any{
+			"value": value,
+		},
+		Target: Entity(entityId),
 	}
-
-	return ib.api.WriteMessage(req)
+	return ib.api.Call(req)
 }
 
 func (ib InputText) Reload() error {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_text"
-	req.Service = "reload"
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_text",
+		Service: "reload",
+	}
+	return ib.api.Call(req)
 }

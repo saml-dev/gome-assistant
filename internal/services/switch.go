@@ -9,25 +9,28 @@ type Switch struct {
 /* Public API */
 
 func (s Switch) TurnOn(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "switch"
-	req.Service = "turn_on"
-
-	return s.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "switch",
+		Service: "turn_on",
+		Target:  Entity(entityId),
+	}
+	return s.api.Call(req)
 }
 
 func (s Switch) Toggle(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "switch"
-	req.Service = "toggle"
-
-	return s.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "switch",
+		Service: "toggle",
+		Target:  Entity(entityId),
+	}
+	return s.api.Call(req)
 }
 
 func (s Switch) TurnOff(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "switch"
-	req.Service = "turn_off"
-
-	return s.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "switch",
+		Service: "turn_off",
+		Target:  Entity(entityId),
+	}
+	return s.api.Call(req)
 }

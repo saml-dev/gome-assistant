@@ -9,33 +9,37 @@ type InputNumber struct {
 /* Public API */
 
 func (ib InputNumber) Set(entityId string, value float32) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_number"
-	req.Service = "set_value"
-	req.ServiceData = map[string]any{"value": value}
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:      "input_number",
+		Service:     "set_value",
+		ServiceData: map[string]any{"value": value},
+		Target:      Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputNumber) Increment(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_number"
-	req.Service = "increment"
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_number",
+		Service: "increment",
+		Target:  Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputNumber) Decrement(entityId string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "input_number"
-	req.Service = "decrement"
-
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_number",
+		Service: "decrement",
+		Target:  Entity(entityId),
+	}
+	return ib.api.Call(req)
 }
 
 func (ib InputNumber) Reload() error {
-	req := NewBaseServiceRequest("")
-	req.Domain = "input_number"
-	req.Service = "reload"
-	return ib.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:  "input_number",
+		Service: "reload",
+	}
+	return ib.api.Call(req)
 }

@@ -13,19 +13,21 @@ type Climate struct {
 /* Public API */
 
 func (c Climate) SetFanMode(entityId string, fanMode string) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "climate"
-	req.Service = "set_fan_mode"
-	req.ServiceData = map[string]any{"fan_mode": fanMode}
-
-	return c.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:      "climate",
+		Service:     "set_fan_mode",
+		ServiceData: map[string]any{"fan_mode": fanMode},
+		Target:      Entity(entityId),
+	}
+	return c.api.Call(req)
 }
 
 func (c Climate) SetTemperature(entityId string, serviceData types.SetTemperatureRequest) error {
-	req := NewBaseServiceRequest(entityId)
-	req.Domain = "climate"
-	req.Service = "set_temperature"
-	req.ServiceData = serviceData.ToJSON()
-
-	return c.api.WriteMessage(req)
+	req := BaseServiceRequest{
+		Domain:      "climate",
+		Service:     "set_temperature",
+		ServiceData: serviceData.ToJSON(),
+		Target:      Entity(entityId),
+	}
+	return c.api.Call(req)
 }
