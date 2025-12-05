@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"example/entities" // Optional import generated entities
+	"saml.dev/gome-assistant/cmd/example/entities" // Optional import generated entities
 
 	ga "saml.dev/gome-assistant"
 )
