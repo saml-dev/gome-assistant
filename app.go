@@ -344,7 +344,18 @@ func (app *App) Start() {
 
 	// entity listeners and event listeners
 	elChan := make(chan websocket.ChanMsg)
-	go app.conn.ListenWebsocket(elChan)
+	go func() {
+		err := app.conn.ListenWebsocket(
+			func(msg websocket.ChanMsg) {
+				elChan <- msg
+			},
+		)
+		if err != nil {
+			close(elChan)
+			slog.Error("Error reading from websocket", "err", err)
+			return
+		}
+	}()
 
 	for {
 		msg, ok := <-elChan
