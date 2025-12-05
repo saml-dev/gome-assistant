@@ -26,13 +26,13 @@ type AuthMessage struct {
 }
 
 type Conn struct {
-	conn  *websocket.Conn
-	mutex sync.Mutex
+	conn      *websocket.Conn
+	writeLock sync.Mutex
 }
 
 func (conn *Conn) WriteMessage(msg any) error {
-	conn.mutex.Lock()
-	defer conn.mutex.Unlock()
+	conn.writeLock.Lock()
+	defer conn.writeLock.Unlock()
 
 	return conn.conn.WriteJSON(msg)
 }
