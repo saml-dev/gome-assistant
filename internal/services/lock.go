@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type Lock struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -22,7 +18,7 @@ func (l Lock) Lock(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return l.conn.WriteMessage(req)
+	return l.api.WriteMessage(req)
 }
 
 // Unlock a lock entity. Takes an entityId and an optional
@@ -35,5 +31,5 @@ func (l Lock) Unlock(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return l.conn.WriteMessage(req)
+	return l.api.WriteMessage(req)
 }

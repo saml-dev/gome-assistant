@@ -1,12 +1,11 @@
 package services
 
 import (
-	"saml.dev/gome-assistant/internal/websocket"
 	"saml.dev/gome-assistant/types"
 )
 
 type Notify struct {
-	conn *websocket.Conn
+	api API
 }
 
 // Notify sends a notification. Takes a types.NotifyRequest.
@@ -23,5 +22,5 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) error {
 	}
 
 	req.ServiceData = serviceData
-	return ha.conn.WriteMessage(req)
+	return ha.api.WriteMessage(req)
 }

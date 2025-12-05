@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type Scene struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -21,7 +17,7 @@ func (s Scene) Apply(serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }
 
 // Create a scene entity. Takes an entityId and an optional
@@ -34,7 +30,7 @@ func (s Scene) Create(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }
 
 // Reload the scenes.
@@ -43,7 +39,7 @@ func (s Scene) Reload() error {
 	req.Domain = "scene"
 	req.Service = "reload"
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }
 
 // TurnOn a scene entity. Takes an entityId and an optional
@@ -56,5 +52,5 @@ func (s Scene) TurnOn(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }

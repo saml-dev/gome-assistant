@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type InputButton struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -17,12 +13,12 @@ func (ib InputButton) Press(entityId string) error {
 	req.Domain = "input_button"
 	req.Service = "press"
 
-	return ib.conn.WriteMessage(req)
+	return ib.api.WriteMessage(req)
 }
 
 func (ib InputButton) Reload() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_button"
 	req.Service = "reload"
-	return ib.conn.WriteMessage(req)
+	return ib.api.WriteMessage(req)
 }

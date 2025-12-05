@@ -1,14 +1,13 @@
 package services
 
 import (
-	"saml.dev/gome-assistant/internal/websocket"
 	"saml.dev/gome-assistant/types"
 )
 
 /* Structs */
 
 type Climate struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -19,7 +18,7 @@ func (c Climate) SetFanMode(entityId string, fanMode string) error {
 	req.Service = "set_fan_mode"
 	req.ServiceData = map[string]any{"fan_mode": fanMode}
 
-	return c.conn.WriteMessage(req)
+	return c.api.WriteMessage(req)
 }
 
 func (c Climate) SetTemperature(entityId string, serviceData types.SetTemperatureRequest) error {
@@ -28,5 +27,5 @@ func (c Climate) SetTemperature(entityId string, serviceData types.SetTemperatur
 	req.Service = "set_temperature"
 	req.ServiceData = serviceData.ToJSON()
 
-	return c.conn.WriteMessage(req)
+	return c.api.WriteMessage(req)
 }
