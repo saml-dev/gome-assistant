@@ -362,7 +362,7 @@ func (app *App) Start() {
 		if !ok {
 			break
 		}
-		if app.entitySubscription.ID() == msg.Id {
+		if msg.Id == app.entitySubscription.MessageID() {
 			go callEntityListeners(app, msg.Raw)
 		} else {
 			go callEventListeners(app, msg)

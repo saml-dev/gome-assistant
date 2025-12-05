@@ -27,6 +27,13 @@ type Conn struct {
 	conn          *websocket.Conn
 	writeLock     sync.Mutex
 	lastMessageID int64
+
+	// subscribersLock guards access to `subscribers`.
+	subscribersLock sync.RWMutex
+
+	// subscribers is a map from message ID to the subscriber that is
+	// subscribed to messages with that ID.
+	subscribers map[int64]Subscriber
 }
 
 func (conn *Conn) readMessage() ([]byte, error) {
@@ -59,7 +66,8 @@ func NewConn(
 	}
 
 	conn := Conn{
-		conn: gConn,
+		conn:        gConn,
+		subscribers: make(map[int64]Subscriber),
 	}
 
 	// Read auth_required message
@@ -125,16 +133,6 @@ type SubEvent struct {
 	Id        int64  `json:"id"`
 	Type      string `json:"type"`
 	EventType string `json:"event_type"`
-}
-
-// Subscription represents a websocket-level subscription to a
-// particular message ID.
-type Subscription struct {
-	id int64
-}
-
-func (sub Subscription) ID() int64 {
-	return sub.id
 }
 
 func SubscribeToStateChangedEvents(conn *Conn) Subscription {
