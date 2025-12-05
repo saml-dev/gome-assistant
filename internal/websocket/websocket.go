@@ -29,23 +29,6 @@ type Conn struct {
 	lastMessageID int64
 }
 
-// NextMessageID returns the next ID in the sequence used for message
-// numbers. These IDs must be used in numerical order!
-func (conn *Conn) NextMessageID() int64 {
-	conn.writeLock.Lock()
-	defer conn.writeLock.Unlock()
-
-	conn.lastMessageID++
-	return conn.lastMessageID
-}
-
-func (conn *Conn) WriteMessage(msg any) error {
-	conn.writeLock.Lock()
-	defer conn.writeLock.Unlock()
-
-	return conn.conn.WriteJSON(msg)
-}
-
 func (conn *Conn) readMessage() ([]byte, error) {
 	_, msg, err := conn.conn.ReadMessage()
 	if err != nil {
@@ -144,28 +127,45 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(id int64, conn *Conn) {
-	SubscribeToEventType("state_changed", conn, id)
+// Subscription represents a websocket-level subscription to a
+// particular message ID.
+type Subscription struct {
+	id int64
 }
 
-func SubscribeToEventType(eventType string, conn *Conn, id ...int64) {
-	var finalId int64
-	if len(id) == 0 {
-		finalId = conn.NextMessageID()
-	} else {
-		finalId = id[0]
-	}
-	e := SubEvent{
-		Id:        finalId,
-		Type:      "subscribe_events",
-		EventType: eventType,
-	}
-	err := conn.WriteMessage(e)
+func (sub Subscription) ID() int64 {
+	return sub.id
+}
+
+func SubscribeToStateChangedEvents(conn *Conn) Subscription {
+	return SubscribeToEventType("state_changed", conn)
+}
+
+func SubscribeToEventType(eventType string, conn *Conn) Subscription {
+	var id int64
+	err := conn.Send(
+		func(lc LockedConn) error {
+			id = lc.NextMessageID()
+			e := SubEvent{
+				Id:        id,
+				Type:      "subscribe_events",
+				EventType: eventType,
+			}
+
+			if err := lc.SendMessage(e); err != nil {
+				return fmt.Errorf("error writing to websocket: %w", err)
+			}
+			// m, _ := ReadMessage(ctx, conn)
+			// log.Default().Println(string(m))
+
+			return nil
+		},
+	)
+
 	if err != nil {
-		wrappedErr := fmt.Errorf("error writing to websocket: %w", err)
-		slog.Error(wrappedErr.Error())
-		panic(wrappedErr)
+		slog.Error(err.Error())
+		panic(err)
 	}
-	// m, _ := ReadMessage(ctx, conn)
-	// log.Default().Println(string(m))
+
+	return Subscription{id}
 }
