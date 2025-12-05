@@ -135,11 +135,11 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func SubscribeToStateChangedEvents(ctx context.Context, id int64, conn *Conn) {
-	SubscribeToEventType(ctx, "state_changed", conn, id)
+func SubscribeToStateChangedEvents(id int64, conn *Conn) {
+	SubscribeToEventType("state_changed", conn, id)
 }
 
-func SubscribeToEventType(ctx context.Context, eventType string, conn *Conn, id ...int64) {
+func SubscribeToEventType(eventType string, conn *Conn, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
 		finalId = internal.GetId()
