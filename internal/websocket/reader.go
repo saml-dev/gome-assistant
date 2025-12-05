@@ -19,15 +19,13 @@ type ChanMsg struct {
 }
 
 // ListenWebsocket reads JSON-formatted messages from `conn`, partly
-// deserializes them, and sends them to `c`. If there is an error,
-// close `c` and return.
-func (conn *Conn) ListenWebsocket(c chan<- ChanMsg) {
+// deserializes them, and passes them to `subscriber`. If there is an
+// error, return the error.
+func (conn *Conn) ListenWebsocket(subscriber Subscriber) error {
 	for {
 		bytes, err := conn.readMessage()
 		if err != nil {
-			slog.Error("Error reading from websocket", "err", err)
-			close(c)
-			return
+			return err
 		}
 
 		base := BaseMessage{
@@ -45,6 +43,6 @@ func (conn *Conn) ListenWebsocket(c chan<- ChanMsg) {
 			Raw:     bytes,
 		}
 
-		c <- chanMsg
+		subscriber(chanMsg)
 	}
 }
