@@ -71,7 +71,7 @@ The constants are based on the entity ID itself, not the name of the entity in H
 
 ### Write your automations
 
-Check out [`example/example.go`](./example/example.go) for an example of the 3 types of automations — schedules, entity listeners, and event listeners.
+Check out [`cmd/example/example.go`](./cmd/example/example.go) for an example of the 3 types of automations — schedules, entity listeners, and event listeners.
 
 > ℹ️ Instead of copying and pasting, try typing it yourself to see how autocomplete guides you through the setup using a builder pattern.
 
