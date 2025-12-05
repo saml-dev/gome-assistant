@@ -1,12 +1,8 @@
 package gomeassistant
 
-import (
-	"saml.dev/gome-assistant/internal"
-)
-
 func (app *App) FireEvent(eventType string, eventData map[string]any) error {
 	req := FireEventRequest{
-		Id:        internal.GetId(),
+		Id:        app.conn.NextMessageID(),
 		Type:      "fire_event",
 		EventType: eventType,
 		EventData: eventData,

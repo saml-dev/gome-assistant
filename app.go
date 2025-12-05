@@ -316,7 +316,7 @@ func (app *App) Start() {
 	go app.runScheduledActions(app.ctx)
 
 	// subscribe to state_changed events
-	id := internal.GetId()
+	id := app.conn.NextMessageID()
 	websocket.SubscribeToStateChangedEvents(id, app.conn)
 	app.entityListenersId = id
 
