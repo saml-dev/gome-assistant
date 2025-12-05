@@ -14,8 +14,6 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-
-	"saml.dev/gome-assistant/internal"
 )
 
 var ErrInvalidToken = errors.New("invalid authentication token")
@@ -26,8 +24,19 @@ type AuthMessage struct {
 }
 
 type Conn struct {
-	conn      *websocket.Conn
-	writeLock sync.Mutex
+	conn          *websocket.Conn
+	writeLock     sync.Mutex
+	lastMessageID int64
+}
+
+// NextMessageID returns the next ID in the sequence used for message
+// numbers. These IDs must be used in numerical order!
+func (conn *Conn) NextMessageID() int64 {
+	conn.writeLock.Lock()
+	defer conn.writeLock.Unlock()
+
+	conn.lastMessageID++
+	return conn.lastMessageID
 }
 
 func (conn *Conn) WriteMessage(msg any) error {
@@ -142,7 +151,7 @@ func SubscribeToStateChangedEvents(id int64, conn *Conn) {
 func SubscribeToEventType(eventType string, conn *Conn, id ...int64) {
 	var finalId int64
 	if len(id) == 0 {
-		finalId = internal.GetId()
+		finalId = conn.NextMessageID()
 	} else {
 		finalId = id[0]
 	}
