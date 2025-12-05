@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type TTS struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -18,7 +14,7 @@ func (tts TTS) ClearCache() error {
 	req.Domain = "tts"
 	req.Service = "clear_cache"
 
-	return tts.conn.WriteMessage(req)
+	return tts.api.WriteMessage(req)
 }
 
 // Say something using text-to-speech on a media player with cloud.
@@ -32,7 +28,7 @@ func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return tts.conn.WriteMessage(req)
+	return tts.api.WriteMessage(req)
 }
 
 // Say something using text-to-speech on a media player with google_translate.
@@ -46,5 +42,5 @@ func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any
 		req.ServiceData = serviceData[0]
 	}
 
-	return tts.conn.WriteMessage(req)
+	return tts.api.WriteMessage(req)
 }

@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type ZWaveJS struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -22,5 +18,5 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(entityId string, parameter int, valu
 		"value":     value,
 	}
 
-	return zw.conn.WriteMessage(req)
+	return zw.api.WriteMessage(req)
 }

@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type AdaptiveLighting struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -22,5 +18,5 @@ func (al AdaptiveLighting) SetManualControl(entityId string, enabled bool) error
 		"manual_control": enabled,
 	}
 
-	return al.conn.WriteMessage(req)
+	return al.api.WriteMessage(req)
 }

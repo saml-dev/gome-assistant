@@ -2,11 +2,10 @@ package services
 
 import (
 	"saml.dev/gome-assistant/internal"
-	"saml.dev/gome-assistant/internal/websocket"
 )
 
 type Event struct {
-	conn *websocket.Conn
+	api API
 }
 
 // Fire an event
@@ -32,5 +31,5 @@ func (e Event) Fire(eventType string, eventData ...map[string]any) error {
 		req.EventData = eventData[0]
 	}
 
-	return e.conn.WriteMessage(req)
+	return e.api.WriteMessage(req)
 }

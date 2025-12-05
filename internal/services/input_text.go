@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type InputText struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -20,12 +16,12 @@ func (ib InputText) Set(entityId string, value string) error {
 		"value": value,
 	}
 
-	return ib.conn.WriteMessage(req)
+	return ib.api.WriteMessage(req)
 }
 
 func (ib InputText) Reload() error {
 	req := NewBaseServiceRequest("")
 	req.Domain = "input_text"
 	req.Service = "reload"
-	return ib.conn.WriteMessage(req)
+	return ib.api.WriteMessage(req)
 }

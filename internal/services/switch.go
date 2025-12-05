@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type Switch struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -17,7 +13,7 @@ func (s Switch) TurnOn(entityId string) error {
 	req.Domain = "switch"
 	req.Service = "turn_on"
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }
 
 func (s Switch) Toggle(entityId string) error {
@@ -25,7 +21,7 @@ func (s Switch) Toggle(entityId string) error {
 	req.Domain = "switch"
 	req.Service = "toggle"
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }
 
 func (s Switch) TurnOff(entityId string) error {
@@ -33,5 +29,5 @@ func (s Switch) TurnOff(entityId string) error {
 	req.Domain = "switch"
 	req.Service = "turn_off"
 
-	return s.conn.WriteMessage(req)
+	return s.api.WriteMessage(req)
 }

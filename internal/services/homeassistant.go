@@ -1,11 +1,7 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 type HomeAssistant struct {
-	conn *websocket.Conn
+	api API
 }
 
 // TurnOn a Home Assistant entity. Takes an entityId and an optional
@@ -18,7 +14,7 @@ func (ha *HomeAssistant) TurnOn(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	return ha.conn.WriteMessage(req)
+	return ha.api.WriteMessage(req)
 }
 
 // Toggle a Home Assistant entity. Takes an entityId and an optional
@@ -31,7 +27,7 @@ func (ha *HomeAssistant) Toggle(entityId string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	return ha.conn.WriteMessage(req)
+	return ha.api.WriteMessage(req)
 }
 
 func (ha *HomeAssistant) TurnOff(entityId string) error {
@@ -39,5 +35,5 @@ func (ha *HomeAssistant) TurnOff(entityId string) error {
 	req.Domain = "homeassistant"
 	req.Service = "turn_off"
 
-	return ha.conn.WriteMessage(req)
+	return ha.api.WriteMessage(req)
 }

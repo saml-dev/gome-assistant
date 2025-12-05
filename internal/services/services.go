@@ -2,8 +2,13 @@ package services
 
 import (
 	"saml.dev/gome-assistant/internal"
-	"saml.dev/gome-assistant/internal/websocket"
 )
+
+// API is the interface that the individual services use to interact
+// with HomeAssistant.
+type API interface {
+	WriteMessage(msg any) error
+}
 
 func BuildService[
 	T AdaptiveLighting |
@@ -29,8 +34,8 @@ func BuildService[
 		Timer |
 		Vacuum |
 		ZWaveJS,
-](conn *websocket.Conn) *T {
-	return &T{conn: conn}
+](api API) *T {
+	return &T{api: api}
 }
 
 type BaseServiceRequest struct {

@@ -1,13 +1,9 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 /* Structs */
 
 type Light struct {
-	conn *websocket.Conn
+	api API
 }
 
 /* Public API */
@@ -22,7 +18,7 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return l.conn.WriteMessage(req)
+	return l.api.WriteMessage(req)
 }
 
 // Toggle a light entity. Takes an entityId and an optional
@@ -35,12 +31,12 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) error {
 		req.ServiceData = serviceData[0]
 	}
 
-	return l.conn.WriteMessage(req)
+	return l.api.WriteMessage(req)
 }
 
 func (l Light) TurnOff(entityId string) error {
 	req := NewBaseServiceRequest(entityId)
 	req.Domain = "light"
 	req.Service = "turn_off"
-	return l.conn.WriteMessage(req)
+	return l.api.WriteMessage(req)
 }

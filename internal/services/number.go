@@ -1,11 +1,7 @@
 package services
 
-import (
-	"saml.dev/gome-assistant/internal/websocket"
-)
-
 type Number struct {
-	conn *websocket.Conn
+	api API
 }
 
 func (ib Number) SetValue(entityId string, value float32) error {
@@ -14,7 +10,7 @@ func (ib Number) SetValue(entityId string, value float32) error {
 	req.Service = "set_value"
 	req.ServiceData = map[string]any{"value": value}
 
-	return ib.conn.WriteMessage(req)
+	return ib.api.WriteMessage(req)
 }
 
 func (ib Number) MustSetValue(entityId string, value float32) {
