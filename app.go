@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -351,7 +352,13 @@ func (app *App) Start() {
 		if msg.Id == app.entitySubscription.MessageID() {
 			go app.callEntityListeners(msg.Raw)
 		} else {
-			go app.callEventListeners(msg)
+			var baseEventMsg struct {
+				Event struct {
+					EventType string `json:"event_type"`
+				} `json:"event"`
+			}
+			_ = json.Unmarshal(msg.Raw, &baseEventMsg)
+			go app.callEventListeners(baseEventMsg.Event.EventType, msg)
 		}
 	}
 
