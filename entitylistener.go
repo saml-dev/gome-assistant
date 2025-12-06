@@ -49,14 +49,16 @@ type stateChangedMsg struct {
 	ID    int    `json:"id"`
 	Type  string `json:"type"`
 	Event struct {
-		Data struct {
-			EntityID string   `json:"entity_id"`
-			NewState msgState `json:"new_state"`
-			OldState msgState `json:"old_state"`
-		} `json:"data"`
-		EventType string `json:"event_type"`
-		Origin    string `json:"origin"`
+		Data      stateData `json:"data"`
+		EventType string    `json:"event_type"`
+		Origin    string    `json:"origin"`
 	} `json:"event"`
+}
+
+type stateData struct {
+	EntityID string   `json:"entity_id"`
+	NewState msgState `json:"new_state"`
+	OldState msgState `json:"old_state"`
 }
 
 type msgState struct {
@@ -191,6 +193,50 @@ func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
 
+func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateData) {
+	// Check conditions
+	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
+		return
+	}
+	if c := checkStatesMatch(l.fromState, data.OldState.State); c.fail {
+		return
+	}
+	if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
+		if l.delayTimer != nil {
+			l.delayTimer.Stop()
+		}
+		return
+	}
+	if c := checkThrottle(l.throttle, l.lastRan); c.fail {
+		return
+	}
+	if c := checkExceptionDates(l.exceptionDates); c.fail {
+		return
+	}
+	if c := checkExceptionRanges(l.exceptionRanges); c.fail {
+		return
+	}
+	if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+		return
+	}
+	if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+		return
+	}
+
+	if l.delay != 0 {
+		l := l
+		l.delayTimer = time.AfterFunc(l.delay, func() {
+			go l.callback(app.service, app.state, entityData)
+			l.lastRan = carbon.Now()
+		})
+		return
+	}
+
+	// run now if no delay set
+	go l.callback(app.service, app.state, entityData)
+	l.lastRan = carbon.Now()
+}
+
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
 	msg := stateChangedMsg{}
@@ -211,56 +257,16 @@ func (app *App) callEntityListeners(msgBytes []byte) {
 		return
 	}
 
+	entityData := EntityData{
+		TriggerEntityId: eid,
+		FromState:       data.OldState.State,
+		FromAttributes:  data.OldState.Attributes,
+		ToState:         data.NewState.State,
+		ToAttributes:    data.NewState.Attributes,
+		LastChanged:     data.OldState.LastChanged,
+	}
+
 	for _, l := range listeners {
-		// Check conditions
-		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
-			continue
-		}
-		if c := checkStatesMatch(l.fromState, data.OldState.State); c.fail {
-			continue
-		}
-		if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
-			if l.delayTimer != nil {
-				l.delayTimer.Stop()
-			}
-			continue
-		}
-		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
-			continue
-		}
-		if c := checkExceptionDates(l.exceptionDates); c.fail {
-			continue
-		}
-		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
-			continue
-		}
-		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
-			continue
-		}
-		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
-			continue
-		}
-
-		entityData := EntityData{
-			TriggerEntityId: eid,
-			FromState:       data.OldState.State,
-			FromAttributes:  data.OldState.Attributes,
-			ToState:         data.NewState.State,
-			ToAttributes:    data.NewState.Attributes,
-			LastChanged:     data.OldState.LastChanged,
-		}
-
-		if l.delay != 0 {
-			l := l
-			l.delayTimer = time.AfterFunc(l.delay, func() {
-				go l.callback(app.service, app.state, entityData)
-				l.lastRan = carbon.Now()
-			})
-			continue
-		}
-
-		// run now if no delay set
-		go l.callback(app.service, app.state, entityData)
-		l.lastRan = carbon.Now()
+		l.maybeCall(app, entityData, data)
 	}
 }
