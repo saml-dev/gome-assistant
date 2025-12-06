@@ -327,7 +327,11 @@ func (app *App) Start() {
 	go app.runScheduledActions(app.ctx)
 
 	// subscribe to state_changed events
-	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(websocket.NoopSubscriber)
+	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
+		func(msg websocket.ChanMsg) {
+			go app.callEntityListeners(msg.Raw)
+		},
+	)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
@@ -353,14 +357,8 @@ func (app *App) Start() {
 		}
 	}
 
-	dispatchMessage := func(msg websocket.ChanMsg) {
-		if msg.Id == app.entitySubscription.MessageID() {
-			go app.callEntityListeners(msg.Raw)
-		}
-	}
-
 	// entity listeners and event listeners
-	err := app.conn.ListenWebsocket(dispatchMessage)
+	err := app.conn.ListenWebsocket(websocket.NoopSubscriber)
 	if err != nil {
 		slog.Error("Error reading from websocket", "err", err)
 	}
