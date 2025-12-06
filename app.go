@@ -2,7 +2,6 @@ package gomeassistant
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -255,7 +254,17 @@ func (app *App) registerEventListener(evl EventListener) {
 	for _, eventType := range evl.eventTypes {
 		elList, ok := app.eventListeners[eventType]
 		if !ok {
-			app.conn.SubscribeToEventType(eventType, websocket.NoopSubscriber)
+			// We're not listening to that event type yet. Ask HA to
+			// send them to us, and when they arrive, call any event
+			// listeners for that type (including any that are
+			// registered in the future).
+			eventType := eventType
+			app.conn.SubscribeToEventType(
+				eventType,
+				func(msg websocket.ChanMsg) {
+					go app.callEventListeners(eventType, msg)
+				},
+			)
 		}
 		app.eventListeners[eventType] = append(elList, &evl)
 	}
@@ -347,14 +356,6 @@ func (app *App) Start() {
 	dispatchMessage := func(msg websocket.ChanMsg) {
 		if msg.Id == app.entitySubscription.MessageID() {
 			go app.callEntityListeners(msg.Raw)
-		} else {
-			var baseEventMsg struct {
-				Event struct {
-					EventType string `json:"event_type"`
-				} `json:"event"`
-			}
-			_ = json.Unmarshal(msg.Raw, &baseEventMsg)
-			go app.callEventListeners(baseEventMsg.Event.EventType, msg)
 		}
 	}
 
