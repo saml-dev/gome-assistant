@@ -233,35 +233,41 @@ func (app *App) RegisterIntervals(intervals ...Interval) {
 	}
 }
 
+func (app *App) registerEntityListener(etl EntityListener) {
+	if etl.delay != 0 && etl.toState == "" {
+		slog.Error("EntityListener error: you have to use ToState() when using Duration()")
+		panic(ErrInvalidArgs)
+	}
+
+	for _, entity := range etl.entityIds {
+		if elList, ok := app.entityListeners[entity]; ok {
+			app.entityListeners[entity] = append(elList, &etl)
+		} else {
+			app.entityListeners[entity] = []*EntityListener{&etl}
+		}
+	}
+}
+
 func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
-		etl := etl
-		if etl.delay != 0 && etl.toState == "" {
-			slog.Error("EntityListener error: you have to use ToState() when using Duration()")
-			panic(ErrInvalidArgs)
-		}
+		app.registerEntityListener(etl)
+	}
+}
 
-		for _, entity := range etl.entityIds {
-			if elList, ok := app.entityListeners[entity]; ok {
-				app.entityListeners[entity] = append(elList, &etl)
-			} else {
-				app.entityListeners[entity] = []*EntityListener{&etl}
-			}
+func (app *App) registerEventListener(evl EventListener) {
+	for _, eventType := range evl.eventTypes {
+		if elList, ok := app.eventListeners[eventType]; ok {
+			app.eventListeners[eventType] = append(elList, &evl)
+		} else {
+			app.conn.SubscribeToEventType(eventType, websocket.NoopSubscriber)
+			app.eventListeners[eventType] = []*EventListener{&evl}
 		}
 	}
 }
 
 func (app *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
-		evl := evl
-		for _, eventType := range evl.eventTypes {
-			if elList, ok := app.eventListeners[eventType]; ok {
-				app.eventListeners[eventType] = append(elList, &evl)
-			} else {
-				app.conn.SubscribeToEventType(eventType, websocket.NoopSubscriber)
-				app.eventListeners[eventType] = []*EventListener{&evl}
-			}
-		}
+		app.registerEventListener(evl)
 	}
 }
 
