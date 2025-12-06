@@ -256,12 +256,11 @@ func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 
 func (app *App) registerEventListener(evl EventListener) {
 	for _, eventType := range evl.eventTypes {
-		if elList, ok := app.eventListeners[eventType]; ok {
-			app.eventListeners[eventType] = append(elList, &evl)
-		} else {
+		elList, ok := app.eventListeners[eventType]
+		if !ok {
 			app.conn.SubscribeToEventType(eventType, websocket.NoopSubscriber)
-			app.eventListeners[eventType] = []*EventListener{&evl}
 		}
+		app.eventListeners[eventType] = append(elList, &evl)
 	}
 }
 
