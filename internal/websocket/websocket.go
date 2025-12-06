@@ -8,7 +8,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/url"
 	"sync"
@@ -127,43 +126,4 @@ func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-type SubEvent struct {
-	Id        int64  `json:"id"`
-	Type      string `json:"type"`
-	EventType string `json:"event_type"`
-}
-
-func SubscribeToStateChangedEvents(conn *Conn) Subscription {
-	return SubscribeToEventType("state_changed", conn)
-}
-
-func SubscribeToEventType(eventType string, conn *Conn) Subscription {
-	var id int64
-	err := conn.Send(
-		func(lc LockedConn) error {
-			id = lc.NextMessageID()
-			e := SubEvent{
-				Id:        id,
-				Type:      "subscribe_events",
-				EventType: eventType,
-			}
-
-			if err := lc.SendMessage(e); err != nil {
-				return fmt.Errorf("error writing to websocket: %w", err)
-			}
-			// m, _ := ReadMessage(ctx, conn)
-			// log.Default().Println(string(m))
-
-			return nil
-		},
-	)
-
-	if err != nil {
-		slog.Error(err.Error())
-		panic(err)
-	}
-
-	return Subscription{id}
 }

@@ -1,5 +1,10 @@
 package websocket
 
+import (
+	"fmt"
+	"log/slog"
+)
+
 // Subscription represents a websocket-level subscription to a
 // particular message ID.
 type Subscription struct {
@@ -24,4 +29,43 @@ func (conn *Conn) getSubscriber(messageID int64) (Subscriber, bool) {
 
 	subscriber, ok := conn.subscribers[messageID]
 	return subscriber, ok
+}
+
+type SubEvent struct {
+	Id        int64  `json:"id"`
+	Type      string `json:"type"`
+	EventType string `json:"event_type"`
+}
+
+func (conn *Conn) SubscribeToEventType(eventType string) Subscription {
+	var id int64
+	err := conn.Send(
+		func(lc LockedConn) error {
+			id = lc.NextMessageID()
+			e := SubEvent{
+				Id:        id,
+				Type:      "subscribe_events",
+				EventType: eventType,
+			}
+
+			if err := lc.SendMessage(e); err != nil {
+				return fmt.Errorf("error writing to websocket: %w", err)
+			}
+			// m, _ := ReadMessage(ctx, conn)
+			// log.Default().Println(string(m))
+
+			return nil
+		},
+	)
+
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+
+	return Subscription{id}
+}
+
+func (conn *Conn) SubscribeToStateChangedEvents() Subscription {
+	return conn.SubscribeToEventType("state_changed")
 }
