@@ -358,7 +358,7 @@ func (app *App) Start() {
 	}
 
 	// entity listeners and event listeners
-	err := app.conn.ListenWebsocket(websocket.NoopSubscriber)
+	err := app.conn.ListenWebsocket()
 	if err != nil {
 		slog.Error("Error reading from websocket", "err", err)
 	}
