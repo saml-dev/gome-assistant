@@ -1,7 +1,6 @@
 package gomeassistant
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -159,22 +158,15 @@ func (l *EventListener) maybeCall(app *App, eventData EventData) {
 }
 
 /* Functions */
-func (app *App) callEventListeners(msg websocket.ChanMsg) {
-	var baseEventMsg struct {
-		Event struct {
-			EventType string `json:"event_type"`
-		} `json:"event"`
-	}
-	_ = json.Unmarshal(msg.Raw, &baseEventMsg)
-
-	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]
+func (app *App) callEventListeners(eventType string, msg websocket.ChanMsg) {
+	listeners, ok := app.eventListeners[eventType]
 	if !ok {
 		// no listeners registered for this event type
 		return
 	}
 
 	eventData := EventData{
-		Type:         baseEventMsg.Event.EventType,
+		Type:         eventType,
 		RawEventJSON: msg.Raw,
 	}
 
