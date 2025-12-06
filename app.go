@@ -342,31 +342,18 @@ func (app *App) Start() {
 		}
 	}
 
-	// entity listeners and event listeners
-	elChan := make(chan websocket.ChanMsg)
-	go func() {
-		err := app.conn.ListenWebsocket(
-			func(msg websocket.ChanMsg) {
-				elChan <- msg
-			},
-		)
-		if err != nil {
-			close(elChan)
-			slog.Error("Error reading from websocket", "err", err)
-			return
-		}
-	}()
-
-	for {
-		msg, ok := <-elChan
-		if !ok {
-			break
-		}
+	dispatchMessage := func(msg websocket.ChanMsg) {
 		if msg.Id == app.entitySubscription.MessageID() {
 			go app.callEntityListeners(msg.Raw)
 		} else {
 			go app.callEventListeners(msg)
 		}
+	}
+
+	// entity listeners and event listeners
+	err := app.conn.ListenWebsocket(dispatchMessage)
+	if err != nil {
+		slog.Error("Error reading from websocket", "err", err)
 	}
 }
 
