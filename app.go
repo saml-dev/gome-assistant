@@ -258,7 +258,7 @@ func (app *App) RegisterEventListeners(evls ...EventListener) {
 			if elList, ok := app.eventListeners[eventType]; ok {
 				app.eventListeners[eventType] = append(elList, &evl)
 			} else {
-				app.conn.SubscribeToEventType(eventType)
+				app.conn.SubscribeToEventType(eventType, websocket.NoopSubscriber)
 				app.eventListeners[eventType] = []*EventListener{&evl}
 			}
 		}
@@ -316,7 +316,7 @@ func (app *App) Start() {
 	go app.runScheduledActions(app.ctx)
 
 	// subscribe to state_changed events
-	app.entitySubscription = app.conn.SubscribeToStateChangedEvents()
+	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(websocket.NoopSubscriber)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {

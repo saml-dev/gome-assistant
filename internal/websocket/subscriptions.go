@@ -21,6 +21,9 @@ func (sub Subscription) MessageID() int64 {
 // matches its subscription's message ID.
 type Subscriber func(msg ChanMsg)
 
+// NoopSubscriber is a `Subscriber` that does nothing.
+func NoopSubscriber(_ ChanMsg) {}
+
 // getSubscriber returns the subscriber, if any, that is subscribed to
 // the specified message ID.
 func (conn *Conn) getSubscriber(messageID int64) (Subscriber, bool) {
@@ -37,18 +40,19 @@ type SubEvent struct {
 	EventType string `json:"event_type"`
 }
 
-func (conn *Conn) SubscribeToEventType(eventType string) Subscription {
-	var id int64
+func (conn *Conn) SubscribeToEventType(eventType string, subr Subscriber) Subscription {
+	var subn Subscription
 	err := conn.Send(
 		func(lc LockedConn) error {
-			id = lc.NextMessageID()
+			subn = lc.Subscribe(subr)
 			e := SubEvent{
-				Id:        id,
+				Id:        subn.messageID,
 				Type:      "subscribe_events",
 				EventType: eventType,
 			}
 
 			if err := lc.SendMessage(e); err != nil {
+				lc.Unsubscribe(subn)
 				return fmt.Errorf("error writing to websocket: %w", err)
 			}
 			// m, _ := ReadMessage(ctx, conn)
@@ -63,9 +67,9 @@ func (conn *Conn) SubscribeToEventType(eventType string) Subscription {
 		panic(err)
 	}
 
-	return Subscription{id}
+	return subn
 }
 
-func (conn *Conn) SubscribeToStateChangedEvents() Subscription {
-	return conn.SubscribeToEventType("state_changed")
+func (conn *Conn) SubscribeToStateChangedEvents(subr Subscriber) Subscription {
+	return conn.SubscribeToEventType("state_changed", subr)
 }
