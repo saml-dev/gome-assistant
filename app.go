@@ -363,9 +363,9 @@ func (app *App) Start() {
 			break
 		}
 		if msg.Id == app.entitySubscription.MessageID() {
-			go callEntityListeners(app, msg.Raw)
+			go app.callEntityListeners(msg.Raw)
 		} else {
-			go callEventListeners(app, msg)
+			go app.callEventListeners(msg)
 		}
 	}
 }
