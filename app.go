@@ -241,11 +241,7 @@ func (app *App) registerEntityListener(etl EntityListener) {
 	}
 
 	for _, entity := range etl.entityIds {
-		if elList, ok := app.entityListeners[entity]; ok {
-			app.entityListeners[entity] = append(elList, &etl)
-		} else {
-			app.entityListeners[entity] = []*EntityListener{&etl}
-		}
+		app.entityListeners[entity] = append(app.entityListeners[entity], &etl)
 	}
 }
 
