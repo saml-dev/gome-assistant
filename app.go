@@ -357,9 +357,8 @@ func (app *App) Start() {
 		}
 	}
 
-	// entity listeners and event listeners
-	err := app.conn.ListenWebsocket()
-	if err != nil {
+	// Start listen on the connection for incoming messages:
+	if err := app.conn.Run(); err != nil {
 		slog.Error("Error reading from websocket", "err", err)
 	}
 }
