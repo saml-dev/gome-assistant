@@ -168,8 +168,12 @@ func (i Interval) run(ctx context.Context, app *App) {
 		}
 
 		i.maybeRunCallback(app)
-		i.nextRunTime = i.nextRunTime.Add(i.frequency)
+		i.updateNextRunTime()
 	}
+}
+
+func (i *Interval) updateNextRunTime() {
+	i.nextRunTime = i.nextRunTime.Add(i.frequency)
 }
 
 func (i Interval) maybeRunCallback(app *App) {
