@@ -198,7 +198,7 @@ func (s DailySchedule) maybeRunCallback(app *App) {
 
 // updateNextRunTime updates `s.nextRunTime` to the next time that `s`
 // should run.
-func (s DailySchedule) updateNextRunTime(app *App) {
+func (s *DailySchedule) updateNextRunTime(app *App) {
 	if s.isSunrise || s.isSunset {
 		var nextSunTime carbon.Carbon
 		// "0s" is default value
