@@ -233,35 +233,46 @@ func (app *App) RegisterIntervals(intervals ...Interval) {
 	}
 }
 
+func (app *App) registerEntityListener(etl EntityListener) {
+	if etl.delay != 0 && etl.toState == "" {
+		slog.Error("EntityListener error: you have to use ToState() when using Duration()")
+		panic(ErrInvalidArgs)
+	}
+
+	for _, entity := range etl.entityIds {
+		app.entityListeners[entity] = append(app.entityListeners[entity], &etl)
+	}
+}
+
 func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 	for _, etl := range etls {
-		etl := etl
-		if etl.delay != 0 && etl.toState == "" {
-			slog.Error("EntityListener error: you have to use ToState() when using Duration()")
-			panic(ErrInvalidArgs)
-		}
+		app.registerEntityListener(etl)
+	}
+}
 
-		for _, entity := range etl.entityIds {
-			if elList, ok := app.entityListeners[entity]; ok {
-				app.entityListeners[entity] = append(elList, &etl)
-			} else {
-				app.entityListeners[entity] = []*EntityListener{&etl}
-			}
+func (app *App) registerEventListener(evl EventListener) {
+	for _, eventType := range evl.eventTypes {
+		elList, ok := app.eventListeners[eventType]
+		if !ok {
+			// We're not listening to that event type yet. Ask HA to
+			// send them to us, and when they arrive, call any event
+			// listeners for that type (including any that are
+			// registered in the future).
+			eventType := eventType
+			app.conn.SubscribeToEventType(
+				eventType,
+				func(msg websocket.ChanMsg) {
+					go app.callEventListeners(eventType, msg)
+				},
+			)
 		}
+		app.eventListeners[eventType] = append(elList, &evl)
 	}
 }
 
 func (app *App) RegisterEventListeners(evls ...EventListener) {
 	for _, evl := range evls {
-		evl := evl
-		for _, eventType := range evl.eventTypes {
-			if elList, ok := app.eventListeners[eventType]; ok {
-				app.eventListeners[eventType] = append(elList, &evl)
-			} else {
-				websocket.SubscribeToEventType(eventType, app.conn)
-				app.eventListeners[eventType] = []*EventListener{&evl}
-			}
-		}
+		app.registerEventListener(evl)
 	}
 }
 
@@ -316,7 +327,11 @@ func (app *App) Start() {
 	go app.runScheduledActions(app.ctx)
 
 	// subscribe to state_changed events
-	app.entitySubscription = websocket.SubscribeToStateChangedEvents(app.conn)
+	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
+		func(msg websocket.ChanMsg) {
+			go app.callEntityListeners(msg.Raw)
+		},
+	)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
@@ -342,20 +357,9 @@ func (app *App) Start() {
 		}
 	}
 
-	// entity listeners and event listeners
-	elChan := make(chan websocket.ChanMsg)
-	go app.conn.ListenWebsocket(elChan)
-
-	for {
-		msg, ok := <-elChan
-		if !ok {
-			break
-		}
-		if app.entitySubscription.ID() == msg.Id {
-			go callEntityListeners(app, msg.Raw)
-		} else {
-			go callEventListeners(app, msg)
-		}
+	// Start listen on the connection for incoming messages:
+	if err := app.conn.Run(); err != nil {
+		slog.Error("Error reading from websocket", "err", err)
 	}
 }
 

@@ -18,16 +18,21 @@ type ChanMsg struct {
 	Raw     []byte
 }
 
-// ListenWebsocket reads JSON-formatted messages from `conn`, partly
-// deserializes them, and sends them to `c`. If there is an error,
-// close `c` and return.
-func (conn *Conn) ListenWebsocket(c chan<- ChanMsg) {
+// Run processes incoming messages from `Conn`. It reads
+// JSON-formatted messages from `conn`, partly deserializes them, and
+// passes them to the subscriber that has subscribed to that message
+// ID (if any). If there is an error, return the error and stop
+// listening.
+//
+// Note that the subscribers are invoked synchronously, in the same
+// order as the messages arrived, and only one is run at a time. If
+// the subscriber wants processing to happen in the background, it
+// must spawn a goroutine itself.
+func (conn *Conn) Run() error {
 	for {
 		bytes, err := conn.readMessage()
 		if err != nil {
-			slog.Error("Error reading from websocket", "err", err)
-			close(c)
-			return
+			return err
 		}
 
 		base := BaseMessage{
@@ -45,6 +50,10 @@ func (conn *Conn) ListenWebsocket(c chan<- ChanMsg) {
 			Raw:     bytes,
 		}
 
-		c <- chanMsg
+		// If a subscriber has been registered for this message ID,
+		// then call it, too:
+		if subr, ok := conn.getSubscriber(base.Id); ok {
+			subr(chanMsg)
+		}
 	}
 }

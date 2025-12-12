@@ -1,7 +1,6 @@
 package gomeassistant
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -133,48 +132,45 @@ func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
 
-type BaseEventMsg struct {
-	Event struct {
-		EventType string `json:"event_type"`
-	} `json:"event"`
+func (l *EventListener) maybeCall(app *App, eventData EventData) {
+	// Check conditions
+	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
+		return
+	}
+	if c := checkThrottle(l.throttle, l.lastRan); c.fail {
+		return
+	}
+	if c := checkExceptionDates(l.exceptionDates); c.fail {
+		return
+	}
+	if c := checkExceptionRanges(l.exceptionRanges); c.fail {
+		return
+	}
+	if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+		return
+	}
+	if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+		return
+	}
+
+	go l.callback(app.service, app.state, eventData)
+	l.lastRan = carbon.Now()
 }
 
 /* Functions */
-func callEventListeners(app *App, msg websocket.ChanMsg) {
-	baseEventMsg := BaseEventMsg{}
-	_ = json.Unmarshal(msg.Raw, &baseEventMsg)
-	listeners, ok := app.eventListeners[baseEventMsg.Event.EventType]
+func (app *App) callEventListeners(eventType string, msg websocket.ChanMsg) {
+	listeners, ok := app.eventListeners[eventType]
 	if !ok {
 		// no listeners registered for this event type
 		return
 	}
 
-	for _, l := range listeners {
-		// Check conditions
-		if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
-			continue
-		}
-		if c := checkThrottle(l.throttle, l.lastRan); c.fail {
-			continue
-		}
-		if c := checkExceptionDates(l.exceptionDates); c.fail {
-			continue
-		}
-		if c := checkExceptionRanges(l.exceptionRanges); c.fail {
-			continue
-		}
-		if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
-			continue
-		}
-		if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
-			continue
-		}
+	eventData := EventData{
+		Type:         eventType,
+		RawEventJSON: msg.Raw,
+	}
 
-		eventData := EventData{
-			Type:         baseEventMsg.Event.EventType,
-			RawEventJSON: msg.Raw,
-		}
-		go l.callback(app.service, app.state, eventData)
-		l.lastRan = carbon.Now()
+	for _, l := range listeners {
+		l.maybeCall(app, eventData)
 	}
 }
