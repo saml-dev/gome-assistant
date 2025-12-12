@@ -10,7 +10,7 @@ func (app *App) Call(req services.BaseServiceRequest) error {
 
 	return app.conn.Send(
 		func(lc websocket.LockedConn) error {
-			req.Id = lc.NextMessageID()
+			req.ID = lc.NextMessageID()
 			return lc.SendMessage(req)
 		},
 	)

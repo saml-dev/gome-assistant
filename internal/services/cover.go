@@ -8,53 +8,53 @@ type Cover struct {
 
 /* Public API */
 
-// Close all or specified cover. Takes an entityId.
-func (c Cover) Close(entityId string) error {
+// Close all or specified cover. Takes an entityID.
+func (c Cover) Close(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "close_cover",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Close all or specified cover tilt. Takes an entityId.
-func (c Cover) CloseTilt(entityId string) error {
+// Close all or specified cover tilt. Takes an entityID.
+func (c Cover) CloseTilt(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "close_cover_tilt",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Open all or specified cover. Takes an entityId.
-func (c Cover) Open(entityId string) error {
+// Open all or specified cover. Takes an entityID.
+func (c Cover) Open(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "open_cover",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Open all or specified cover tilt. Takes an entityId.
-func (c Cover) OpenTilt(entityId string) error {
+// Open all or specified cover tilt. Takes an entityID.
+func (c Cover) OpenTilt(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "open_cover_tilt",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Move to specific position all or specified cover. Takes an entityId and an optional
+// Move to specific position all or specified cover. Takes an entityID and an optional
 // map that is translated into service_data.
-func (c Cover) SetPosition(entityId string, serviceData ...map[string]any) error {
+func (c Cover) SetPosition(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "set_cover_position",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -63,11 +63,11 @@ func (c Cover) SetPosition(entityId string, serviceData ...map[string]any) error
 	return c.api.Call(req)
 }
 
-// Move to specific position all or specified cover tilt. Takes an entityId and an optional
+// Move to specific position all or specified cover tilt. Takes an entityID and an optional
 // map that is translated into service_data.
-func (c Cover) SetTiltPosition(entityId string, serviceData ...map[string]any) error {
+func (c Cover) SetTiltPosition(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 		Domain:  "cover",
 		Service: "set_cover_tilt_position",
 	}
@@ -78,42 +78,42 @@ func (c Cover) SetTiltPosition(entityId string, serviceData ...map[string]any) e
 	return c.api.Call(req)
 }
 
-// Stop a cover entity. Takes an entityId.
-func (c Cover) Stop(entityId string) error {
+// Stop a cover entity. Takes an entityID.
+func (c Cover) Stop(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "stop_cover",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Stop a cover entity tilt. Takes an entityId.
-func (c Cover) StopTilt(entityId string) error {
+// Stop a cover entity tilt. Takes an entityID.
+func (c Cover) StopTilt(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "stop_cover_tilt",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Toggle a cover open/closed. Takes an entityId.
-func (c Cover) Toggle(entityId string) error {
+// Toggle a cover open/closed. Takes an entityID.
+func (c Cover) Toggle(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "toggle",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }
 
-// Toggle a cover tilt open/closed. Takes an entityId.
-func (c Cover) ToggleTilt(entityId string) error {
+// Toggle a cover tilt open/closed. Takes an entityID.
+func (c Cover) ToggleTilt(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "toggle_cover_tilt",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return c.api.Call(req)
 }

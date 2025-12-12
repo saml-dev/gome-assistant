@@ -9,21 +9,21 @@ type Script struct {
 /* Public API */
 
 // Reload a script that was created in the HA UI.
-func (s Script) Reload(entityId string) error {
+func (s Script) Reload(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "reload",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return s.api.Call(req)
 }
 
 // Toggle a script that was created in the HA UI.
-func (s Script) Toggle(entityId string) error {
+func (s Script) Toggle(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "toggle",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return s.api.Call(req)
 }
@@ -39,11 +39,11 @@ func (s Script) TurnOff() error {
 }
 
 // TurnOn a script that was created in the HA UI.
-func (s Script) TurnOn(entityId string) error {
+func (s Script) TurnOn(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "turn_on",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return s.api.Call(req)
 }

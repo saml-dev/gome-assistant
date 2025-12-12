@@ -13,14 +13,14 @@ type InputDatetime struct {
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityId string, value time.Time) error {
+func (ib InputDatetime) Set(entityID string, value time.Time) error {
 	req := BaseServiceRequest{
 		Domain:  "input_datetime",
 		Service: "set_datetime",
 		ServiceData: map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		Target: Entity(entityId),
+		Target: Entity(entityID),
 	}
 	return ib.api.Call(req)
 }

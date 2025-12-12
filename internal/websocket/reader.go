@@ -7,13 +7,13 @@ import (
 
 type BaseMessage struct {
 	Type    string `json:"type"`
-	Id      int64  `json:"id"`
+	ID      int64  `json:"id"`
 	Success bool   `json:"success"`
 }
 
 type ChanMsg struct {
 	Type    string
-	Id      int64
+	ID      int64
 	Success bool
 	Raw     []byte
 }
@@ -45,14 +45,14 @@ func (conn *Conn) Run() error {
 		}
 		chanMsg := ChanMsg{
 			Type:    base.Type,
-			Id:      base.Id,
+			ID:      base.ID,
 			Success: base.Success,
 			Raw:     bytes,
 		}
 
 		// If a subscriber has been registered for this message ID,
 		// then call it, too:
-		if subr, ok := conn.getSubscriber(base.Id); ok {
+		if subr, ok := conn.getSubscriber(base.ID); ok {
 			subr(chanMsg)
 		}
 	}

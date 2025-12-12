@@ -9,13 +9,13 @@ type AlarmControlPanel struct {
 /* Public API */
 
 // Send the alarm the command for arm away.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmAway(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) ArmAway(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_away",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -25,13 +25,13 @@ func (acp AlarmControlPanel) ArmAway(entityId string, serviceData ...map[string]
 }
 
 // Send the alarm the command for arm away.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmWithCustomBypass(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_custom_bypass",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -41,13 +41,13 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(entityId string, serviceData ..
 }
 
 // Send the alarm the command for arm home.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmHome(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) ArmHome(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_home",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -57,13 +57,13 @@ func (acp AlarmControlPanel) ArmHome(entityId string, serviceData ...map[string]
 }
 
 // Send the alarm the command for arm night.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmNight(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) ArmNight(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_night",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -73,13 +73,13 @@ func (acp AlarmControlPanel) ArmNight(entityId string, serviceData ...map[string
 }
 
 // Send the alarm the command for arm vacation.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) ArmVacation(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_arm_vacation",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -89,13 +89,13 @@ func (acp AlarmControlPanel) ArmVacation(entityId string, serviceData ...map[str
 }
 
 // Send the alarm the command for disarm.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) Disarm(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) Disarm(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_disarm",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -105,13 +105,13 @@ func (acp AlarmControlPanel) Disarm(entityId string, serviceData ...map[string]a
 }
 
 // Send the alarm the command for trigger.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (acp AlarmControlPanel) Trigger(entityId string, serviceData ...map[string]any) error {
+func (acp AlarmControlPanel) Trigger(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "alarm_control_panel",
 		Service: "alarm_trigger",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]

@@ -8,29 +8,29 @@ type InputBoolean struct {
 
 /* Public API */
 
-func (ib InputBoolean) TurnOn(entityId string) error {
+func (ib InputBoolean) TurnOn(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "input_boolean",
 		Service: "turn_on",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return ib.api.Call(req)
 }
 
-func (ib InputBoolean) Toggle(entityId string) error {
+func (ib InputBoolean) Toggle(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "input_boolean",
 		Service: "toggle",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return ib.api.Call(req)
 }
 
-func (ib InputBoolean) TurnOff(entityId string) error {
+func (ib InputBoolean) TurnOff(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "input_boolean",
 		Service: "turn_off",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return ib.api.Call(req)
 }

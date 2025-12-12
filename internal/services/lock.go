@@ -8,13 +8,13 @@ type Lock struct {
 
 /* Public API */
 
-// Lock a lock entity. Takes an entityId and an optional
+// Lock a lock entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Lock) Lock(entityId string, serviceData ...map[string]any) error {
+func (l Lock) Lock(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "lock",
 		Service: "lock",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -22,13 +22,13 @@ func (l Lock) Lock(entityId string, serviceData ...map[string]any) error {
 	return l.api.Call(req)
 }
 
-// Unlock a lock entity. Takes an entityId and an optional
+// Unlock a lock entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Lock) Unlock(entityId string, serviceData ...map[string]any) error {
+func (l Lock) Unlock(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "lock",
 		Service: "unlock",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]

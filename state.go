@@ -17,8 +17,8 @@ type State interface {
 	AfterSunset(...DurationString) bool
 	BeforeSunset(...DurationString) bool
 	ListEntities() ([]EntityState, error)
-	Get(entityId string) (EntityState, error)
-	Equals(entityId, state string) (bool, error)
+	Get(entityID string) (EntityState, error)
+	Equals(entityID, state string) (bool, error)
 }
 
 // State is used to retrieve state from Home Assistant.
@@ -35,42 +35,42 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 }
 
-func newState(c *http.HttpClient, homeZoneEntityId string) (*StateImpl, error) {
+func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
 	state := &StateImpl{httpClient: c}
 
 	// Ensure the zone exists and has required attributes
-	entity, err := state.Get(homeZoneEntityId)
+	entity, err := state.Get(homeZoneEntityID)
 	if err != nil {
-		return nil, fmt.Errorf("home zone entity '%s' not found: %w", homeZoneEntityId, err)
+		return nil, fmt.Errorf("home zone entity '%s' not found: %w", homeZoneEntityID, err)
 	}
 
 	// Ensure it's a zone entity
-	if !strings.HasPrefix(homeZoneEntityId, "zone.") {
-		return nil, fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", homeZoneEntityId)
+	if !strings.HasPrefix(homeZoneEntityID, "zone.") {
+		return nil, fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", homeZoneEntityID)
 	}
 
 	// Verify and extract latitude and longitude
 	if entity.Attributes == nil {
-		return nil, fmt.Errorf("home zone entity '%s' has no attributes", homeZoneEntityId)
+		return nil, fmt.Errorf("home zone entity '%s' has no attributes", homeZoneEntityID)
 	}
 
 	if lat, ok := entity.Attributes["latitude"].(float64); ok {
 		state.latitude = lat
 	} else {
-		return nil, fmt.Errorf("home zone entity '%s' missing valid latitude attribute", homeZoneEntityId)
+		return nil, fmt.Errorf("home zone entity '%s' missing valid latitude attribute", homeZoneEntityID)
 	}
 
 	if long, ok := entity.Attributes["longitude"].(float64); ok {
 		state.longitude = long
 	} else {
-		return nil, fmt.Errorf("home zone entity '%s' missing valid longitude attribute", homeZoneEntityId)
+		return nil, fmt.Errorf("home zone entity '%s' missing valid longitude attribute", homeZoneEntityID)
 	}
 
 	return state, nil
 }
 
-func (s *StateImpl) Get(entityId string) (EntityState, error) {
-	resp, err := s.httpClient.GetState(entityId)
+func (s *StateImpl) Get(entityID string) (EntityState, error) {
+	resp, err := s.httpClient.GetState(entityID)
 	if err != nil {
 		return EntityState{}, err
 	}
@@ -91,8 +91,8 @@ func (s *StateImpl) ListEntities() ([]EntityState, error) {
 	return es, err
 }
 
-func (s *StateImpl) Equals(entityId string, expectedState string) (bool, error) {
-	currentState, err := s.Get(entityId)
+func (s *StateImpl) Equals(entityID string, expectedState string) (bool, error) {
+	currentState, err := s.Get(entityID)
 	if err != nil {
 		return false, err
 	}

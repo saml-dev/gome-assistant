@@ -110,15 +110,15 @@ func (ib intervalBuilderEnd) ExceptionRange(start, end time.Time) intervalBuilde
 }
 
 /*
-Enable this interval only when the current state of {entityId} matches {state}.
+Enable this interval only when the current state of {entityID} matches {state}.
 If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
 */
-func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+func (ib intervalBuilderEnd) EnabledWhen(entityID, state string, runOnNetworkError bool) intervalBuilderEnd {
+	if entityID == "" {
+		panic(fmt.Sprintf("entityID is empty in EnabledWhen entityID='%s' state='%s'", entityID, state))
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -127,15 +127,15 @@ func (ib intervalBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 }
 
 /*
-Disable this interval when the current state of {entityId} matches {state}.
+Disable this interval when the current state of {entityID} matches {state}.
 If there is a network error while retrieving state, the interval runs if {runOnNetworkError} is true.
 */
-func (ib intervalBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) intervalBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+func (ib intervalBuilderEnd) DisabledWhen(entityID, state string, runOnNetworkError bool) intervalBuilderEnd {
+	if entityID == "" {
+		panic(fmt.Sprintf("entityID is empty in EnabledWhen entityID='%s' state='%s'", entityID, state))
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}

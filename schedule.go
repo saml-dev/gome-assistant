@@ -116,15 +116,15 @@ func (sb scheduleBuilderEnd) OnlyOnDates(t time.Time, tl ...time.Time) scheduleB
 }
 
 /*
-Enable this schedule only when the current state of {entityId} matches {state}.
+Enable this schedule only when the current state of {entityID} matches {state}.
 If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
 */
-func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+func (sb scheduleBuilderEnd) EnabledWhen(entityID, state string, runOnNetworkError bool) scheduleBuilderEnd {
+	if entityID == "" {
+		panic(fmt.Sprintf("entityID is empty in EnabledWhen entityID='%s' state='%s'", entityID, state))
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}
@@ -133,15 +133,15 @@ func (sb scheduleBuilderEnd) EnabledWhen(entityId, state string, runOnNetworkErr
 }
 
 /*
-Disable this schedule when the current state of {entityId} matches {state}.
+Disable this schedule when the current state of {entityID} matches {state}.
 If there is a network error while retrieving state, the schedule runs if {runOnNetworkError} is true.
 */
-func (sb scheduleBuilderEnd) DisabledWhen(entityId, state string, runOnNetworkError bool) scheduleBuilderEnd {
-	if entityId == "" {
-		panic(fmt.Sprintf("entityId is empty in EnabledWhen entityId='%s' state='%s'", entityId, state))
+func (sb scheduleBuilderEnd) DisabledWhen(entityID, state string, runOnNetworkError bool) scheduleBuilderEnd {
+	if entityID == "" {
+		panic(fmt.Sprintf("entityID is empty in EnabledWhen entityID='%s' state='%s'", entityID, state))
 	}
 	i := internal.EnabledDisabledInfo{
-		Entity:     entityId,
+		Entity:     entityID,
 		State:      state,
 		RunOnError: runOnNetworkError,
 	}

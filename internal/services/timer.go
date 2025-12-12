@@ -9,37 +9,37 @@ type Timer struct {
 /* Public API */
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerstart
-func (t Timer) Start(entityId string, duration string) error {
+func (t Timer) Start(entityID string, duration string) error {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "start",
 		ServiceData: map[string]any{
 			"duration": duration,
 		},
-		Target: Entity(entityId),
+		Target: Entity(entityID),
 	}
 	return t.api.Call(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerstart
-func (t Timer) Change(entityId string, duration string) error {
+func (t Timer) Change(entityID string, duration string) error {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "change",
 		ServiceData: map[string]any{
 			"duration": duration,
 		},
-		Target: Entity(entityId),
+		Target: Entity(entityID),
 	}
 	return t.api.Call(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerpause
-func (t Timer) Pause(entityId string) error {
+func (t Timer) Pause(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "pause",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return t.api.Call(req)
 }
@@ -55,11 +55,11 @@ func (t Timer) Cancel() error {
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerfinish
-func (t Timer) Finish(entityId string) error {
+func (t Timer) Finish(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "finish",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return t.api.Call(req)
 }
