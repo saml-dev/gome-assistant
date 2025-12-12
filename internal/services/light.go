@@ -8,13 +8,13 @@ type Light struct {
 
 /* Public API */
 
-// TurnOn a light entity. Takes an entityId and an optional
+// TurnOn a light entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Light) TurnOn(entityId string, serviceData ...map[string]any) error {
+func (l Light) TurnOn(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "light",
 		Service: "turn_on",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -22,13 +22,13 @@ func (l Light) TurnOn(entityId string, serviceData ...map[string]any) error {
 	return l.api.Call(req)
 }
 
-// Toggle a light entity. Takes an entityId and an optional
+// Toggle a light entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Light) Toggle(entityId string, serviceData ...map[string]any) error {
+func (l Light) Toggle(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "light",
 		Service: "toggle",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -36,11 +36,11 @@ func (l Light) Toggle(entityId string, serviceData ...map[string]any) error {
 	return l.api.Call(req)
 }
 
-func (l Light) TurnOff(entityId string) error {
+func (l Light) TurnOff(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "light",
 		Service: "turn_off",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return l.api.Call(req)
 }

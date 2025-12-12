@@ -19,13 +19,13 @@ func (tts TTS) ClearCache() error {
 }
 
 // Say something using text-to-speech on a media player with cloud.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) error {
+func (tts TTS) CloudSay(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "tts",
 		Service: "cloud_say",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -34,13 +34,13 @@ func (tts TTS) CloudSay(entityId string, serviceData ...map[string]any) error {
 }
 
 // Say something using text-to-speech on a media player with google_translate.
-// Takes an entityId and an optional
+// Takes an entityID and an optional
 // map that is translated into service_data.
-func (tts TTS) GoogleTranslateSay(entityId string, serviceData ...map[string]any) error {
+func (tts TTS) GoogleTranslateSay(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "tts",
 		Service: "google_translate_say",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]

@@ -98,7 +98,7 @@ import ga "saml.dev/gome-assistant"
 app, err := ga.NewApp(ga.NewAppRequest{
 	URL:              "http://192.168.1.123:8123",
 	HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
-	HomeZoneEntityId: "zone.home",
+	HomeZoneEntityID: "zone.home",
 })
 
 // create automations here (see next sections)
@@ -161,7 +161,7 @@ func myFunc(se *ga.Service, st *ga.State) {
 Entity Listeners are used to respond to entities changing state. The simplest entity listener looks like:
 
 ```go
-etl := ga.NewEntityListener().EntityIds("binary_sensor.front_door").Call(myFunc).Build()
+etl := ga.NewEntityListener().EntityIDs("binary_sensor.front_door").Call(myFunc).Build()
 ```
 
 Entity listeners have other functions to change the behavior.

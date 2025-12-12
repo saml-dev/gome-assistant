@@ -9,15 +9,15 @@ type AdaptiveLighting struct {
 /* Public API */
 
 // Set manual control for an adaptive lighting entity.
-func (al AdaptiveLighting) SetManualControl(entityId string, enabled bool) error {
+func (al AdaptiveLighting) SetManualControl(entityID string, enabled bool) error {
 	req := BaseServiceRequest{
 		Domain:  "adaptive_lighting",
 		Service: "set_manual_control",
 		ServiceData: map[string]any{
-			"entity_id":      entityId,
+			"entity_id":      entityID,
 			"manual_control": enabled,
 		},
-		Target: Entity(entityId),
+		Target: Entity(entityID),
 	}
 
 	return al.api.Call(req)

@@ -18,7 +18,7 @@ import (
 type Config struct {
 	URL              string   `yaml:"url"`
 	HAAuthToken      string   `yaml:"ha_auth_token"`
-	HomeZoneEntityId string   `yaml:"home_zone_entity_id,omitempty"` // Now optional
+	HomeZoneEntityID string   `yaml:"home_zone_entity_id,omitempty"` // Now optional
 	IncludeDomains   []string `yaml:"include_domains,omitempty"`     // Optional list of domains to include
 	ExcludeDomains   []string `yaml:"exclude_domains,omitempty"`     // Optional list of domains to exclude
 }
@@ -96,8 +96,8 @@ func validateHomeZone(state ga.State, entityID string) error {
 
 // generate creates the entities.go file with constants for all Home Assistant entities
 func generate(ctx context.Context, config Config) error {
-	if config.HomeZoneEntityId == "" {
-		config.HomeZoneEntityId = "zone.home"
+	if config.HomeZoneEntityID == "" {
+		config.HomeZoneEntityID = "zone.home"
 	}
 
 	app, err := ga.NewApp(
@@ -105,7 +105,7 @@ func generate(ctx context.Context, config Config) error {
 		ga.NewAppRequest{
 			URL:              config.URL,
 			HAAuthToken:      config.HAAuthToken,
-			HomeZoneEntityId: config.HomeZoneEntityId,
+			HomeZoneEntityID: config.HomeZoneEntityID,
 		},
 	)
 	if err != nil {
@@ -114,7 +114,7 @@ func generate(ctx context.Context, config Config) error {
 	defer app.Cleanup()
 
 	// Validate that the home zone exists before proceeding
-	if err := validateHomeZone(app.GetState(), config.HomeZoneEntityId); err != nil {
+	if err := validateHomeZone(app.GetState(), config.HomeZoneEntityID); err != nil {
 		return fmt.Errorf("invalid home zone: %w", err)
 	}
 

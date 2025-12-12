@@ -8,14 +8,14 @@ type InputText struct {
 
 /* Public API */
 
-func (ib InputText) Set(entityId string, value string) error {
+func (ib InputText) Set(entityID string, value string) error {
 	req := BaseServiceRequest{
 		Domain:  "input_text",
 		Service: "set_value",
 		ServiceData: map[string]any{
 			"value": value,
 		},
-		Target: Entity(entityId),
+		Target: Entity(entityID),
 	}
 	return ib.api.Call(req)
 }

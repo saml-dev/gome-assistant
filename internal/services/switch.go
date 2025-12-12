@@ -8,29 +8,29 @@ type Switch struct {
 
 /* Public API */
 
-func (s Switch) TurnOn(entityId string) error {
+func (s Switch) TurnOn(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_on",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return s.api.Call(req)
 }
 
-func (s Switch) Toggle(entityId string) error {
+func (s Switch) Toggle(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "toggle",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return s.api.Call(req)
 }
 
-func (s Switch) TurnOff(entityId string) error {
+func (s Switch) TurnOff(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_off",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return s.api.Call(req)
 }

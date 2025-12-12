@@ -8,11 +8,11 @@ type InputButton struct {
 
 /* Public API */
 
-func (ib InputButton) Press(entityId string) error {
+func (ib InputButton) Press(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "input_button",
 		Service: "press",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return ib.api.Call(req)
 }

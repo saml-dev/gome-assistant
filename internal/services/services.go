@@ -36,7 +36,7 @@ func BuildService[
 }
 
 type BaseServiceRequest struct {
-	Id          int64          `json:"id"`
+	ID          int64          `json:"id"`
 	RequestType string         `json:"type"` // must be set to "call_service"
 	Domain      string         `json:"domain"`
 	Service     string         `json:"service"`

@@ -78,10 +78,10 @@ type NewAppRequest struct {
 	HAAuthToken string
 
 	// Required
-	// EntityId of the zone representing your home e.g. "zone.home".
+	// EntityID of the zone representing your home e.g. "zone.home".
 	// Used to pull latitude/longitude from Home Assistant
 	// to calculate sunset/sunrise times.
-	HomeZoneEntityId string
+	HomeZoneEntityID string
 
 	// Optional
 	// Whether to use secure connections for http and websockets.
@@ -125,8 +125,8 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	}
 
 	// Set default home zone if not provided
-	if request.HomeZoneEntityId == "" {
-		request.HomeZoneEntityId = "zone.home"
+	if request.HomeZoneEntityID == "" {
+		request.HomeZoneEntityID = "zone.home"
 	}
 
 	baseURL := &url.URL{}
@@ -160,7 +160,7 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
 
-	state, err := newState(httpClient, request.HomeZoneEntityId)
+	state, err := newState(httpClient, request.HomeZoneEntityID)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 	app.service = newService(&app)
 
 	// Validate home zone
-	if err := validateHomeZone(state, request.HomeZoneEntityId); err != nil {
+	if err := validateHomeZone(state, request.HomeZoneEntityID); err != nil {
 		return nil, err
 	}
 
@@ -239,7 +239,7 @@ func (app *App) registerEntityListener(etl EntityListener) {
 		panic(ErrInvalidArgs)
 	}
 
-	for _, entity := range etl.entityIds {
+	for _, entity := range etl.entityIDs {
 		app.entityListeners[entity] = append(app.entityListeners[entity], &etl)
 	}
 }
@@ -346,7 +346,7 @@ func (app *App) Start() {
 
 				etl.runOnStartupCompleted = true
 				go etl.callback(app.service, app.state, EntityData{
-					TriggerEntityId: eid,
+					TriggerEntityID: eid,
 					FromState:       entityState.State,
 					FromAttributes:  entityState.Attributes,
 					ToState:         entityState.State,

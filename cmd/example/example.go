@@ -25,7 +25,7 @@ func main() {
 		ga.NewAppRequest{
 			URL:              "http://192.168.86.67:8123", // Replace with your Home Assistant URL
 			HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
-			HomeZoneEntityId: "zone.home",
+			HomeZoneEntityID: "zone.home",
 		},
 	)
 	if err != nil {
@@ -37,7 +37,7 @@ func main() {
 
 	pantryDoor := ga.
 		NewEntityListener().
-		EntityIds(entities.BinarySensor.PantryDoor). // Use generated entity constant
+		EntityIDs(entities.BinarySensor.PantryDoor). // Use generated entity constant
 		Call(pantryLights).
 		Build()
 

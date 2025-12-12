@@ -35,7 +35,7 @@ func (conn *Conn) getSubscriber(messageID int64) (Subscriber, bool) {
 }
 
 type SubEvent struct {
-	Id        int64  `json:"id"`
+	ID        int64  `json:"id"`
 	Type      string `json:"type"`
 	EventType string `json:"event_type"`
 }
@@ -46,7 +46,7 @@ func (conn *Conn) SubscribeToEventType(eventType string, subr Subscriber) Subscr
 		func(lc LockedConn) error {
 			subn = lc.Subscribe(subr)
 			e := SubEvent{
-				Id:        subn.messageID,
+				ID:        subn.messageID,
 				Type:      "subscribe_events",
 				EventType: eventType,
 			}

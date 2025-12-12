@@ -9,56 +9,56 @@ type Vacuum struct {
 /* Public API */
 
 // Tell the vacuum cleaner to do a spot clean-up.
-// Takes an entityId.
-func (v Vacuum) CleanSpot(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) CleanSpot(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "clean_spot",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Locate the vacuum cleaner robot.
-// Takes an entityId.
-func (v Vacuum) Locate(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) Locate(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "locate",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Pause the cleaning task.
-// Takes an entityId.
-func (v Vacuum) Pause(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) Pause(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "pause",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Tell the vacuum cleaner to return to its dock.
-// Takes an entityId.
-func (v Vacuum) ReturnToBase(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) ReturnToBase(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "return_to_base",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
-// Send a raw command to the vacuum cleaner. Takes an entityId and an optional
+// Send a raw command to the vacuum cleaner. Takes an entityID and an optional
 // map that is translated into service_data.
-func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) error {
+func (v Vacuum) SendCommand(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "send_command",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -67,13 +67,13 @@ func (v Vacuum) SendCommand(entityId string, serviceData ...map[string]any) erro
 	return v.api.Call(req)
 }
 
-// Set the fan speed of the vacuum cleaner. Takes an entityId and an optional
+// Set the fan speed of the vacuum cleaner. Takes an entityID and an optional
 // map that is translated into service_data.
-func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) error {
+func (v Vacuum) SetFanSpeed(entityID string, serviceData ...map[string]any) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "set_fan_speed",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
@@ -83,56 +83,56 @@ func (v Vacuum) SetFanSpeed(entityId string, serviceData ...map[string]any) erro
 }
 
 // Start or resume the cleaning task.
-// Takes an entityId.
-func (v Vacuum) Start(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) Start(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "start",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Start, pause, or resume the cleaning task.
-// Takes an entityId.
-func (v Vacuum) StartPause(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) StartPause(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "start_pause",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Stop the current cleaning task.
-// Takes an entityId.
-func (v Vacuum) Stop(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) Stop(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "stop",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Stop the current cleaning task and return to home.
-// Takes an entityId.
-func (v Vacuum) TurnOff(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) TurnOff(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "turn_off",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
 
 // Start a new cleaning task.
-// Takes an entityId.
-func (v Vacuum) TurnOn(entityId string) error {
+// Takes an entityID.
+func (v Vacuum) TurnOn(entityID string) error {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "turn_on",
-		Target:  Entity(entityId),
+		Target:  Entity(entityID),
 	}
 	return v.api.Call(req)
 }
