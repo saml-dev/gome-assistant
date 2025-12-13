@@ -45,7 +45,7 @@ type EntityData struct {
 	LastChanged     time.Time
 }
 
-type stateChangedMsg struct {
+type stateChangedMessage struct {
 	ID    int    `json:"id"`
 	Type  string `json:"type"`
 	Event struct {
@@ -239,7 +239,7 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateDa
 
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
-	msg := stateChangedMsg{}
+	msg := stateChangedMessage{}
 	_ = json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
 	eid := data.EntityID

@@ -5,19 +5,6 @@ import (
 	"log/slog"
 )
 
-type BaseMessage struct {
-	Type    string `json:"type"`
-	ID      int64  `json:"id"`
-	Success bool   `json:"success"`
-}
-
-type ChanMsg struct {
-	Type    string
-	ID      int64
-	Success bool
-	Raw     []byte
-}
-
 // Run processes incoming messages from `Conn`. It reads
 // JSON-formatted messages from `conn`, partly deserializes them, and
 // passes them to the subscriber that has subscribed to that message
@@ -51,7 +38,7 @@ func (conn *Conn) Run() error {
 			continue
 		}
 
-		chanMsg := ChanMsg{
+		chanMsg := ChanMessage{
 			Type:    base.Type,
 			ID:      base.ID,
 			Success: base.Success,

@@ -19,10 +19,10 @@ func (sub Subscription) MessageID() int64 {
 
 // Subscriber is called synchronously when a message is received that
 // matches its subscription's message ID.
-type Subscriber func(msg ChanMsg)
+type Subscriber func(msg ChanMessage)
 
 // NoopSubscriber is a `Subscriber` that does nothing.
-func NoopSubscriber(_ ChanMsg) {}
+func NoopSubscriber(_ ChanMessage) {}
 
 // getSubscriber returns the subscriber, if any, that is subscribed to
 // the specified message ID.
