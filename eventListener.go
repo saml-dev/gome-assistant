@@ -158,7 +158,7 @@ func (l *EventListener) maybeCall(app *App, eventData EventData) {
 }
 
 /* Functions */
-func (app *App) callEventListeners(eventType string, msg websocket.ResultMessage) {
+func (app *App) callEventListeners(eventType string, msg websocket.Message) {
 	listeners, ok := app.eventListeners[eventType]
 	if !ok {
 		// no listeners registered for this event type
