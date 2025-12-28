@@ -22,33 +22,28 @@ func (conn *Conn) Run() error {
 			return err
 		}
 
-		var base BaseResultMessage
-
-		// default to true for messages that don't include "success"
-		// at all:
-		base.Success = true
-
-		_ = json.Unmarshal(bytes, &base)
-		if !base.Success {
-			slog.Warn("Received unsuccessful response", "response", string(bytes))
+		var msg Message
+		if err := json.Unmarshal(bytes, &msg.BaseMessage); err != nil {
+			slog.Warn(
+				"error unmarshaling websocket message; ignoring message",
+				"error", err,
+				"message", string(bytes),
+			)
+			continue
 		}
+		msg.Raw = bytes
 
 		// Result messages are sent in response to the initial subscribe request.
 		// As a result, every event listener was being called on startup. This
 		// check prevents that.
-		if base.Type == "result" {
+		if msg.Type == "result" {
 			continue
 		}
 
-		resultMsg := ResultMessage{
-			BaseResultMessage: base,
-			Raw:               bytes,
-		}
-
 		// If a subscriber has been registered for this message ID,
-		// then call it, too:
-		if subr, ok := conn.getSubscriber(base.ID); ok {
-			subr(resultMsg)
+		// then call it:
+		if subr, ok := conn.getSubscriber(msg.ID); ok {
+			subr(msg)
 		}
 	}
 }
