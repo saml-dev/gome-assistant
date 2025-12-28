@@ -15,7 +15,7 @@ import (
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")

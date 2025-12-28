@@ -2,9 +2,10 @@ package gomeassistant
 
 import (
 	"saml.dev/gome-assistant/internal/services"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
+// Call implements [services.API.Call].
 func (app *App) Call(req services.BaseServiceRequest) error {
 	req.RequestType = "call_service"
 
