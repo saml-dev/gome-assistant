@@ -22,10 +22,12 @@ func (conn *Conn) Run() error {
 			return err
 		}
 
-		base := BaseResultMessage{
-			// default to true for messages that don't include "success" at all
-			Success: true,
-		}
+		var base BaseResultMessage
+
+		// default to true for messages that don't include "success"
+		// at all:
+		base.Success = true
+
 		_ = json.Unmarshal(bytes, &base)
 		if !base.Success {
 			slog.Warn("Received unsuccessful response", "response", string(bytes))
@@ -38,17 +40,15 @@ func (conn *Conn) Run() error {
 			continue
 		}
 
-		chanMsg := ChanMessage{
-			Type:    base.Type,
-			ID:      base.ID,
-			Success: base.Success,
-			Raw:     bytes,
+		resultMsg := ResultMessage{
+			BaseResultMessage: base,
+			Raw:               bytes,
 		}
 
 		// If a subscriber has been registered for this message ID,
 		// then call it, too:
 		if subr, ok := conn.getSubscriber(base.ID); ok {
-			subr(chanMsg)
+			subr(resultMsg)
 		}
 	}
 }

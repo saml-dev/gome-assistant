@@ -261,7 +261,7 @@ func (app *App) registerEventListener(evl EventListener) {
 			eventType := eventType
 			app.conn.SubscribeToEventType(
 				eventType,
-				func(msg websocket.ChanMessage) {
+				func(msg websocket.ResultMessage) {
 					go app.callEventListeners(eventType, msg)
 				},
 			)
@@ -328,7 +328,7 @@ func (app *App) Start() {
 
 	// subscribe to state_changed events
 	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
-		func(msg websocket.ChanMessage) {
+		func(msg websocket.ResultMessage) {
 			go app.callEntityListeners(msg.Raw)
 		},
 	)
