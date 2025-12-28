@@ -7,7 +7,7 @@ import (
 
 // Call implements [services.API.Call].
 func (app *App) Call(req services.BaseServiceRequest) error {
-	req.RequestType = "call_service"
+	req.Type = "call_service"
 
 	return app.conn.Send(
 		func(lc websocket.LockedConn) error {

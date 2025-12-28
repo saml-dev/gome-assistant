@@ -37,7 +37,7 @@ func BuildService[
 
 type BaseServiceRequest struct {
 	ID          int64          `json:"id"`
-	RequestType string         `json:"type"` // must be set to "call_service"
+	Type        string         `json:"type"` // must be set to "call_service"
 	Domain      string         `json:"domain"`
 	Service     string         `json:"service"`
 	ServiceData map[string]any `json:"service_data,omitempty"`
