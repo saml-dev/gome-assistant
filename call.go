@@ -7,12 +7,17 @@ import (
 
 // Call implements [services.API.Call].
 func (app *App) Call(req services.BaseServiceRequest) error {
-	req.Type = "call_service"
+	reqMsg := services.CallServiceMessage{
+		BaseMessage: websocket.BaseMessage{
+			Type: "call_service",
+		},
+		BaseServiceRequest: req,
+	}
 
 	return app.conn.Send(
 		func(lc websocket.LockedConn) error {
-			req.ID = lc.NextMessageID()
-			return lc.SendMessage(req)
+			reqMsg.ID = lc.NextMessageID()
+			return lc.SendMessage(reqMsg)
 		},
 	)
 }

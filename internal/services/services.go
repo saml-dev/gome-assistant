@@ -1,5 +1,7 @@
 package services
 
+import "saml.dev/gome-assistant/websocket"
+
 // API is the interface that the individual services use to interact
 // with HomeAssistant.
 type API interface {
@@ -35,9 +37,17 @@ func BuildService[
 	return &T{api: api}
 }
 
+// CallServiceMessage represents a message that can be sent to request
+// an API call. Its `Type` field must be set to "call_service".
+type CallServiceMessage struct {
+	websocket.BaseMessage
+	BaseServiceRequest
+}
+
+// BaseServiceRequest contains the fields needed to make an HA API
+// call. `ServiceData` can contain arbitrary data needed for a
+// particular call.
 type BaseServiceRequest struct {
-	ID          int64          `json:"id"`
-	Type        string         `json:"type"` // must be set to "call_service"
 	Domain      string         `json:"domain"`
 	Service     string         `json:"service"`
 	ServiceData map[string]any `json:"service_data,omitempty"`
