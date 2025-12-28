@@ -22,7 +22,7 @@ func (conn *Conn) Run() error {
 			return err
 		}
 
-		base := BaseMessage{
+		base := BaseResultMessage{
 			// default to true for messages that don't include "success" at all
 			Success: true,
 		}
