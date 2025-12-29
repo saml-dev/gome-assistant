@@ -11,7 +11,7 @@ func (ib Number) SetValue(entityID string, value float32) error {
 		ServiceData: map[string]any{"value": value},
 		Target:      Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib Number) MustSetValue(entityID string, value float32) {

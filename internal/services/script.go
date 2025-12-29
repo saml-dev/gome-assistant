@@ -15,7 +15,7 @@ func (s Script) Reload(entityID string) error {
 		Service: "reload",
 		Target:  Entity(entityID),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 // Toggle a script that was created in the HA UI.
@@ -25,7 +25,7 @@ func (s Script) Toggle(entityID string) error {
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 // TurnOff a script that was created in the HA UI.
@@ -35,7 +35,7 @@ func (s Script) TurnOff() error {
 		Service: "turn_off",
 		Target:  Entity(""),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 // TurnOn a script that was created in the HA UI.
@@ -45,5 +45,5 @@ func (s Script) TurnOn(entityID string) error {
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }

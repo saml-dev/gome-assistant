@@ -19,7 +19,7 @@ func (c Climate) SetFanMode(entityID string, fanMode string) error {
 		ServiceData: map[string]any{"fan_mode": fanMode},
 		Target:      Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 func (c Climate) SetTemperature(entityID string, serviceData types.SetTemperatureRequest) error {
@@ -29,5 +29,5 @@ func (c Climate) SetTemperature(entityID string, serviceData types.SetTemperatur
 		ServiceData: serviceData.ToJSON(),
 		Target:      Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }

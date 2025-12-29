@@ -21,5 +21,5 @@ func (ha *Notify) Notify(reqData types.NotifyRequest) error {
 		serviceData["data"] = reqData.Data
 	}
 	req.ServiceData = serviceData
-	return ha.api.Call(req)
+	return ha.api.CallAndForget(req)
 }

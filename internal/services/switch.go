@@ -14,7 +14,7 @@ func (s Switch) TurnOn(entityID string) error {
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 func (s Switch) Toggle(entityID string) error {
@@ -23,7 +23,7 @@ func (s Switch) Toggle(entityID string) error {
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 func (s Switch) TurnOff(entityID string) error {
@@ -32,5 +32,5 @@ func (s Switch) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }

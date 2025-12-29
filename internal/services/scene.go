@@ -18,7 +18,7 @@ func (s Scene) Apply(serviceData ...map[string]any) error {
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 // Create a scene entity. Takes an entityID and an optional
@@ -32,7 +32,7 @@ func (s Scene) Create(entityID string, serviceData ...map[string]any) error {
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 // Reload the scenes.
@@ -42,7 +42,7 @@ func (s Scene) Reload() error {
 		Service: "reload",
 		Target:  Entity(""),
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }
 
 // TurnOn a scene entity. Takes an entityID and an optional
@@ -56,5 +56,5 @@ func (s Scene) TurnOn(entityID string, serviceData ...map[string]any) error {
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return s.api.Call(req)
+	return s.api.CallAndForget(req)
 }

@@ -5,8 +5,8 @@ import (
 	"saml.dev/gome-assistant/websocket"
 )
 
-// Call implements [services.API.Call].
-func (app *App) Call(req services.BaseServiceRequest) error {
+// CallAndForget implements [services.API.CallAndForget].
+func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 	reqMsg := services.CallServiceMessage{
 		BaseMessage: websocket.BaseMessage{
 			Type: "call_service",

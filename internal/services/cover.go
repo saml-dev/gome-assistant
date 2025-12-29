@@ -15,7 +15,7 @@ func (c Cover) Close(entityID string) error {
 		Service: "close_cover",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Close all or specified cover tilt. Takes an entityID.
@@ -25,7 +25,7 @@ func (c Cover) CloseTilt(entityID string) error {
 		Service: "close_cover_tilt",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Open all or specified cover. Takes an entityID.
@@ -35,7 +35,7 @@ func (c Cover) Open(entityID string) error {
 		Service: "open_cover",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Open all or specified cover tilt. Takes an entityID.
@@ -45,7 +45,7 @@ func (c Cover) OpenTilt(entityID string) error {
 		Service: "open_cover_tilt",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Move to specific position all or specified cover. Takes an entityID and an optional
@@ -60,7 +60,7 @@ func (c Cover) SetPosition(entityID string, serviceData ...map[string]any) error
 		req.ServiceData = serviceData[0]
 	}
 
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Move to specific position all or specified cover tilt. Takes an entityID and an optional
@@ -75,7 +75,7 @@ func (c Cover) SetTiltPosition(entityID string, serviceData ...map[string]any) e
 		req.ServiceData = serviceData[0]
 	}
 
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Stop a cover entity. Takes an entityID.
@@ -85,7 +85,7 @@ func (c Cover) Stop(entityID string) error {
 		Service: "stop_cover",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Stop a cover entity tilt. Takes an entityID.
@@ -95,7 +95,7 @@ func (c Cover) StopTilt(entityID string) error {
 		Service: "stop_cover_tilt",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Toggle a cover open/closed. Takes an entityID.
@@ -105,7 +105,7 @@ func (c Cover) Toggle(entityID string) error {
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }
 
 // Toggle a cover tilt open/closed. Takes an entityID.
@@ -115,5 +115,5 @@ func (c Cover) ToggleTilt(entityID string) error {
 		Service: "toggle_cover_tilt",
 		Target:  Entity(entityID),
 	}
-	return c.api.Call(req)
+	return c.api.CallAndForget(req)
 }

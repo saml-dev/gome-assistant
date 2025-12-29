@@ -16,7 +16,7 @@ func (ha *HomeAssistant) TurnOn(entityID string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	return ha.api.Call(req)
+	return ha.api.CallAndForget(req)
 }
 
 // Toggle a Home Assistant entity. Takes an entityID and an optional
@@ -31,7 +31,7 @@ func (ha *HomeAssistant) Toggle(entityID string, serviceData ...map[string]any) 
 		req.ServiceData = serviceData[0]
 	}
 
-	return ha.api.Call(req)
+	return ha.api.CallAndForget(req)
 }
 
 func (ha *HomeAssistant) TurnOff(entityID string) error {
@@ -40,5 +40,5 @@ func (ha *HomeAssistant) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return ha.api.Call(req)
+	return ha.api.CallAndForget(req)
 }

@@ -5,7 +5,10 @@ import "saml.dev/gome-assistant/websocket"
 // API is the interface that the individual services use to interact
 // with HomeAssistant.
 type API interface {
-	Call(req BaseServiceRequest) error
+	// CallAndForget makes a call to the Home Assistant API but
+	// doesn't subscribe to or wait for a response.
+	CallAndForget(req BaseServiceRequest) error
+
 	FireEvent(eventType string, eventData map[string]any) error
 }
 

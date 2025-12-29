@@ -20,5 +20,5 @@ func (al AdaptiveLighting) SetManualControl(entityID string, enabled bool) error
 		Target: Entity(entityID),
 	}
 
-	return al.api.Call(req)
+	return al.api.CallAndForget(req)
 }

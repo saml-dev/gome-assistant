@@ -21,7 +21,7 @@ func (acp AlarmControlPanel) ArmAway(entityID string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }
 
 // Send the alarm the command for arm away.
@@ -37,7 +37,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData ..
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }
 
 // Send the alarm the command for arm home.
@@ -53,7 +53,7 @@ func (acp AlarmControlPanel) ArmHome(entityID string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }
 
 // Send the alarm the command for arm night.
@@ -69,7 +69,7 @@ func (acp AlarmControlPanel) ArmNight(entityID string, serviceData ...map[string
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }
 
 // Send the alarm the command for arm vacation.
@@ -85,7 +85,7 @@ func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData ...map[str
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }
 
 // Send the alarm the command for disarm.
@@ -101,7 +101,7 @@ func (acp AlarmControlPanel) Disarm(entityID string, serviceData ...map[string]a
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }
 
 // Send the alarm the command for trigger.
@@ -117,5 +117,5 @@ func (acp AlarmControlPanel) Trigger(entityID string, serviceData ...map[string]
 		req.ServiceData = serviceData[0]
 	}
 
-	return acp.api.Call(req)
+	return acp.api.CallAndForget(req)
 }

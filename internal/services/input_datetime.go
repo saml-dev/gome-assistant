@@ -22,7 +22,7 @@ func (ib InputDatetime) Set(entityID string, value time.Time) error {
 		},
 		Target: Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputDatetime) Reload() error {
@@ -30,5 +30,5 @@ func (ib InputDatetime) Reload() error {
 		Domain:  "input_datetime",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }

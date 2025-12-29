@@ -14,7 +14,7 @@ func (ib InputButton) Press(entityID string) error {
 		Service: "press",
 		Target:  Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputButton) Reload() error {
@@ -23,5 +23,5 @@ func (ib InputButton) Reload() error {
 		Service: "reload",
 		Target:  Entity(""),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }

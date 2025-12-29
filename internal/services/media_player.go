@@ -16,7 +16,7 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) error {
 		Service: "clear_playlist",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Group players together. Only works on platforms with support for player groups.
@@ -31,7 +31,7 @@ func (mp MediaPlayer) Join(entityID string, serviceData ...map[string]any) error
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command for next track.
@@ -42,7 +42,7 @@ func (mp MediaPlayer) Next(entityID string) error {
 		Service: "media_next_track",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command for pause.
@@ -53,7 +53,7 @@ func (mp MediaPlayer) Pause(entityID string) error {
 		Service: "media_pause",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command for play.
@@ -64,7 +64,7 @@ func (mp MediaPlayer) Play(entityID string) error {
 		Service: "media_play",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Toggle media player play/pause state.
@@ -75,7 +75,7 @@ func (mp MediaPlayer) PlayPause(entityID string) error {
 		Service: "media_play_pause",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command for previous track.
@@ -86,7 +86,7 @@ func (mp MediaPlayer) Previous(entityID string) error {
 		Service: "media_previous_track",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command to seek in current playing media.
@@ -101,7 +101,7 @@ func (mp MediaPlayer) Seek(entityID string, serviceData ...map[string]any) error
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the stop command.
@@ -112,7 +112,7 @@ func (mp MediaPlayer) Stop(entityID string) error {
 		Service: "media_stop",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command for playing media.
@@ -127,7 +127,7 @@ func (mp MediaPlayer) PlayMedia(entityID string, serviceData ...map[string]any) 
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Set repeat mode. Takes an entityID and an optional
@@ -141,7 +141,7 @@ func (mp MediaPlayer) RepeatSet(entityID string, serviceData ...map[string]any) 
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command to change sound mode.
@@ -156,7 +156,7 @@ func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData ...map[string
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command to change input source.
@@ -171,7 +171,7 @@ func (mp MediaPlayer) SelectSource(entityID string, serviceData ...map[string]an
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Set shuffling state.
@@ -186,7 +186,7 @@ func (mp MediaPlayer) Shuffle(entityID string, serviceData ...map[string]any) er
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Toggles a media player power state.
@@ -197,7 +197,7 @@ func (mp MediaPlayer) Toggle(entityID string) error {
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Turn a media player power off.
@@ -208,7 +208,7 @@ func (mp MediaPlayer) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Turn a media player power on.
@@ -219,7 +219,7 @@ func (mp MediaPlayer) TurnOn(entityID string) error {
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Unjoin the player from a group. Only works on
@@ -231,7 +231,7 @@ func (mp MediaPlayer) Unjoin(entityID string) error {
 		Service: "unjoin",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Turn a media player volume down.
@@ -242,7 +242,7 @@ func (mp MediaPlayer) VolumeDown(entityID string) error {
 		Service: "volume_down",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Mute a media player's volume.
@@ -257,7 +257,7 @@ func (mp MediaPlayer) VolumeMute(entityID string, serviceData ...map[string]any)
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Set a media player's volume level.
@@ -272,7 +272,7 @@ func (mp MediaPlayer) VolumeSet(entityID string, serviceData ...map[string]any) 
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
 
 // Turn a media player volume up.
@@ -283,5 +283,5 @@ func (mp MediaPlayer) VolumeUp(entityID string) error {
 		Service: "volume_up",
 		Target:  Entity(entityID),
 	}
-	return mp.api.Call(req)
+	return mp.api.CallAndForget(req)
 }
