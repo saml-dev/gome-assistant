@@ -16,7 +16,7 @@ type LockedConn interface {
 	// called for any incoming messages that have that ID. This
 	// doesn't actually interact with the server. Typically the next
 	// step would be to send a message with its message ID set to
-	// `Subscription.ID()`.
+	// `Subscription.MessageID()`.
 	//
 	// The returned `Subscription` must eventually be passed at least
 	// once to `Unsubscribe()`, though `Unsubscribe()` can be called
