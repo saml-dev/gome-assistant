@@ -15,7 +15,7 @@ func (ib InputNumber) Set(entityID string, value float32) error {
 		ServiceData: map[string]any{"value": value},
 		Target:      Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputNumber) Increment(entityID string) error {
@@ -24,7 +24,7 @@ func (ib InputNumber) Increment(entityID string) error {
 		Service: "increment",
 		Target:  Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputNumber) Decrement(entityID string) error {
@@ -33,7 +33,7 @@ func (ib InputNumber) Decrement(entityID string) error {
 		Service: "decrement",
 		Target:  Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputNumber) Reload() error {
@@ -41,5 +41,5 @@ func (ib InputNumber) Reload() error {
 		Domain:  "input_number",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }

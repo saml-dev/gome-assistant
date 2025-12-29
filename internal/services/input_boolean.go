@@ -14,7 +14,7 @@ func (ib InputBoolean) TurnOn(entityID string) error {
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputBoolean) Toggle(entityID string) error {
@@ -23,7 +23,7 @@ func (ib InputBoolean) Toggle(entityID string) error {
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputBoolean) TurnOff(entityID string) error {
@@ -32,7 +32,7 @@ func (ib InputBoolean) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputBoolean) Reload() error {
@@ -40,5 +40,5 @@ func (ib InputBoolean) Reload() error {
 		Domain:  "input_boolean",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }

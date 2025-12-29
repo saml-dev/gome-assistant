@@ -16,7 +16,7 @@ func (v Vacuum) CleanSpot(entityID string) error {
 		Service: "clean_spot",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Locate the vacuum cleaner robot.
@@ -27,7 +27,7 @@ func (v Vacuum) Locate(entityID string) error {
 		Service: "locate",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Pause the cleaning task.
@@ -38,7 +38,7 @@ func (v Vacuum) Pause(entityID string) error {
 		Service: "pause",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Tell the vacuum cleaner to return to its dock.
@@ -49,7 +49,7 @@ func (v Vacuum) ReturnToBase(entityID string) error {
 		Service: "return_to_base",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Send a raw command to the vacuum cleaner. Takes an entityID and an optional
@@ -64,7 +64,7 @@ func (v Vacuum) SendCommand(entityID string, serviceData ...map[string]any) erro
 		req.ServiceData = serviceData[0]
 	}
 
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Set the fan speed of the vacuum cleaner. Takes an entityID and an optional
@@ -79,7 +79,7 @@ func (v Vacuum) SetFanSpeed(entityID string, serviceData ...map[string]any) erro
 		req.ServiceData = serviceData[0]
 	}
 
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Start or resume the cleaning task.
@@ -90,7 +90,7 @@ func (v Vacuum) Start(entityID string) error {
 		Service: "start",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Start, pause, or resume the cleaning task.
@@ -101,7 +101,7 @@ func (v Vacuum) StartPause(entityID string) error {
 		Service: "start_pause",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Stop the current cleaning task.
@@ -112,7 +112,7 @@ func (v Vacuum) Stop(entityID string) error {
 		Service: "stop",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Stop the current cleaning task and return to home.
@@ -123,7 +123,7 @@ func (v Vacuum) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }
 
 // Start a new cleaning task.
@@ -134,5 +134,5 @@ func (v Vacuum) TurnOn(entityID string) error {
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
-	return v.api.Call(req)
+	return v.api.CallAndForget(req)
 }

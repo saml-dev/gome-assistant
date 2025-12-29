@@ -15,7 +15,7 @@ func (tts TTS) ClearCache() error {
 		Service: "clear_cache",
 		Target:  Entity(""),
 	}
-	return tts.api.Call(req)
+	return tts.api.CallAndForget(req)
 }
 
 // Say something using text-to-speech on a media player with cloud.
@@ -30,7 +30,7 @@ func (tts TTS) CloudSay(entityID string, serviceData ...map[string]any) error {
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return tts.api.Call(req)
+	return tts.api.CallAndForget(req)
 }
 
 // Say something using text-to-speech on a media player with google_translate.
@@ -46,5 +46,5 @@ func (tts TTS) GoogleTranslateSay(entityID string, serviceData ...map[string]any
 		req.ServiceData = serviceData[0]
 	}
 
-	return tts.api.Call(req)
+	return tts.api.CallAndForget(req)
 }

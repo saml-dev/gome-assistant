@@ -17,7 +17,7 @@ func (ib InputText) Set(entityID string, value string) error {
 		},
 		Target: Entity(entityID),
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }
 
 func (ib InputText) Reload() error {
@@ -25,5 +25,5 @@ func (ib InputText) Reload() error {
 		Domain:  "input_text",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+	return ib.api.CallAndForget(req)
 }

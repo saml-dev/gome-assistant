@@ -18,7 +18,7 @@ func (t Timer) Start(entityID string, duration string) error {
 		},
 		Target: Entity(entityID),
 	}
-	return t.api.Call(req)
+	return t.api.CallAndForget(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerstart
@@ -31,7 +31,7 @@ func (t Timer) Change(entityID string, duration string) error {
 		},
 		Target: Entity(entityID),
 	}
-	return t.api.Call(req)
+	return t.api.CallAndForget(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerpause
@@ -41,7 +41,7 @@ func (t Timer) Pause(entityID string) error {
 		Service: "pause",
 		Target:  Entity(entityID),
 	}
-	return t.api.Call(req)
+	return t.api.CallAndForget(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timercancel
@@ -51,7 +51,7 @@ func (t Timer) Cancel() error {
 		Service: "cancel",
 		Target:  Entity(""),
 	}
-	return t.api.Call(req)
+	return t.api.CallAndForget(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerfinish
@@ -61,7 +61,7 @@ func (t Timer) Finish(entityID string) error {
 		Service: "finish",
 		Target:  Entity(entityID),
 	}
-	return t.api.Call(req)
+	return t.api.CallAndForget(req)
 }
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerreload
@@ -71,5 +71,5 @@ func (t Timer) Reload() error {
 		Service: "reload",
 		Target:  Entity(""),
 	}
-	return t.api.Call(req)
+	return t.api.CallAndForget(req)
 }

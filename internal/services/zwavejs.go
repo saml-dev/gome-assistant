@@ -19,5 +19,5 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(entityID string, parameter int, valu
 		},
 		Target: Entity(entityID),
 	}
-	return zw.api.Call(req)
+	return zw.api.CallAndForget(req)
 }

@@ -19,7 +19,7 @@ func (l Light) TurnOn(entityID string, serviceData ...map[string]any) error {
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return l.api.Call(req)
+	return l.api.CallAndForget(req)
 }
 
 // Toggle a light entity. Takes an entityID and an optional
@@ -33,7 +33,7 @@ func (l Light) Toggle(entityID string, serviceData ...map[string]any) error {
 	if len(serviceData) != 0 {
 		req.ServiceData = serviceData[0]
 	}
-	return l.api.Call(req)
+	return l.api.CallAndForget(req)
 }
 
 func (l Light) TurnOff(entityID string) error {
@@ -42,5 +42,5 @@ func (l Light) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return l.api.Call(req)
+	return l.api.CallAndForget(req)
 }
