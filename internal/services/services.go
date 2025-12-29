@@ -64,10 +64,10 @@ type CallServiceMessage struct {
 // call. `ServiceData` can contain arbitrary data needed for a
 // particular call.
 type BaseServiceRequest struct {
-	Domain      string         `json:"domain"`
-	Service     string         `json:"service"`
-	ServiceData map[string]any `json:"service_data,omitempty"`
-	Target      Target         `json:"target,omitempty"`
+	Domain      string `json:"domain"`
+	Service     string `json:"service"`
+	ServiceData any    `json:"service_data,omitempty"`
+	Target      Target `json:"target,omitempty"`
 }
 
 type Target struct {

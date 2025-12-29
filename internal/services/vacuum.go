@@ -54,14 +54,12 @@ func (v Vacuum) ReturnToBase(entityID string) error {
 
 // Send a raw command to the vacuum cleaner. Takes an entityID and an optional
 // map that is translated into service_data.
-func (v Vacuum) SendCommand(entityID string, serviceData ...map[string]any) error {
+func (v Vacuum) SendCommand(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "vacuum",
-		Service: "send_command",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "vacuum",
+		Service:     "send_command",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
 
 	return v.api.CallAndForget(req)
@@ -69,14 +67,12 @@ func (v Vacuum) SendCommand(entityID string, serviceData ...map[string]any) erro
 
 // Set the fan speed of the vacuum cleaner. Takes an entityID and an optional
 // map that is translated into service_data.
-func (v Vacuum) SetFanSpeed(entityID string, serviceData ...map[string]any) error {
+func (v Vacuum) SetFanSpeed(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "vacuum",
-		Service: "set_fan_speed",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "vacuum",
+		Service:     "set_fan_speed",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
 
 	return v.api.CallAndForget(req)

@@ -10,28 +10,26 @@ type Lock struct {
 
 // Lock a lock entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Lock) Lock(entityID string, serviceData ...map[string]any) error {
+func (l Lock) Lock(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "lock",
-		Service: "lock",
-		Target:  Entity(entityID),
+		Domain:      "lock",
+		Service:     "lock",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return l.api.CallAndForget(req)
 }
 
 // Unlock a lock entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Lock) Unlock(entityID string, serviceData ...map[string]any) error {
+func (l Lock) Unlock(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "lock",
-		Service: "unlock",
-		Target:  Entity(entityID),
+		Domain:      "lock",
+		Service:     "unlock",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return l.api.CallAndForget(req)
 }

@@ -9,29 +9,27 @@ type Scene struct {
 /* Public API */
 
 // Apply a scene. Takes map that is translated into service_data.
-func (s Scene) Apply(serviceData ...map[string]any) error {
+func (s Scene) Apply(serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "apply",
-		Target:  Entity(""),
+		Domain:      "scene",
+		Service:     "apply",
+		Target:      Entity(""),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return s.api.CallAndForget(req)
 }
 
 // Create a scene entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (s Scene) Create(entityID string, serviceData ...map[string]any) error {
+func (s Scene) Create(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "create",
-		Target:  Entity(entityID),
+		Domain:      "scene",
+		Service:     "create",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return s.api.CallAndForget(req)
 }
 
@@ -42,19 +40,19 @@ func (s Scene) Reload() error {
 		Service: "reload",
 		Target:  Entity(""),
 	}
+
 	return s.api.CallAndForget(req)
 }
 
 // TurnOn a scene entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (s Scene) TurnOn(entityID string, serviceData ...map[string]any) error {
+func (s Scene) TurnOn(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "turn_on",
-		Target:  Entity(entityID),
+		Domain:      "scene",
+		Service:     "turn_on",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return s.api.CallAndForget(req)
 }

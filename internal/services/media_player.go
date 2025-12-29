@@ -22,15 +22,14 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) error {
 // Group players together. Only works on platforms with support for player groups.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Join(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) Join(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "join",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "join",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -42,6 +41,7 @@ func (mp MediaPlayer) Next(entityID string) error {
 		Service: "media_next_track",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -53,6 +53,7 @@ func (mp MediaPlayer) Pause(entityID string) error {
 		Service: "media_pause",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -64,6 +65,7 @@ func (mp MediaPlayer) Play(entityID string) error {
 		Service: "media_play",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -75,6 +77,7 @@ func (mp MediaPlayer) PlayPause(entityID string) error {
 		Service: "media_play_pause",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -86,21 +89,21 @@ func (mp MediaPlayer) Previous(entityID string) error {
 		Service: "media_previous_track",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command to seek in current playing media.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) Seek(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "media_seek",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "media_seek",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -112,80 +115,76 @@ func (mp MediaPlayer) Stop(entityID string) error {
 		Service: "media_stop",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command for playing media.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "play_media",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "play_media",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Set repeat mode. Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "repeat_set",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "repeat_set",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command to change sound mode.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "select_sound_mode",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "select_sound_mode",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Send the media player the command to change input source.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) SelectSource(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "select_source",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "select_source",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Set shuffling state.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) Shuffle(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "shuffle_set",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "shuffle_set",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -197,6 +196,7 @@ func (mp MediaPlayer) Toggle(entityID string) error {
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -208,6 +208,7 @@ func (mp MediaPlayer) TurnOff(entityID string) error {
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -219,6 +220,7 @@ func (mp MediaPlayer) TurnOn(entityID string) error {
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -231,6 +233,7 @@ func (mp MediaPlayer) Unjoin(entityID string) error {
 		Service: "unjoin",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -242,36 +245,35 @@ func (mp MediaPlayer) VolumeDown(entityID string) error {
 		Service: "volume_down",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Mute a media player's volume.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "volume_mute",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "volume_mute",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
 // Set a media player's volume level.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityID string, serviceData ...map[string]any) error {
+func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "volume_set",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "volume_set",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -283,5 +285,6 @@ func (mp MediaPlayer) VolumeUp(entityID string) error {
 		Service: "volume_up",
 		Target:  Entity(entityID),
 	}
+
 	return mp.api.CallAndForget(req)
 }
