@@ -1,6 +1,10 @@
 package services
 
-import "saml.dev/gome-assistant/websocket"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/websocket"
+)
 
 // API is the interface that the individual services use to interact
 // with HomeAssistant.
@@ -8,6 +12,15 @@ type API interface {
 	// CallAndForget makes a call to the Home Assistant API but
 	// doesn't subscribe to or wait for a response.
 	CallAndForget(req BaseServiceRequest) error
+
+	// Call makes a call to the Home Assistant API and waits for a
+	// response. The result is unmarshaled into invokes `result`.
+	// `result` must be something that `json.Unmarshal()` can
+	// deserialize into; typically, it is a pointer. If the result
+	// indicates a failure (success==false), then return that as a
+	// `*websocket.ResultError`. If another error occurs (e.g.,
+	// sending the request or if `ctx` expires), return that error.
+	Call(ctx context.Context, req BaseServiceRequest, result any) error
 
 	FireEvent(eventType string, eventData map[string]any) error
 }
