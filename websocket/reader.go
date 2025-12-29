@@ -11,10 +11,12 @@ import (
 // ID (if any). If there is an error, return the error and stop
 // listening.
 //
-// Note that the subscribers are invoked synchronously, in the same
-// order as the messages arrived, and only one is run at a time. If
-// the subscriber wants processing to happen in the background, it
-// must spawn a goroutine itself.
+// Note that subscribers are invoked synchronously, in the same order
+// as the messages arrive, and only one is run at a time. If the
+// subscriber wants processing to happen in the background, it must
+// spawn a goroutine itself. A subscriber is allowed to unsubscribe
+// itself synchronously within the callback, in which case it is
+// guaranteed not to be invoked again for subsequent messages.
 func (conn *Conn) Run() error {
 	for {
 		bytes, err := conn.readMessage()
