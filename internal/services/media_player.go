@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type MediaPlayer struct {
@@ -10,19 +12,29 @@ type MediaPlayer struct {
 
 // Send the media player the command to clear players playlist.
 // Takes an entityID.
-func (mp MediaPlayer) ClearPlaylist(entityID string) error {
+func (mp MediaPlayer) ClearPlaylist(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "clear_playlist",
 		Target:  Entity(entityID),
 	}
-	return mp.api.CallAndForget(req)
+
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Group players together. Only works on platforms with support for player groups.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Join(entityID string, serviceData any) error {
+func (mp MediaPlayer) Join(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "join",
@@ -30,73 +42,115 @@ func (mp MediaPlayer) Join(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command for next track.
 // Takes an entityID.
-func (mp MediaPlayer) Next(entityID string) error {
+func (mp MediaPlayer) Next(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_next_track",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command for pause.
 // Takes an entityID.
-func (mp MediaPlayer) Pause(entityID string) error {
+func (mp MediaPlayer) Pause(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_pause",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command for play.
 // Takes an entityID.
-func (mp MediaPlayer) Play(entityID string) error {
+func (mp MediaPlayer) Play(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_play",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Toggle media player play/pause state.
 // Takes an entityID.
-func (mp MediaPlayer) PlayPause(entityID string) error {
+func (mp MediaPlayer) PlayPause(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_play_pause",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command for previous track.
 // Takes an entityID.
-func (mp MediaPlayer) Previous(entityID string) error {
+func (mp MediaPlayer) Previous(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_previous_track",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command to seek in current playing media.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityID string, serviceData any) error {
+func (mp MediaPlayer) Seek(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "media_seek",
@@ -104,25 +158,39 @@ func (mp MediaPlayer) Seek(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the stop command.
 // Takes an entityID.
-func (mp MediaPlayer) Stop(entityID string) error {
+func (mp MediaPlayer) Stop(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_stop",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command for playing media.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) error {
+func (mp MediaPlayer) PlayMedia(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "play_media",
@@ -130,12 +198,19 @@ func (mp MediaPlayer) PlayMedia(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Set repeat mode. Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) error {
+func (mp MediaPlayer) RepeatSet(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "repeat_set",
@@ -143,13 +218,20 @@ func (mp MediaPlayer) RepeatSet(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command to change sound mode.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData any) error {
+func (mp MediaPlayer) SelectSoundMode(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "select_sound_mode",
@@ -157,13 +239,20 @@ func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Send the media player the command to change input source.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityID string, serviceData any) error {
+func (mp MediaPlayer) SelectSource(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "select_source",
@@ -171,13 +260,20 @@ func (mp MediaPlayer) SelectSource(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Set shuffling state.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityID string, serviceData any) error {
+func (mp MediaPlayer) Shuffle(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "shuffle_set",
@@ -185,74 +281,116 @@ func (mp MediaPlayer) Shuffle(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Toggles a media player power state.
 // Takes an entityID.
-func (mp MediaPlayer) Toggle(entityID string) error {
+func (mp MediaPlayer) Toggle(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Turn a media player power off.
 // Takes an entityID.
-func (mp MediaPlayer) TurnOff(entityID string) error {
+func (mp MediaPlayer) TurnOff(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Turn a media player power on.
 // Takes an entityID.
-func (mp MediaPlayer) TurnOn(entityID string) error {
+func (mp MediaPlayer) TurnOn(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Unjoin the player from a group. Only works on
 // platforms with support for player groups.
 // Takes an entityID.
-func (mp MediaPlayer) Unjoin(entityID string) error {
+func (mp MediaPlayer) Unjoin(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "unjoin",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Turn a media player volume down.
 // Takes an entityID.
-func (mp MediaPlayer) VolumeDown(entityID string) error {
+func (mp MediaPlayer) VolumeDown(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_down",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Mute a media player's volume.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) error {
+func (mp MediaPlayer) VolumeMute(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "volume_mute",
@@ -260,13 +398,20 @@ func (mp MediaPlayer) VolumeMute(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Set a media player's volume level.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) error {
+func (mp MediaPlayer) VolumeSet(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "volume_set",
@@ -274,17 +419,29 @@ func (mp MediaPlayer) VolumeSet(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Turn a media player volume up.
 // Takes an entityID.
-func (mp MediaPlayer) VolumeUp(entityID string) error {
+func (mp MediaPlayer) VolumeUp(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_up",
 		Target:  Entity(entityID),
 	}
 
-	return mp.api.CallAndForget(req)
+	var result any
+	if err := mp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

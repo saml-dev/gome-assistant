@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type Switch struct {
@@ -8,29 +10,53 @@ type Switch struct {
 
 /* Public API */
 
-func (s Switch) TurnOn(entityID string) error {
+func (s Switch) TurnOn(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_on",
 		Target:  Entity(entityID),
 	}
-	return s.api.CallAndForget(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (s Switch) Toggle(entityID string) error {
+func (s Switch) Toggle(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "toggle",
 		Target:  Entity(entityID),
 	}
-	return s.api.CallAndForget(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (s Switch) TurnOff(entityID string) error {
+func (s Switch) TurnOff(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return s.api.CallAndForget(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type Lock struct {
@@ -10,7 +12,9 @@ type Lock struct {
 
 // Lock a lock entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Lock) Lock(entityID string, serviceData any) error {
+func (l Lock) Lock(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "lock",
 		Service:     "lock",
@@ -18,12 +22,19 @@ func (l Lock) Lock(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return l.api.CallAndForget(req)
+	var result any
+	if err := l.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Unlock a lock entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Lock) Unlock(entityID string, serviceData any) error {
+func (l Lock) Unlock(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "lock",
 		Service:     "unlock",
@@ -31,5 +42,10 @@ func (l Lock) Unlock(entityID string, serviceData any) error {
 		ServiceData: serviceData,
 	}
 
-	return l.api.CallAndForget(req)
+	var result any
+	if err := l.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

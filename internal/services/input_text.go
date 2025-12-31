@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type InputText struct {
@@ -8,7 +10,9 @@ type InputText struct {
 
 /* Public API */
 
-func (ib InputText) Set(entityID string, value string) error {
+func (ib InputText) Set(
+	ctx context.Context, entityID string, value string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_text",
 		Service: "set_value",
@@ -17,13 +21,25 @@ func (ib InputText) Set(entityID string, value string) error {
 		},
 		Target: Entity(entityID),
 	}
-	return ib.api.CallAndForget(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputText) Reload() error {
+func (ib InputText) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_text",
 		Service: "reload",
 	}
-	return ib.api.CallAndForget(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
