@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -13,7 +14,9 @@ type InputDatetime struct {
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityID string, value time.Time) error {
+func (ib InputDatetime) Set(
+	ctx context.Context, entityID string, value time.Time,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_datetime",
 		Service: "set_datetime",
@@ -22,13 +25,25 @@ func (ib InputDatetime) Set(entityID string, value time.Time) error {
 		},
 		Target: Entity(entityID),
 	}
-	return ib.api.CallAndForget(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputDatetime) Reload() error {
+func (ib InputDatetime) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_datetime",
 		Service: "reload",
 	}
-	return ib.api.CallAndForget(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
