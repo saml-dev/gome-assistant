@@ -106,11 +106,12 @@ func (s *MySuite) TearDownSuite() {
 
 // Basic test of light toggle service and entity listener
 func (s *MySuite) TestLightService() {
+	ctx := context.TODO()
 	entityID := s.config.Entities.LightEntityID
 
 	if entityID != "" {
 		initState := getEntityState(s, entityID)
-		s.app.GetService().Light.Toggle(entityID)
+		s.app.GetService().Light.Toggle(ctx, entityID)
 
 		assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
 			newState := getEntityState(s, entityID)

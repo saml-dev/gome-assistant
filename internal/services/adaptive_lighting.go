@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type AdaptiveLighting struct {
@@ -9,7 +11,9 @@ type AdaptiveLighting struct {
 /* Public API */
 
 // Set manual control for an adaptive lighting entity.
-func (al AdaptiveLighting) SetManualControl(entityID string, enabled bool) error {
+func (al AdaptiveLighting) SetManualControl(
+	ctx context.Context, entityID string, enabled bool,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "adaptive_lighting",
 		Service: "set_manual_control",
@@ -20,5 +24,10 @@ func (al AdaptiveLighting) SetManualControl(entityID string, enabled bool) error
 		Target: Entity(entityID),
 	}
 
-	return al.api.CallAndForget(req)
+	var result any
+	if err := al.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

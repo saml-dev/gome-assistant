@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type InputButton struct {
@@ -8,20 +10,34 @@ type InputButton struct {
 
 /* Public API */
 
-func (ib InputButton) Press(entityID string) error {
+func (ib InputButton) Press(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_button",
 		Service: "press",
 		Target:  Entity(entityID),
 	}
-	return ib.api.CallAndForget(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputButton) Reload() error {
+func (ib InputButton) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_button",
 		Service: "reload",
 		Target:  Entity(""),
 	}
-	return ib.api.CallAndForget(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
