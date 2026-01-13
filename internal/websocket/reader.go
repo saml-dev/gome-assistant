@@ -43,6 +43,14 @@ func (conn *Conn) Run() error {
 		if !base.Success {
 			slog.Warn("Received unsuccessful response", "response", string(bytes))
 		}
+
+		// Result messages are sent in response to the initial subscribe request.
+		// As a result, every event listener was being called on startup. This
+		// check prevents that.
+		if base.Type == "result" {
+			return nil
+		}
+
 		chanMsg := ChanMsg{
 			Type:    base.Type,
 			ID:      base.ID,
