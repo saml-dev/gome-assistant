@@ -48,7 +48,7 @@ func (conn *Conn) Run() error {
 		// As a result, every event listener was being called on startup. This
 		// check prevents that.
 		if base.Type == "result" {
-			return nil
+			continue
 		}
 
 		chanMsg := ChanMsg{
