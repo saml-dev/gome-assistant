@@ -35,13 +35,6 @@ func (conn *Conn) Run() error {
 		}
 		msg.Raw = bytes
 
-		// Result messages are sent in response to the initial subscribe request.
-		// As a result, every event listener was being called on startup. This
-		// check prevents that.
-		if msg.Type == "result" {
-			continue
-		}
-
 		// If a subscriber has been registered for this message ID,
 		// then call it:
 		if subr, ok := conn.getSubscriber(msg.ID); ok {
