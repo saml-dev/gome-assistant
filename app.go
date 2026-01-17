@@ -262,6 +262,13 @@ func (app *App) registerEventListener(evl EventListener) {
 			app.conn.SubscribeToEventType(
 				eventType,
 				func(msg websocket.Message) {
+					// Subscribing, itself, causes the server to send
+					// a "result" message. We don't want to forward
+					// that message to the listeners.
+					if msg.Type != eventType {
+						return
+					}
+
 					go app.callEventListeners(eventType, msg)
 				},
 			)
