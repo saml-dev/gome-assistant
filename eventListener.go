@@ -7,7 +7,7 @@ import (
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type EventListener struct {
@@ -158,7 +158,7 @@ func (l *EventListener) maybeCall(app *App, eventData EventData) {
 }
 
 /* Functions */
-func (app *App) callEventListeners(eventType string, msg websocket.ChanMsg) {
+func (app *App) callEventListeners(eventType string, msg websocket.Message) {
 	listeners, ok := app.eventListeners[eventType]
 	if !ok {
 		// no listeners registered for this event type

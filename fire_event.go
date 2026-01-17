@@ -1,7 +1,8 @@
 package gomeassistant
 
-import "saml.dev/gome-assistant/internal/websocket"
+import "saml.dev/gome-assistant/websocket"
 
+// FireEvent implements [services.API.FireEvent].
 func (app *App) FireEvent(eventType string, eventData map[string]any) error {
 	return app.conn.Send(
 		func(lc websocket.LockedConn) error {

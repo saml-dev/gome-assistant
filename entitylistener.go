@@ -8,6 +8,7 @@ import (
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/websocket"
 )
 
 type EntityListener struct {
@@ -45,9 +46,8 @@ type EntityData struct {
 	LastChanged     time.Time
 }
 
-type stateChangedMsg struct {
-	ID    int    `json:"id"`
-	Type  string `json:"type"`
+type stateChangedMessage struct {
+	websocket.BaseMessage
 	Event struct {
 		Data      stateData `json:"data"`
 		EventType string    `json:"event_type"`
@@ -239,7 +239,7 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateDa
 
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
-	msg := stateChangedMsg{}
+	msg := stateChangedMessage{}
 	_ = json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
 	eid := data.EntityID

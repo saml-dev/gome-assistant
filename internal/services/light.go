@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type Light struct {
@@ -10,37 +12,56 @@ type Light struct {
 
 // TurnOn a light entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Light) TurnOn(entityID string, serviceData ...map[string]any) error {
+func (l Light) TurnOn(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "light",
-		Service: "turn_on",
-		Target:  Entity(entityID),
+		Domain:      "light",
+		Service:     "turn_on",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := l.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return l.api.Call(req)
+
+	return result, nil
 }
 
 // Toggle a light entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (l Light) Toggle(entityID string, serviceData ...map[string]any) error {
+func (l Light) Toggle(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "light",
-		Service: "toggle",
-		Target:  Entity(entityID),
+		Domain:      "light",
+		Service:     "toggle",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := l.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return l.api.Call(req)
+
+	return result, nil
 }
 
-func (l Light) TurnOff(entityID string) error {
+func (l Light) TurnOff(
+	ctx context.Context, entityID string,
+) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "light",
 		Service: "turn_off",
 		Target:  Entity(entityID),
 	}
-	return l.api.Call(req)
+
+	var result any
+	if err := l.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }

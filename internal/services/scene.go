@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type Scene struct {
@@ -9,52 +11,76 @@ type Scene struct {
 /* Public API */
 
 // Apply a scene. Takes map that is translated into service_data.
-func (s Scene) Apply(serviceData ...map[string]any) error {
+func (s Scene) Apply(
+	ctx context.Context, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "apply",
-		Target:  Entity(""),
+		Domain:      "scene",
+		Service:     "apply",
+		Target:      Entity(""),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return s.api.Call(req)
+
+	return result, nil
 }
 
 // Create a scene entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (s Scene) Create(entityID string, serviceData ...map[string]any) error {
+func (s Scene) Create(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "create",
-		Target:  Entity(entityID),
+		Domain:      "scene",
+		Service:     "create",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return s.api.Call(req)
+
+	return result, nil
 }
 
 // Reload the scenes.
-func (s Scene) Reload() error {
+func (s Scene) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "scene",
 		Service: "reload",
 		Target:  Entity(""),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // TurnOn a scene entity. Takes an entityID and an optional
 // map that is translated into service_data.
-func (s Scene) TurnOn(entityID string, serviceData ...map[string]any) error {
+func (s Scene) TurnOn(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "turn_on",
-		Target:  Entity(entityID),
+		Domain:      "scene",
+		Service:     "turn_on",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return s.api.Call(req)
+
+	return result, nil
 }

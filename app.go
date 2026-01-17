@@ -15,7 +15,7 @@ import (
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/websocket"
 )
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
@@ -261,7 +261,14 @@ func (app *App) registerEventListener(evl EventListener) {
 			eventType := eventType
 			app.conn.SubscribeToEventType(
 				eventType,
-				func(msg websocket.ChanMsg) {
+				func(msg websocket.Message) {
+					// Subscribing, itself, causes the server to send
+					// a "result" message. We don't want to forward
+					// that message to the listeners.
+					if msg.Type != eventType {
+						return
+					}
+
 					go app.callEventListeners(eventType, msg)
 				},
 			)
@@ -328,7 +335,7 @@ func (app *App) Start() {
 
 	// subscribe to state_changed events
 	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
-		func(msg websocket.ChanMsg) {
+		func(msg websocket.Message) {
 			go app.callEntityListeners(msg.Raw)
 		},
 	)

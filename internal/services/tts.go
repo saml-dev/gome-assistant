@@ -1,5 +1,7 @@
 package services
 
+import "context"
+
 /* Structs */
 
 type TTS struct {
@@ -9,42 +11,59 @@ type TTS struct {
 /* Public API */
 
 // Remove all text-to-speech cache files and RAM cache.
-func (tts TTS) ClearCache() error {
+func (tts TTS) ClearCache(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "tts",
 		Service: "clear_cache",
 		Target:  Entity(""),
 	}
-	return tts.api.Call(req)
+
+	var result any
+	if err := tts.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Say something using text-to-speech on a media player with cloud.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (tts TTS) CloudSay(entityID string, serviceData ...map[string]any) error {
+func (tts TTS) CloudSay(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "tts",
-		Service: "cloud_say",
-		Target:  Entity(entityID),
+		Domain:      "tts",
+		Service:     "cloud_say",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := tts.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return tts.api.Call(req)
+
+	return result, nil
 }
 
 // Say something using text-to-speech on a media player with google_translate.
 // Takes an entityID and an optional
 // map that is translated into service_data.
-func (tts TTS) GoogleTranslateSay(entityID string, serviceData ...map[string]any) error {
+func (tts TTS) GoogleTranslateSay(
+	ctx context.Context, entityID string, serviceData any,
+) (any, error) {
 	req := BaseServiceRequest{
-		Domain:  "tts",
-		Service: "google_translate_say",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "tts",
+		Service:     "google_translate_say",
+		Target:      Entity(entityID),
+		ServiceData: serviceData,
 	}
 
-	return tts.api.Call(req)
+	var result any
+	if err := tts.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
