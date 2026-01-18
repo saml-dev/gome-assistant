@@ -112,7 +112,7 @@ func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
 	}
 
 	type authResponse struct {
-		MsgType string `json:"type"`
+		Type    string `json:"type"`
 		Message string `json:"message"`
 	}
 
@@ -121,7 +121,7 @@ func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if authResp.MsgType != "auth_ok" {
+	if authResp.Type != "auth_ok" {
 		return ErrInvalidToken
 	}
 
