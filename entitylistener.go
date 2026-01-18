@@ -46,28 +46,6 @@ type EntityData struct {
 	LastChanged     time.Time
 }
 
-type stateChangedMessage struct {
-	message.BaseMessage
-	Event struct {
-		Data      stateData `json:"data"`
-		EventType string    `json:"event_type"`
-		Origin    string    `json:"origin"`
-	} `json:"event"`
-}
-
-type stateData struct {
-	EntityID string   `json:"entity_id"`
-	NewState msgState `json:"new_state"`
-	OldState msgState `json:"old_state"`
-}
-
-type msgState struct {
-	EntityID    string         `json:"entity_id"`
-	LastChanged time.Time      `json:"last_changed"`
-	State       string         `json:"state"`
-	Attributes  map[string]any `json:"attributes"`
-}
-
 /* Methods */
 
 func NewEntityListener() elBuilder1 {
@@ -193,7 +171,7 @@ func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
 
-func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateData) {
+func (l *EntityListener) maybeCall(app *App, entityData EntityData, data message.StateData) {
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -239,7 +217,7 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateDa
 
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
-	msg := stateChangedMessage{}
+	msg := message.StateChangedMessage{}
 	_ = json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
 	eid := data.EntityID
