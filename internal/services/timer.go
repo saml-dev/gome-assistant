@@ -18,7 +18,7 @@ type Timer struct {
 func (t Timer) Start(
 	ctx context.Context, entityID string, duration string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "timer",
 		Service: "start",
 		ServiceData: map[string]any{
@@ -39,7 +39,7 @@ func (t Timer) Start(
 func (t Timer) Change(
 	ctx context.Context, entityID string, duration string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "timer",
 		Service: "change",
 		ServiceData: map[string]any{
@@ -60,7 +60,7 @@ func (t Timer) Change(
 func (t Timer) Pause(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "timer",
 		Service: "pause",
 		Target:  message.Entity(entityID),
@@ -76,7 +76,7 @@ func (t Timer) Pause(
 
 // See https://www.home-assistant.io/integrations/timer/#action-timercancel
 func (t Timer) Cancel(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "timer",
 		Service: "cancel",
 	}
@@ -92,7 +92,7 @@ func (t Timer) Cancel(ctx context.Context) (any, error) {
 func (t Timer) Finish(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "timer",
 		Service: "finish",
 		Target:  message.Entity(entityID),
@@ -108,7 +108,7 @@ func (t Timer) Finish(
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerreload
 func (t Timer) Reload(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "timer",
 		Service: "reload",
 	}

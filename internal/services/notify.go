@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"saml.dev/gome-assistant/message"
 	"saml.dev/gome-assistant/types"
 )
 
@@ -14,7 +15,7 @@ type Notify struct {
 func (ha *Notify) Notify(
 	ctx context.Context, reqData types.NotifyRequest,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "notify",
 		Service: reqData.ServiceName,
 	}

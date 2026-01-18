@@ -15,7 +15,7 @@ type HomeAssistant struct {
 func (ha *HomeAssistant) TurnOn(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "homeassistant",
 		Service:     "turn_on",
 		ServiceData: optionalServiceData(serviceData...),
@@ -35,7 +35,7 @@ func (ha *HomeAssistant) TurnOn(
 func (ha *HomeAssistant) Toggle(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "homeassistant",
 		Service:     "toggle",
 		ServiceData: optionalServiceData(serviceData...),
@@ -53,7 +53,7 @@ func (ha *HomeAssistant) Toggle(
 func (ha *HomeAssistant) TurnOff(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "homeassistant",
 		Service: "turn_off",
 		Target:  message.Entity(entityID),

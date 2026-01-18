@@ -19,7 +19,7 @@ type Vacuum struct {
 func (v Vacuum) CleanSpot(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "clean_spot",
 		Target:  message.Entity(entityID),
@@ -37,7 +37,7 @@ func (v Vacuum) CleanSpot(
 func (v Vacuum) Locate(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "locate",
 		Target:  message.Entity(entityID),
@@ -56,7 +56,7 @@ func (v Vacuum) Locate(
 func (v Vacuum) Pause(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "pause",
 		Target:  message.Entity(entityID),
@@ -75,7 +75,7 @@ func (v Vacuum) Pause(
 func (v Vacuum) ReturnToBase(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "return_to_base",
 		Target:  message.Entity(entityID),
@@ -94,7 +94,7 @@ func (v Vacuum) ReturnToBase(
 func (v Vacuum) SendCommand(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "vacuum",
 		Service:     "send_command",
 		ServiceData: optionalServiceData(serviceData...),
@@ -114,7 +114,7 @@ func (v Vacuum) SendCommand(
 func (v Vacuum) SetFanSpeed(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "vacuum",
 		Service:     "set_fan_speed",
 		ServiceData: optionalServiceData(serviceData...),
@@ -134,7 +134,7 @@ func (v Vacuum) SetFanSpeed(
 func (v Vacuum) Start(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "start",
 		Target:  message.Entity(entityID),
@@ -153,7 +153,7 @@ func (v Vacuum) Start(
 func (v Vacuum) StartPause(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "start_pause",
 		Target:  message.Entity(entityID),
@@ -172,7 +172,7 @@ func (v Vacuum) StartPause(
 func (v Vacuum) Stop(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "stop",
 		Target:  message.Entity(entityID),
@@ -190,7 +190,7 @@ func (v Vacuum) Stop(
 func (v Vacuum) TurnOff(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "turn_off",
 		Target:  message.Entity(entityID),
@@ -209,7 +209,7 @@ func (v Vacuum) TurnOff(
 func (v Vacuum) TurnOn(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "vacuum",
 		Service: "turn_on",
 		Target:  message.Entity(entityID),

@@ -19,7 +19,7 @@ type Scene struct {
 func (s Scene) Apply(
 	ctx context.Context, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "scene",
 		Service:     "apply",
 		ServiceData: optionalServiceData(serviceData...),
@@ -38,7 +38,7 @@ func (s Scene) Apply(
 func (s Scene) Create(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "scene",
 		Service:     "create",
 		ServiceData: optionalServiceData(serviceData...),
@@ -55,7 +55,7 @@ func (s Scene) Create(
 
 // Reload the scenes.
 func (s Scene) Reload(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "scene",
 		Service: "reload",
 	}
@@ -73,7 +73,7 @@ func (s Scene) Reload(ctx context.Context) (any, error) {
 func (s Scene) TurnOn(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "scene",
 		Service:     "turn_on",
 		ServiceData: optionalServiceData(serviceData...),

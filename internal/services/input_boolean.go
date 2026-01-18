@@ -17,7 +17,7 @@ type InputBoolean struct {
 func (ib InputBoolean) TurnOn(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_boolean",
 		Service: "turn_on",
 		Target:  message.Entity(entityID),
@@ -34,7 +34,7 @@ func (ib InputBoolean) TurnOn(
 func (ib InputBoolean) Toggle(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_boolean",
 		Service: "toggle",
 		Target:  message.Entity(entityID),
@@ -51,7 +51,7 @@ func (ib InputBoolean) Toggle(
 func (ib InputBoolean) TurnOff(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_boolean",
 		Service: "turn_off",
 		Target:  message.Entity(entityID),
@@ -66,7 +66,7 @@ func (ib InputBoolean) TurnOff(
 }
 
 func (ib InputBoolean) Reload(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_boolean",
 		Service: "reload",
 	}

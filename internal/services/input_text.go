@@ -17,7 +17,7 @@ type InputText struct {
 func (ib InputText) Set(
 	ctx context.Context, entityID string, value string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_text",
 		Service: "set_value",
 		ServiceData: map[string]any{
@@ -35,7 +35,7 @@ func (ib InputText) Set(
 }
 
 func (ib InputText) Reload(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_text",
 		Service: "reload",
 	}

@@ -13,7 +13,7 @@ type Number struct {
 func (ib Number) SetValue(
 	ctx context.Context, entityID string, value float32,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "number",
 		Service:     "set_value",
 		ServiceData: map[string]any{"value": value},

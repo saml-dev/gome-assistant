@@ -17,7 +17,7 @@ type Switch struct {
 func (s Switch) TurnOn(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "switch",
 		Service: "turn_on",
 		Target:  message.Entity(entityID),
@@ -34,7 +34,7 @@ func (s Switch) TurnOn(
 func (s Switch) Toggle(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "switch",
 		Service: "toggle",
 		Target:  message.Entity(entityID),
@@ -51,7 +51,7 @@ func (s Switch) Toggle(
 func (s Switch) TurnOff(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "switch",
 		Service: "turn_off",
 		Target:  message.Entity(entityID),

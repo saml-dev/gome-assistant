@@ -18,7 +18,7 @@ type Cover struct {
 func (c Cover) Close(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "close_cover",
 		Target:  message.Entity(entityID),
@@ -36,7 +36,7 @@ func (c Cover) Close(
 func (c Cover) CloseTilt(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "close_cover_tilt",
 		Target:  message.Entity(entityID),
@@ -54,7 +54,7 @@ func (c Cover) CloseTilt(
 func (c Cover) Open(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "open_cover",
 		Target:  message.Entity(entityID),
@@ -72,7 +72,7 @@ func (c Cover) Open(
 func (c Cover) OpenTilt(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "open_cover_tilt",
 		Target:  message.Entity(entityID),
@@ -92,7 +92,7 @@ func (c Cover) OpenTilt(
 func (c Cover) SetPosition(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "cover",
 		Service:     "set_cover_position",
 		ServiceData: optionalServiceData(serviceData...),
@@ -113,7 +113,7 @@ func (c Cover) SetPosition(
 func (c Cover) SetTiltPosition(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Target:      message.Entity(entityID),
 		Domain:      "cover",
 		ServiceData: optionalServiceData(serviceData...),
@@ -132,7 +132,7 @@ func (c Cover) SetTiltPosition(
 func (c Cover) Stop(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "stop_cover",
 		Target:  message.Entity(entityID),
@@ -150,7 +150,7 @@ func (c Cover) Stop(
 func (c Cover) StopTilt(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "stop_cover_tilt",
 		Target:  message.Entity(entityID),
@@ -168,7 +168,7 @@ func (c Cover) StopTilt(
 func (c Cover) Toggle(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "toggle",
 		Target:  message.Entity(entityID),
@@ -186,7 +186,7 @@ func (c Cover) Toggle(
 func (c Cover) ToggleTilt(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "cover",
 		Service: "toggle_cover_tilt",
 		Target:  message.Entity(entityID),

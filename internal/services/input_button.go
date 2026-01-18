@@ -17,7 +17,7 @@ type InputButton struct {
 func (ib InputButton) Press(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_button",
 		Service: "press",
 		Target:  message.Entity(entityID),
@@ -32,7 +32,7 @@ func (ib InputButton) Press(
 }
 
 func (ib InputButton) Reload(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_button",
 		Service: "reload",
 	}

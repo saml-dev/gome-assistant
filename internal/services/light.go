@@ -19,7 +19,7 @@ type Light struct {
 func (l Light) TurnOn(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "light",
 		Service:     "turn_on",
 		ServiceData: optionalServiceData(serviceData...),
@@ -39,7 +39,7 @@ func (l Light) TurnOn(
 func (l Light) Toggle(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "light",
 		Service:     "toggle",
 		ServiceData: optionalServiceData(serviceData...),
@@ -57,7 +57,7 @@ func (l Light) Toggle(
 func (l Light) TurnOff(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "light",
 		Service: "turn_off",
 		Target:  message.Entity(entityID),
