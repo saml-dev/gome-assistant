@@ -8,7 +8,7 @@ import (
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal"
-	"saml.dev/gome-assistant/websocket"
+	"saml.dev/gome-assistant/message"
 )
 
 type EntityListener struct {
@@ -47,7 +47,7 @@ type EntityData struct {
 }
 
 type stateChangedMessage struct {
-	websocket.BaseMessage
+	message.BaseMessage
 	Event struct {
 		Data      stateData `json:"data"`
 		EventType string    `json:"event_type"`

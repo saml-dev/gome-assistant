@@ -1,4 +1,4 @@
-package websocket
+package message
 
 // BaseMessage implements the required part of any websocket message.
 // This type can be embedded in other message types.

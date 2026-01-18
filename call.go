@@ -5,13 +5,14 @@ import (
 	"sync"
 
 	"saml.dev/gome-assistant/internal/services"
+	"saml.dev/gome-assistant/message"
 	"saml.dev/gome-assistant/websocket"
 )
 
 // CallAndForget implements [services.API.CallAndForget].
 func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 	reqMsg := services.CallServiceMessage{
-		BaseMessage: websocket.BaseMessage{
+		BaseMessage: message.BaseMessage{
 			Type: "call_service",
 		},
 		BaseServiceRequest: req,
@@ -38,7 +39,7 @@ func (app *App) Call(
 	//  6. Unmarshal the "result" part of the response into `result`.
 
 	reqMsg := services.CallServiceMessage{
-		BaseMessage: websocket.BaseMessage{
+		BaseMessage: message.BaseMessage{
 			Type: "call_service",
 		},
 		BaseServiceRequest: req,
@@ -67,7 +68,7 @@ func (app *App) Call(
 		})
 	}
 
-	handleResponse := func(msg websocket.Message) {
+	handleResponse := func(msg message.Message) {
 		once.Do(
 			func() {
 				responseErr = msg.GetResult(result)
