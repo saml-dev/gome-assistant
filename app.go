@@ -353,13 +353,18 @@ func (app *App) Start() {
 				}
 
 				etl.runOnStartupCompleted = true
-				go etl.callback(app.service, app.state, EntityData{
-					TriggerEntityID: eid,
-					FromState:       entityState.State,
-					FromAttributes:  entityState.Attributes,
-					ToState:         entityState.State,
-					ToAttributes:    entityState.Attributes,
-					LastChanged:     entityState.LastChanged,
+				stateChangedState := message.StateChangedState{
+					EntityID:    eid,
+					LastChanged: entityState.LastChanged,
+					State:       entityState.State,
+					Attributes:  entityState.Attributes,
+					LastUpdated: entityState.LastChanged,
+				}
+
+				go etl.callback(app.service, app.state, message.StateChangedData{
+					EntityID: eid,
+					NewState: stateChangedState,
+					OldState: stateChangedState,
 				})
 			}
 		}

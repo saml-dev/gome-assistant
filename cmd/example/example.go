@@ -39,7 +39,7 @@ func main() {
 	pantryDoor := ga.
 		NewEntityListener().
 		EntityIDs(entities.BinarySensor.PantryDoor). // Use generated entity constant
-		Call(func(service *ga.Service, state ga.State, sensor ga.EntityData) {
+		Call(func(service *ga.Service, state ga.State, sensor message.StateChangedData) {
 			pantryLights(ctx, service, state, sensor)
 		}).
 		Build()
@@ -74,11 +74,11 @@ func main() {
 }
 
 func pantryLights(
-	ctx context.Context, service *ga.Service, state ga.State, sensor ga.EntityData,
+	ctx context.Context, service *ga.Service, state ga.State, sensor message.StateChangedData,
 ) {
 	l := "light.pantry"
 	// l := entities.Light.Pantry // Or use generated entity constant
-	if sensor.ToState == "on" {
+	if sensor.NewState.State == "on" {
 		if _, err := service.HomeAssistant.TurnOn(ctx, l); err != nil {
 			slog.Warn("couldn't turn on pantry light")
 		}
