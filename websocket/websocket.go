@@ -94,11 +94,11 @@ func (conn *Conn) Close() error {
 
 func (conn *Conn) sendAuthMessage(ctx context.Context, token string) error {
 	type authMessage struct {
-		MsgType     string `json:"type"`
+		Type        string `json:"type"`
 		AccessToken string `json:"access_token"`
 	}
 
-	err := conn.conn.WriteJSON(authMessage{MsgType: "auth", AccessToken: token})
+	err := conn.conn.WriteJSON(authMessage{Type: "auth", AccessToken: token})
 	if err != nil {
 		return err
 	}
