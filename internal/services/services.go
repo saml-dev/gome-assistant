@@ -65,20 +65,10 @@ type CallServiceMessage struct {
 // call. `ServiceData` can contain arbitrary data needed for a
 // particular call.
 type BaseServiceRequest struct {
-	Domain      string `json:"domain"`
-	Service     string `json:"service"`
-	ServiceData any    `json:"service_data,omitempty"`
-	Target      Target `json:"target,omitempty"`
-}
-
-type Target struct {
-	EntityID string `json:"entity_id,omitempty"`
-}
-
-func Entity(entityID string) Target {
-	return Target{
-		EntityID: entityID,
-	}
+	Domain      string         `json:"domain"`
+	Service     string         `json:"service"`
+	ServiceData any            `json:"service_data,omitempty"`
+	Target      message.Target `json:"target,omitempty"`
 }
 
 func optionalServiceData(serviceData ...any) any {

@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -17,7 +21,7 @@ func (c Cover) Close(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "close_cover",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -35,7 +39,7 @@ func (c Cover) CloseTilt(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "close_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -53,7 +57,7 @@ func (c Cover) Open(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "open_cover",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -71,7 +75,7 @@ func (c Cover) OpenTilt(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "open_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -92,7 +96,7 @@ func (c Cover) SetPosition(
 		Domain:      "cover",
 		Service:     "set_cover_position",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -110,7 +114,7 @@ func (c Cover) SetTiltPosition(
 	ctx context.Context, entityID string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		Domain:      "cover",
 		ServiceData: optionalServiceData(serviceData...),
 		Service:     "set_cover_tilt_position",
@@ -131,7 +135,7 @@ func (c Cover) Stop(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "stop_cover",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -149,7 +153,7 @@ func (c Cover) StopTilt(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "stop_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -167,7 +171,7 @@ func (c Cover) Toggle(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -185,7 +189,7 @@ func (c Cover) ToggleTilt(
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "toggle_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any

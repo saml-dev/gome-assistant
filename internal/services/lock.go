@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -19,7 +23,7 @@ func (l Lock) Lock(
 		Domain:      "lock",
 		Service:     "lock",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -39,7 +43,7 @@ func (l Lock) Unlock(
 		Domain:      "lock",
 		Service:     "unlock",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any

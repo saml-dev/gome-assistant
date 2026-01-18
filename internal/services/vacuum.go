@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -18,7 +22,7 @@ func (v Vacuum) CleanSpot(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "clean_spot",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 	var result any
 	if err := v.api.Call(ctx, req, &result); err != nil {
@@ -36,7 +40,7 @@ func (v Vacuum) Locate(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "locate",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -55,7 +59,7 @@ func (v Vacuum) Pause(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "pause",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -74,7 +78,7 @@ func (v Vacuum) ReturnToBase(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "return_to_base",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -94,7 +98,7 @@ func (v Vacuum) SendCommand(
 		Domain:      "vacuum",
 		Service:     "send_command",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -114,7 +118,7 @@ func (v Vacuum) SetFanSpeed(
 		Domain:      "vacuum",
 		Service:     "set_fan_speed",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -133,7 +137,7 @@ func (v Vacuum) Start(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "start",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -152,7 +156,7 @@ func (v Vacuum) StartPause(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "start_pause",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -171,7 +175,7 @@ func (v Vacuum) Stop(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "stop",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 	var result any
 	if err := v.api.Call(ctx, req, &result); err != nil {
@@ -189,7 +193,7 @@ func (v Vacuum) TurnOff(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -208,7 +212,7 @@ func (v Vacuum) TurnOn(
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 	var result any
 	if err := v.api.Call(ctx, req, &result); err != nil {

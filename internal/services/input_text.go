@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -19,7 +23,7 @@ func (ib InputText) Set(
 		ServiceData: map[string]any{
 			"value": value,
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
 
 	var result any

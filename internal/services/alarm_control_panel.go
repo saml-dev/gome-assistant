@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -19,7 +23,7 @@ func (acp AlarmControlPanel) ArmAway(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_away",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -39,7 +43,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_custom_bypass",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -59,7 +63,7 @@ func (acp AlarmControlPanel) ArmHome(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_home",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -79,7 +83,7 @@ func (acp AlarmControlPanel) ArmNight(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_night",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -100,7 +104,7 @@ func (acp AlarmControlPanel) ArmVacation(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_vacation",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -120,7 +124,7 @@ func (acp AlarmControlPanel) Disarm(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_disarm",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -140,7 +144,7 @@ func (acp AlarmControlPanel) Trigger(
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_trigger",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any

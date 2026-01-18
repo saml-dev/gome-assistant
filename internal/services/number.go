@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 type Number struct {
 	api API
@@ -13,7 +17,7 @@ func (ib Number) SetValue(
 		Domain:      "number",
 		Service:     "set_value",
 		ServiceData: map[string]any{"value": value},
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any

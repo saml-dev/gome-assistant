@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -21,7 +25,7 @@ func (al AdaptiveLighting) SetManualControl(
 			"entity_id":      entityID,
 			"manual_control": enabled,
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
 
 	var result any

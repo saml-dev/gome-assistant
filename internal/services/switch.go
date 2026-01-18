@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -16,7 +20,7 @@ func (s Switch) TurnOn(
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -33,7 +37,7 @@ func (s Switch) Toggle(
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -50,7 +54,7 @@ func (s Switch) TurnOff(
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
