@@ -6,12 +6,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/message"
 )
 
 type MockState struct {
 	EqualsReturn bool
 	EqualsError  bool
-	GetReturn    EntityState
+	GetReturn    message.EntityState
 	GetError     bool
 }
 
@@ -27,14 +28,14 @@ func (s MockState) AfterSunset(_ ...DurationString) bool {
 func (s MockState) BeforeSunset(_ ...DurationString) bool {
 	return true
 }
-func (s MockState) Get(eid string) (EntityState, error) {
+func (s MockState) Get(eid string) (message.EntityState, error) {
 	if s.GetError {
-		return EntityState{}, errors.New("some error")
+		return message.EntityState{}, errors.New("some error")
 	}
 	return s.GetReturn, nil
 }
-func (s MockState) ListEntities() ([]EntityState, error) {
-	return []EntityState{}, nil
+func (s MockState) ListEntities() ([]message.EntityState, error) {
+	return []message.EntityState{}, nil
 }
 func (s MockState) Equals(eid, state string) (bool, error) {
 	if s.EqualsError {
