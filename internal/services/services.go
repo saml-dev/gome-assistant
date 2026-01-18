@@ -23,7 +23,7 @@ type API interface {
 	// sending the request or if `ctx` expires), return that error.
 	Call(ctx context.Context, req BaseServiceRequest, result any) error
 
-	FireEvent(eventType string, eventData map[string]any) error
+	FireEvent(eventType string, eventData any) error
 }
 
 func BuildService[

@@ -8,9 +8,6 @@ type Event struct {
 
 // Fire an event. Takes an event type and an optional map that is sent
 // as `event_data`.
-func (e Event) Fire(eventType string, eventData ...map[string]any) error {
-	if len(eventData) == 0 {
-		return e.api.FireEvent(eventType, nil)
-	}
-	return e.api.FireEvent(eventType, eventData[0])
+func (e Event) Fire(eventType string, eventData any) error {
+	return e.api.FireEvent(eventType, eventData)
 }
