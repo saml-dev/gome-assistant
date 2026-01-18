@@ -171,7 +171,7 @@ func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
 
-func (l *EntityListener) maybeCall(app *App, entityData EntityData, data message.StateData) {
+func (l *EntityListener) maybeCall(app *App, entityData EntityData, data message.StateChangedData) {
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -217,11 +217,10 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data message
 
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
-	msg := message.StateChangedMessage{}
+	msg := message.StateChangedEventMessage{}
 	_ = json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
-	eid := data.EntityID
-	listeners, ok := app.entityListeners[eid]
+	listeners, ok := app.entityListeners[data.EntityID]
 	if !ok {
 		// no listeners registered for this id
 		return
@@ -236,7 +235,7 @@ func (app *App) callEntityListeners(msgBytes []byte) {
 	}
 
 	entityData := EntityData{
-		TriggerEntityID: eid,
+		TriggerEntityID: data.EntityID,
 		FromState:       data.OldState.State,
 		FromAttributes:  data.OldState.Attributes,
 		ToState:         data.NewState.State,
