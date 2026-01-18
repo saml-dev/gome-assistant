@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -20,7 +24,7 @@ func (t Timer) Start(
 		ServiceData: map[string]any{
 			"duration": duration,
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
 
 	var result any
@@ -41,7 +45,7 @@ func (t Timer) Change(
 		ServiceData: map[string]any{
 			"duration": duration,
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
 
 	var result any
@@ -59,7 +63,7 @@ func (t Timer) Pause(
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "pause",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -75,7 +79,6 @@ func (t Timer) Cancel(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "cancel",
-		Target:  Entity(""),
 	}
 	var result any
 	if err := t.api.Call(ctx, req, &result); err != nil {
@@ -92,7 +95,7 @@ func (t Timer) Finish(
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "finish",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -108,7 +111,6 @@ func (t Timer) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "reload",
-		Target:  Entity(""),
 	}
 
 	var result any

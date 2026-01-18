@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"saml.dev/gome-assistant/message"
 )
 
 /* Structs */
@@ -23,7 +25,7 @@ func (ib InputDatetime) Set(
 		ServiceData: map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
 
 	var result any

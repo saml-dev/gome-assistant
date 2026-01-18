@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -17,7 +21,7 @@ func (s Script) Reload(
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "reload",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -35,7 +39,7 @@ func (s Script) Toggle(
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -51,7 +55,6 @@ func (s Script) TurnOff(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "turn_off",
-		Target:  Entity(""),
 	}
 
 	var result any
@@ -69,7 +72,7 @@ func (s Script) TurnOn(
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any

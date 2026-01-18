@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -21,7 +25,7 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(
 			"parameter": parameter,
 			"value":     value,
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
 
 	var result any

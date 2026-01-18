@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -15,7 +19,6 @@ func (tts TTS) ClearCache(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "tts",
 		Service: "clear_cache",
-		Target:  Entity(""),
 	}
 
 	var result any
@@ -35,7 +38,7 @@ func (tts TTS) CloudSay(
 	req := BaseServiceRequest{
 		Domain:      "tts",
 		Service:     "cloud_say",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -56,7 +59,7 @@ func (tts TTS) GoogleTranslateSay(
 	req := BaseServiceRequest{
 		Domain:      "tts",
 		Service:     "google_translate_say",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 

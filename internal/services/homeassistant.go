@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 type HomeAssistant struct {
 	api API
@@ -14,7 +18,7 @@ func (ha *HomeAssistant) TurnOn(
 	req := BaseServiceRequest{
 		Domain:      "homeassistant",
 		Service:     "turn_on",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -34,7 +38,7 @@ func (ha *HomeAssistant) Toggle(
 	req := BaseServiceRequest{
 		Domain:      "homeassistant",
 		Service:     "toggle",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -52,7 +56,7 @@ func (ha *HomeAssistant) TurnOff(
 	req := BaseServiceRequest{
 		Domain:  "homeassistant",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any

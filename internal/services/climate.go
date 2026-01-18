@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"saml.dev/gome-assistant/message"
 	"saml.dev/gome-assistant/types"
 )
 
@@ -21,7 +22,7 @@ func (c Climate) SetFanMode(
 		Domain:      "climate",
 		Service:     "set_fan_mode",
 		ServiceData: map[string]any{"fan_mode": fanMode},
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -39,7 +40,7 @@ func (c Climate) SetTemperature(
 		Domain:      "climate",
 		Service:     "set_temperature",
 		ServiceData: serviceData.ToJSON(),
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any

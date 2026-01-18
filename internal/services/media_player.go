@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -18,7 +22,7 @@ func (mp MediaPlayer) ClearPlaylist(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "clear_playlist",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -38,7 +42,7 @@ func (mp MediaPlayer) Join(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "join",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -58,7 +62,7 @@ func (mp MediaPlayer) Next(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_next_track",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -77,7 +81,7 @@ func (mp MediaPlayer) Pause(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_pause",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -96,7 +100,7 @@ func (mp MediaPlayer) Play(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_play",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -115,7 +119,7 @@ func (mp MediaPlayer) PlayPause(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_play_pause",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -134,7 +138,7 @@ func (mp MediaPlayer) Previous(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_previous_track",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -154,7 +158,7 @@ func (mp MediaPlayer) Seek(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "media_seek",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -174,7 +178,7 @@ func (mp MediaPlayer) Stop(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_stop",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -194,7 +198,7 @@ func (mp MediaPlayer) PlayMedia(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "play_media",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -214,7 +218,7 @@ func (mp MediaPlayer) RepeatSet(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "repeat_set",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -235,7 +239,7 @@ func (mp MediaPlayer) SelectSoundMode(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "select_sound_mode",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -256,7 +260,7 @@ func (mp MediaPlayer) SelectSource(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "select_source",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -277,7 +281,7 @@ func (mp MediaPlayer) Shuffle(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "shuffle_set",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -297,7 +301,7 @@ func (mp MediaPlayer) Toggle(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -316,7 +320,7 @@ func (mp MediaPlayer) TurnOff(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -335,7 +339,7 @@ func (mp MediaPlayer) TurnOn(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -355,7 +359,7 @@ func (mp MediaPlayer) Unjoin(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "unjoin",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -374,7 +378,7 @@ func (mp MediaPlayer) VolumeDown(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_down",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -394,7 +398,7 @@ func (mp MediaPlayer) VolumeMute(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "volume_mute",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -415,7 +419,7 @@ func (mp MediaPlayer) VolumeSet(
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "volume_set",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -435,7 +439,7 @@ func (mp MediaPlayer) VolumeUp(
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_up",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any

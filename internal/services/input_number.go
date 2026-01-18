@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -17,7 +21,7 @@ func (ib InputNumber) Set(
 		Domain:      "input_number",
 		Service:     "set_value",
 		ServiceData: map[string]any{"value": value},
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
 
 	var result any
@@ -34,7 +38,7 @@ func (ib InputNumber) Increment(
 	req := BaseServiceRequest{
 		Domain:  "input_number",
 		Service: "increment",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -51,7 +55,7 @@ func (ib InputNumber) Decrement(
 	req := BaseServiceRequest{
 		Domain:  "input_number",
 		Service: "decrement",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any

@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -16,7 +20,7 @@ func (ib InputButton) Press(
 	req := BaseServiceRequest{
 		Domain:  "input_button",
 		Service: "press",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
 
 	var result any
@@ -31,7 +35,6 @@ func (ib InputButton) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_button",
 		Service: "reload",
-		Target:  Entity(""),
 	}
 
 	var result any

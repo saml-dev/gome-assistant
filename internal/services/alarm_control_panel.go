@@ -1,6 +1,10 @@
 package services
 
-import "context"
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
 
 /* Structs */
 
@@ -19,7 +23,7 @@ func (acp AlarmControlPanel) ArmAway(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_away",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -40,7 +44,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_custom_bypass",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -61,7 +65,7 @@ func (acp AlarmControlPanel) ArmHome(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_home",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -82,7 +86,7 @@ func (acp AlarmControlPanel) ArmNight(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_night",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -103,7 +107,7 @@ func (acp AlarmControlPanel) ArmVacation(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_vacation",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -124,7 +128,7 @@ func (acp AlarmControlPanel) Disarm(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_disarm",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
@@ -145,7 +149,7 @@ func (acp AlarmControlPanel) Trigger(
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_trigger",
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 		ServiceData: serviceData,
 	}
 
