@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 
-	"saml.dev/gome-assistant/websocket"
+	"saml.dev/gome-assistant/message"
 )
 
 // API is the interface that the individual services use to interact
@@ -57,7 +57,7 @@ func BuildService[
 // CallServiceMessage represents a message that can be sent to request
 // an API call. Its `Type` field must be set to "call_service".
 type CallServiceMessage struct {
-	websocket.BaseMessage
+	message.BaseMessage
 	BaseServiceRequest
 }
 

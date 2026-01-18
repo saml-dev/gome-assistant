@@ -3,6 +3,8 @@ package websocket
 import (
 	"encoding/json"
 	"log/slog"
+
+	"saml.dev/gome-assistant/message"
 )
 
 // Run processes incoming messages from `Conn`. It reads
@@ -24,7 +26,7 @@ func (conn *Conn) Run() error {
 			return err
 		}
 
-		var msg Message
+		var msg message.Message
 		if err := json.Unmarshal(bytes, &msg.BaseMessage); err != nil {
 			slog.Warn(
 				"error unmarshaling websocket message; ignoring message",

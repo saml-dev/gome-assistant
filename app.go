@@ -15,6 +15,7 @@ import (
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/message"
 	"saml.dev/gome-assistant/websocket"
 )
 
@@ -261,7 +262,7 @@ func (app *App) registerEventListener(evl EventListener) {
 			eventType := eventType
 			app.conn.SubscribeToEventType(
 				eventType,
-				func(msg websocket.Message) {
+				func(msg message.Message) {
 					// Subscribing, itself, causes the server to send
 					// a "result" message. We don't want to forward
 					// that message to the listeners.
@@ -335,7 +336,7 @@ func (app *App) Start() {
 
 	// subscribe to state_changed events
 	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
-		func(msg websocket.Message) {
+		func(msg message.Message) {
 			go app.callEntityListeners(msg.Raw)
 		},
 	)

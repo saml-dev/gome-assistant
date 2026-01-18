@@ -3,6 +3,8 @@ package websocket
 import (
 	"fmt"
 	"log/slog"
+
+	"saml.dev/gome-assistant/message"
 )
 
 // Subscription represents a websocket-level subscription to a
@@ -19,10 +21,10 @@ func (sub Subscription) MessageID() int64 {
 
 // Subscriber is called synchronously when a message is received that
 // matches its subscription's message ID.
-type Subscriber func(msg Message)
+type Subscriber func(msg message.Message)
 
 // NoopSubscriber is a `Subscriber` that does nothing.
-func NoopSubscriber(_ Message) {}
+func NoopSubscriber(_ message.Message) {}
 
 // getSubscriber returns the subscriber, if any, that is subscribed to
 // the specified message ID.
