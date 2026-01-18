@@ -16,8 +16,8 @@ type State interface {
 	BeforeSunrise(...DurationString) bool
 	AfterSunset(...DurationString) bool
 	BeforeSunset(...DurationString) bool
-	ListEntities() ([]EntityState, error)
-	Get(entityID string) (EntityState, error)
+	ListEntities() ([]message.EntityState, error)
+	Get(entityID string) (message.EntityState, error)
 	Equals(entityID, state string) (bool, error)
 }
 
@@ -26,13 +26,6 @@ type StateImpl struct {
 	httpClient *http.HttpClient
 	latitude   float64
 	longitude  float64
-}
-
-type EntityState struct {
-	EntityID    string            `json:"entity_id"`
-	State       string            `json:"state"`
-	Attributes  map[string]any    `json:"attributes"`
-	LastChanged message.TimeStamp `json:"last_changed"`
 }
 
 func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
@@ -69,24 +62,24 @@ func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
 	return state, nil
 }
 
-func (s *StateImpl) Get(entityID string) (EntityState, error) {
+func (s *StateImpl) Get(entityID string) (message.EntityState, error) {
 	resp, err := s.httpClient.GetState(entityID)
 	if err != nil {
-		return EntityState{}, err
+		return message.EntityState{}, err
 	}
-	es := EntityState{}
+	es := message.EntityState{}
 	err = json.Unmarshal(resp, &es)
 	return es, err
 }
 
 // ListEntities returns a list of all entities in Home Assistant.
 // see rest documentation for more details: https://developers.home-assistant.io/docs/api/rest/#actions
-func (s *StateImpl) ListEntities() ([]EntityState, error) {
+func (s *StateImpl) ListEntities() ([]message.EntityState, error) {
 	resp, err := s.httpClient.States()
 	if err != nil {
 		return nil, err
 	}
-	es := []EntityState{}
+	es := []message.EntityState{}
 	err = json.Unmarshal(resp, &es)
 	return es, err
 }
