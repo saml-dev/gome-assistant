@@ -18,7 +18,7 @@ type Climate struct {
 func (c Climate) SetFanMode(
 	ctx context.Context, entityID string, fanMode string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "climate",
 		Service:     "set_fan_mode",
 		ServiceData: map[string]any{"fan_mode": fanMode},
@@ -36,7 +36,7 @@ func (c Climate) SetFanMode(
 func (c Climate) SetTemperature(
 	ctx context.Context, entityID string, serviceData types.SetTemperatureRequest,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "climate",
 		Service:     "set_temperature",
 		ServiceData: serviceData.ToJSON(),

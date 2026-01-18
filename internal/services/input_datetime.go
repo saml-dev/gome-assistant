@@ -19,7 +19,7 @@ type InputDatetime struct {
 func (ib InputDatetime) Set(
 	ctx context.Context, entityID string, value time.Time,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_datetime",
 		Service: "set_datetime",
 		ServiceData: map[string]any{
@@ -37,7 +37,7 @@ func (ib InputDatetime) Set(
 }
 
 func (ib InputDatetime) Reload(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "input_datetime",
 		Service: "reload",
 	}

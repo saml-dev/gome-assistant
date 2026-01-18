@@ -19,7 +19,7 @@ type MediaPlayer struct {
 func (mp MediaPlayer) ClearPlaylist(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "clear_playlist",
 		Target:  message.Entity(entityID),
@@ -39,7 +39,7 @@ func (mp MediaPlayer) ClearPlaylist(
 func (mp MediaPlayer) Join(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "join",
 		Target:      message.Entity(entityID),
@@ -59,7 +59,7 @@ func (mp MediaPlayer) Join(
 func (mp MediaPlayer) Next(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "media_next_track",
 		Target:  message.Entity(entityID),
@@ -78,7 +78,7 @@ func (mp MediaPlayer) Next(
 func (mp MediaPlayer) Pause(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "media_pause",
 		Target:  message.Entity(entityID),
@@ -97,7 +97,7 @@ func (mp MediaPlayer) Pause(
 func (mp MediaPlayer) Play(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "media_play",
 		Target:  message.Entity(entityID),
@@ -116,7 +116,7 @@ func (mp MediaPlayer) Play(
 func (mp MediaPlayer) PlayPause(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "media_play_pause",
 		Target:  message.Entity(entityID),
@@ -135,7 +135,7 @@ func (mp MediaPlayer) PlayPause(
 func (mp MediaPlayer) Previous(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "media_previous_track",
 		Target:  message.Entity(entityID),
@@ -155,7 +155,7 @@ func (mp MediaPlayer) Previous(
 func (mp MediaPlayer) Seek(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "media_seek",
 		Target:      message.Entity(entityID),
@@ -175,7 +175,7 @@ func (mp MediaPlayer) Seek(
 func (mp MediaPlayer) Stop(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "media_stop",
 		Target:  message.Entity(entityID),
@@ -195,7 +195,7 @@ func (mp MediaPlayer) Stop(
 func (mp MediaPlayer) PlayMedia(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "play_media",
 		Target:      message.Entity(entityID),
@@ -215,7 +215,7 @@ func (mp MediaPlayer) PlayMedia(
 func (mp MediaPlayer) RepeatSet(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "repeat_set",
 		Target:      message.Entity(entityID),
@@ -236,7 +236,7 @@ func (mp MediaPlayer) RepeatSet(
 func (mp MediaPlayer) SelectSoundMode(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "select_sound_mode",
 		Target:      message.Entity(entityID),
@@ -257,7 +257,7 @@ func (mp MediaPlayer) SelectSoundMode(
 func (mp MediaPlayer) SelectSource(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "select_source",
 		Target:      message.Entity(entityID),
@@ -278,7 +278,7 @@ func (mp MediaPlayer) SelectSource(
 func (mp MediaPlayer) Shuffle(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "shuffle_set",
 		Target:      message.Entity(entityID),
@@ -298,7 +298,7 @@ func (mp MediaPlayer) Shuffle(
 func (mp MediaPlayer) Toggle(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "toggle",
 		Target:  message.Entity(entityID),
@@ -317,7 +317,7 @@ func (mp MediaPlayer) Toggle(
 func (mp MediaPlayer) TurnOff(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "turn_off",
 		Target:  message.Entity(entityID),
@@ -336,7 +336,7 @@ func (mp MediaPlayer) TurnOff(
 func (mp MediaPlayer) TurnOn(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "turn_on",
 		Target:  message.Entity(entityID),
@@ -356,7 +356,7 @@ func (mp MediaPlayer) TurnOn(
 func (mp MediaPlayer) Unjoin(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "unjoin",
 		Target:  message.Entity(entityID),
@@ -375,7 +375,7 @@ func (mp MediaPlayer) Unjoin(
 func (mp MediaPlayer) VolumeDown(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "volume_down",
 		Target:  message.Entity(entityID),
@@ -395,7 +395,7 @@ func (mp MediaPlayer) VolumeDown(
 func (mp MediaPlayer) VolumeMute(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "volume_mute",
 		Target:      message.Entity(entityID),
@@ -416,7 +416,7 @@ func (mp MediaPlayer) VolumeMute(
 func (mp MediaPlayer) VolumeSet(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "media_player",
 		Service:     "volume_set",
 		Target:      message.Entity(entityID),
@@ -436,7 +436,7 @@ func (mp MediaPlayer) VolumeSet(
 func (mp MediaPlayer) VolumeUp(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "media_player",
 		Service: "volume_up",
 		Target:  message.Entity(entityID),

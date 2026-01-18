@@ -18,7 +18,7 @@ type Script struct {
 func (s Script) Reload(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "reload",
 		Target:  message.Entity(entityID),
@@ -36,7 +36,7 @@ func (s Script) Reload(
 func (s Script) Toggle(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "toggle",
 		Target:  message.Entity(entityID),
@@ -52,7 +52,7 @@ func (s Script) Toggle(
 
 // TurnOff a script that was created in the HA UI.
 func (s Script) TurnOff(ctx context.Context) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "turn_off",
 	}
@@ -69,7 +69,7 @@ func (s Script) TurnOff(ctx context.Context) (any, error) {
 func (s Script) TurnOn(
 	ctx context.Context, entityID string,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "turn_on",
 		Target:  message.Entity(entityID),

@@ -19,7 +19,7 @@ type Lock struct {
 func (l Lock) Lock(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "lock",
 		Service:     "lock",
 		Target:      message.Entity(entityID),
@@ -39,7 +39,7 @@ func (l Lock) Lock(
 func (l Lock) Unlock(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "lock",
 		Service:     "unlock",
 		Target:      message.Entity(entityID),

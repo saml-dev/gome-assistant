@@ -4,18 +4,17 @@ import (
 	"context"
 	"sync"
 
-	"saml.dev/gome-assistant/internal/services"
 	"saml.dev/gome-assistant/message"
 	"saml.dev/gome-assistant/websocket"
 )
 
 // CallAndForget implements [services.API.CallAndForget].
-func (app *App) CallAndForget(req services.BaseServiceRequest) error {
-	reqMsg := services.CallServiceMessage{
+func (app *App) CallAndForget(req message.CallServiceData) error {
+	reqMsg := message.CallServiceRequest{
 		BaseMessage: message.BaseMessage{
 			Type: "call_service",
 		},
-		BaseServiceRequest: req,
+		CallServiceData: req,
 	}
 
 	return app.conn.Send(
@@ -28,21 +27,21 @@ func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 
 // Call implements [services.API.Call].
 func (app *App) Call(
-	ctx context.Context, req services.BaseServiceRequest, result any,
+	ctx context.Context, req message.CallServiceData, result any,
 ) error {
 	// Call works as follows:
 	//  1. Generate a message ID.
 	//  2. Subscribe to that ID.
-	//  3. Send a `CallServiceMessage` containing `req` over the websocket.
+	//  3. Send a `CallServiceRequest` containing `req` over the websocket.
 	//  4. Wait for a single "result" message.
 	//  5. Unsubscribe from ID.
 	//  6. Unmarshal the "result" part of the response into `result`.
 
-	reqMsg := services.CallServiceMessage{
+	reqMsg := message.CallServiceRequest{
 		BaseMessage: message.BaseMessage{
 			Type: "call_service",
 		},
-		BaseServiceRequest: req,
+		CallServiceData: req,
 	}
 
 	// once ensures that exactly one of the following occurs:

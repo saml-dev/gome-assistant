@@ -20,7 +20,7 @@ type AlarmControlPanel struct {
 func (acp AlarmControlPanel) ArmAway(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_away",
 		Target:      message.Entity(entityID),
@@ -41,7 +41,7 @@ func (acp AlarmControlPanel) ArmAway(
 func (acp AlarmControlPanel) ArmWithCustomBypass(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_custom_bypass",
 		Target:      message.Entity(entityID),
@@ -62,7 +62,7 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(
 func (acp AlarmControlPanel) ArmHome(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_home",
 		Target:      message.Entity(entityID),
@@ -83,7 +83,7 @@ func (acp AlarmControlPanel) ArmHome(
 func (acp AlarmControlPanel) ArmNight(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_night",
 		Target:      message.Entity(entityID),
@@ -104,7 +104,7 @@ func (acp AlarmControlPanel) ArmNight(
 func (acp AlarmControlPanel) ArmVacation(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_vacation",
 		Target:      message.Entity(entityID),
@@ -125,7 +125,7 @@ func (acp AlarmControlPanel) ArmVacation(
 func (acp AlarmControlPanel) Disarm(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_disarm",
 		Target:      message.Entity(entityID),
@@ -146,7 +146,7 @@ func (acp AlarmControlPanel) Disarm(
 func (acp AlarmControlPanel) Trigger(
 	ctx context.Context, entityID string, serviceData any,
 ) (any, error) {
-	req := BaseServiceRequest{
+	req := message.CallServiceData{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_trigger",
 		Target:      message.Entity(entityID),
