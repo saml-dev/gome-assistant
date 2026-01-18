@@ -1,7 +1,5 @@
 package message
 
-import "time"
-
 type StateChangedEventMessage EventMessage[StateChangedData]
 
 type StateChangedData struct {
@@ -12,9 +10,9 @@ type StateChangedData struct {
 
 type StateChangedState struct {
 	EntityID    string         `json:"entity_id"`
-	LastChanged time.Time      `json:"last_changed"`
+	LastChanged TimeStamp      `json:"last_changed"`
 	State       string         `json:"state"`
 	Attributes  map[string]any `json:"attributes"`
-	LastUpdated time.Time      `json:"last_updated"`
+	LastUpdated TimeStamp      `json:"last_updated"`
 	Context     EventContext   `json:"context"`
 }

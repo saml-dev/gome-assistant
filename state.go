@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/message"
 )
 
 type State interface {
@@ -29,10 +29,10 @@ type StateImpl struct {
 }
 
 type EntityState struct {
-	EntityID    string         `json:"entity_id"`
-	State       string         `json:"state"`
-	Attributes  map[string]any `json:"attributes"`
-	LastChanged time.Time      `json:"last_changed"`
+	EntityID    string            `json:"entity_id"`
+	State       string            `json:"state"`
+	Attributes  map[string]any    `json:"attributes"`
+	LastChanged message.TimeStamp `json:"last_changed"`
 }
 
 func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {

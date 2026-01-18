@@ -1,7 +1,5 @@
 package message
 
-import "time"
-
 // EventMessage represents a full event message. The `DataT` type
 // parameter specifies the type of the `Event.Data` field. See
 // the Home Assistant [docs] for more information.
@@ -18,7 +16,7 @@ type Event[DataT any] struct {
 	EventType string       `json:"event_type"`
 	Data      DataT        `json:"data"`
 	Origin    EventOrigin  `json:"origin"`
-	TimeFired time.Time    `json:"time_fired"`
+	TimeFired TimeStamp    `json:"time_fired"`
 	Context   EventContext `json:"context"`
 }
 
