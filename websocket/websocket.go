@@ -105,15 +105,15 @@ func (conn *Conn) sendAuthMessage(ctx context.Context, token string) error {
 	return nil
 }
 
-type authResponse struct {
-	MsgType string `json:"type"`
-	Message string `json:"message"`
-}
-
 func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
 	msg, err := conn.readMessage()
 	if err != nil {
 		return err
+	}
+
+	type authResponse struct {
+		MsgType string `json:"type"`
+		Message string `json:"message"`
 	}
 
 	var authResp authResponse
