@@ -25,12 +25,7 @@ type EventListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(*Service, State, EventData)
-
-type EventData struct {
-	Type         string
-	RawEventJSON []byte
-}
+type EventListenerCallback func(*Service, State, message.Message)
 
 /* Methods */
 
@@ -132,7 +127,7 @@ func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
 
-func (l *EventListener) maybeCall(app *App, eventData EventData) {
+func (l *EventListener) maybeCall(app *App, eventMsg message.Message) {
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -153,7 +148,7 @@ func (l *EventListener) maybeCall(app *App, eventData EventData) {
 		return
 	}
 
-	go l.callback(app.service, app.state, eventData)
+	go l.callback(app.service, app.state, eventMsg)
 	l.lastRan = carbon.Now()
 }
 
@@ -165,12 +160,7 @@ func (app *App) callEventListeners(eventType string, msg message.Message) {
 		return
 	}
 
-	eventData := EventData{
-		Type:         eventType,
-		RawEventJSON: msg.Raw,
-	}
-
 	for _, l := range listeners {
-		l.maybeCall(app, eventData)
+		l.maybeCall(app, msg)
 	}
 }

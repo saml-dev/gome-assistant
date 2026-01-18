@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"saml.dev/gome-assistant/cmd/example/entities" // Optional import generated entities
+	"saml.dev/gome-assistant/message"
 
 	ga "saml.dev/gome-assistant"
 )
@@ -88,14 +89,14 @@ func pantryLights(
 	}
 }
 
-func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
+func onEvent(service *ga.Service, state ga.State, msg message.Message) {
 	// Since the structure of the event changes depending
 	// on the event type, you can Unmarshal the raw json
 	// into a Go type. If a type for your event doesn't
 	// exist, you can write it yourself! PR's welcome to
 	// the eventTypes.go file :)
 	ev := ga.EventZWaveJSValueNotification{}
-	json.Unmarshal(data.RawEventJSON, &ev)
+	json.Unmarshal(msg.Raw, &ev)
 	slog.Info("On event invoked", "event", ev)
 }
 
