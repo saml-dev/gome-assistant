@@ -113,7 +113,7 @@ func lightsOut(ctx context.Context, service *ga.Service, state ga.State) {
 	}
 
 	// if no motion detected in living room for 30mins
-	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
+	if s.State == "off" && time.Since(s.LastChanged.Time()).Minutes() > 30 {
 		if _, err := service.Light.TurnOff(ctx, entities.Light.MainLights); err != nil {
 			slog.Warn("couldn't turn off living light")
 			return
