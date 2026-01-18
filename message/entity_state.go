@@ -7,4 +7,5 @@ type EntityState struct {
 	State       string         `json:"state"`
 	Attributes  map[string]any `json:"attributes"`
 	LastChanged TimeStamp      `json:"last_changed"`
+	LastUpdated TimeStamp      `json:"last_updated"`
 }
