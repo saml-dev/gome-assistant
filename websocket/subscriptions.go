@@ -36,20 +36,16 @@ func (conn *Conn) getSubscriber(messageID int64) (Subscriber, bool) {
 	return subscriber, ok
 }
 
-type SubEvent struct {
-	ID        int64  `json:"id"`
-	Type      string `json:"type"`
-	EventType string `json:"event_type"`
-}
-
 func (conn *Conn) SubscribeToEventType(eventType string, subr Subscriber) Subscription {
 	var subn Subscription
 	err := conn.Send(
 		func(lc LockedConn) error {
 			subn = lc.Subscribe(subr)
-			e := SubEvent{
-				ID:        subn.messageID,
-				Type:      "subscribe_events",
+			e := message.SubscribeEventRequest{
+				BaseMessage: message.BaseMessage{
+					Type: "subscribe_events",
+					ID:   subn.messageID,
+				},
 				EventType: eventType,
 			}
 
