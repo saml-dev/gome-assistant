@@ -1,27 +1,26 @@
 package gomeassistant
 
-import "saml.dev/gome-assistant/websocket"
+import (
+	"saml.dev/gome-assistant/message"
+	"saml.dev/gome-assistant/websocket"
+)
 
 // FireEvent implements [services.API.FireEvent].
-func (app *App) FireEvent(eventType string, eventData map[string]any) error {
+func (app *App) FireEvent(eventType string, eventData any) error {
 	return app.conn.Send(
 		func(lc websocket.LockedConn) error {
-			req := FireEventRequest{
-				ID:        lc.NextMessageID(),
-				Type:      "fire_event",
+			req := message.FireEventRequest{
+				BaseMessage: message.BaseMessage{
+					ID:   lc.NextMessageID(),
+					Type: "fire_event",
+				},
 				EventType: eventType,
 				EventData: eventData,
 			}
 
+			// FIXME: wait for result to make sure that the event was
+			// fired successfully.
 			return lc.SendMessage(req)
 		},
 	)
-}
-
-// Fire an event
-type FireEventRequest struct {
-	ID        int64          `json:"id"`
-	Type      string         `json:"type"` // always set to "fire_event"
-	EventType string         `json:"event_type"`
-	EventData map[string]any `json:"event_data,omitempty"`
 }
