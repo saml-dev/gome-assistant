@@ -35,16 +35,7 @@ type EntityListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EntityListenerCallback func(*Service, State, EntityData)
-
-type EntityData struct {
-	TriggerEntityID string
-	FromState       string
-	FromAttributes  map[string]any
-	ToState         string
-	ToAttributes    map[string]any
-	LastChanged     time.Time
-}
+type EntityListenerCallback func(*Service, State, message.StateChangedData)
 
 /* Methods */
 
@@ -171,7 +162,7 @@ func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
 
-func (l *EntityListener) maybeCall(app *App, entityData EntityData, data message.StateChangedData) {
+func (l *EntityListener) maybeCall(app *App, data message.StateChangedData) {
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -204,14 +195,14 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data message
 	if l.delay != 0 {
 		l := l
 		l.delayTimer = time.AfterFunc(l.delay, func() {
-			go l.callback(app.service, app.state, entityData)
+			go l.callback(app.service, app.state, data)
 			l.lastRan = carbon.Now()
 		})
 		return
 	}
 
 	// run now if no delay set
-	go l.callback(app.service, app.state, entityData)
+	go l.callback(app.service, app.state, data)
 	l.lastRan = carbon.Now()
 }
 
@@ -230,20 +221,11 @@ func (app *App) callEntityListeners(msgBytes []byte) {
 	// event listener. I noticed this with iOS app location,
 	// every time I refresh the app it triggers a device_tracker
 	// entity listener.
-	if msg.Event.Data.NewState.State == msg.Event.Data.OldState.State {
+	if data.NewState.State == data.OldState.State {
 		return
 	}
 
-	entityData := EntityData{
-		TriggerEntityID: data.EntityID,
-		FromState:       data.OldState.State,
-		FromAttributes:  data.OldState.Attributes,
-		ToState:         data.NewState.State,
-		ToAttributes:    data.NewState.Attributes,
-		LastChanged:     data.OldState.LastChanged,
-	}
-
 	for _, l := range listeners {
-		l.maybeCall(app, entityData, data)
+		l.maybeCall(app, data)
 	}
 }
