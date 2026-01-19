@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"saml.dev/gome-assistant/message"
-	"saml.dev/gome-assistant/types"
 )
 
 /* Structs */
@@ -34,12 +33,12 @@ func (c Climate) SetFanMode(
 }
 
 func (c Climate) SetTemperature(
-	ctx context.Context, entityID string, serviceData types.SetTemperatureRequest,
+	ctx context.Context, entityID string, serviceData message.SetTemperatureData,
 ) (any, error) {
 	req := message.CallServiceData{
 		Domain:      "climate",
 		Service:     "set_temperature",
-		ServiceData: serviceData.ToJSON(),
+		ServiceData: serviceData,
 		Target:      message.Entity(entityID),
 	}
 
