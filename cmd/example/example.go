@@ -95,7 +95,7 @@ func onEvent(service *ga.Service, state ga.State, msg message.Message) {
 	// into a Go type. If a type for your event doesn't
 	// exist, you can write it yourself! PR's welcome to
 	// the eventTypes.go file :)
-	ev := ga.EventZWaveJSValueNotification{}
+	ev := message.ZWaveJSValueNotificationEventMessage{}
 	json.Unmarshal(msg.Raw, &ev)
 	slog.Info("On event invoked", "event", ev)
 }
