@@ -1,10 +1,28 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 // API is the interface that the individual services use to interact
 // with HomeAssistant.
 type API interface {
-	Call(req BaseServiceRequest) error
-	FireEvent(eventType string, eventData map[string]any) error
+	// CallAndForget makes a call to the Home Assistant API but
+	// doesn't subscribe to or wait for a response.
+	CallAndForget(req message.CallServiceData) error
+
+	// Call makes a call to the Home Assistant API and waits for a
+	// response. The result is unmarshaled into invokes `result`.
+	// `result` must be something that `json.Unmarshal()` can
+	// deserialize into; typically, it is a pointer. If the result
+	// indicates a failure (success==false), then return that as a
+	// `*websocket.ResultError`. If another error occurs (e.g.,
+	// sending the request or if `ctx` expires), return that error.
+	Call(ctx context.Context, req message.CallServiceData, result any) error
+
+	FireEvent(eventType string, eventData any) error
 }
 
 func BuildService[
@@ -33,23 +51,4 @@ func BuildService[
 		ZWaveJS,
 ](api API) *T {
 	return &T{api: api}
-}
-
-type BaseServiceRequest struct {
-	ID          int64          `json:"id"`
-	RequestType string         `json:"type"` // must be set to "call_service"
-	Domain      string         `json:"domain"`
-	Service     string         `json:"service"`
-	ServiceData map[string]any `json:"service_data,omitempty"`
-	Target      Target         `json:"target,omitempty"`
-}
-
-type Target struct {
-	EntityID string `json:"entity_id,omitempty"`
-}
-
-func Entity(entityID string) Target {
-	return Target{
-		EntityID: entityID,
-	}
 }

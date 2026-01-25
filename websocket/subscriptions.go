@@ -3,6 +3,8 @@ package websocket
 import (
 	"fmt"
 	"log/slog"
+
+	"saml.dev/gome-assistant/message"
 )
 
 // Subscription represents a websocket-level subscription to a
@@ -19,10 +21,10 @@ func (sub Subscription) MessageID() int64 {
 
 // Subscriber is called synchronously when a message is received that
 // matches its subscription's message ID.
-type Subscriber func(msg ChanMsg)
+type Subscriber func(msg message.Message)
 
 // NoopSubscriber is a `Subscriber` that does nothing.
-func NoopSubscriber(_ ChanMsg) {}
+func NoopSubscriber(_ message.Message) {}
 
 // getSubscriber returns the subscriber, if any, that is subscribed to
 // the specified message ID.
@@ -34,20 +36,16 @@ func (conn *Conn) getSubscriber(messageID int64) (Subscriber, bool) {
 	return subscriber, ok
 }
 
-type SubEvent struct {
-	ID        int64  `json:"id"`
-	Type      string `json:"type"`
-	EventType string `json:"event_type"`
-}
-
 func (conn *Conn) SubscribeToEventType(eventType string, subr Subscriber) Subscription {
 	var subn Subscription
 	err := conn.Send(
 		func(lc LockedConn) error {
 			subn = lc.Subscribe(subr)
-			e := SubEvent{
-				ID:        subn.messageID,
-				Type:      "subscribe_events",
+			e := message.SubscribeEventRequest{
+				BaseMessage: message.BaseMessage{
+					Type: "subscribe_events",
+					ID:   subn.messageID,
+				},
 				EventType: eventType,
 			}
 

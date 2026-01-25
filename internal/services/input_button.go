@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type InputButton struct {
@@ -8,20 +14,33 @@ type InputButton struct {
 
 /* Public API */
 
-func (ib InputButton) Press(entityID string) error {
-	req := BaseServiceRequest{
+func (ib InputButton) Press(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_button",
 		Service: "press",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputButton) Reload() error {
-	req := BaseServiceRequest{
+func (ib InputButton) Reload(ctx context.Context) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_button",
 		Service: "reload",
-		Target:  Entity(""),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

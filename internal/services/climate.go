@@ -1,7 +1,9 @@
 package services
 
 import (
-	"saml.dev/gome-assistant/types"
+	"context"
+
+	"saml.dev/gome-assistant/message"
 )
 
 /* Structs */
@@ -12,22 +14,38 @@ type Climate struct {
 
 /* Public API */
 
-func (c Climate) SetFanMode(entityID string, fanMode string) error {
-	req := BaseServiceRequest{
+func (c Climate) SetFanMode(
+	ctx context.Context, entityID string, fanMode string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:      "climate",
 		Service:     "set_fan_mode",
 		ServiceData: map[string]any{"fan_mode": fanMode},
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
-	return c.api.Call(req)
+
+	var result any
+	if err := c.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (c Climate) SetTemperature(entityID string, serviceData types.SetTemperatureRequest) error {
-	req := BaseServiceRequest{
+func (c Climate) SetTemperature(
+	ctx context.Context, entityID string, serviceData message.SetTemperatureData,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:      "climate",
 		Service:     "set_temperature",
-		ServiceData: serviceData.ToJSON(),
-		Target:      Entity(entityID),
+		ServiceData: serviceData,
+		Target:      message.Entity(entityID),
 	}
-	return c.api.Call(req)
+
+	var result any
+	if err := c.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
