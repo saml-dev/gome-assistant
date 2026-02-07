@@ -29,8 +29,9 @@ type Domain struct {
 }
 
 type Entity struct {
-	FieldName string
-	EntityID  string
+	FieldName    string
+	EntityID     string
+	FriendlyName string
 }
 
 func toFieldName(entityID string) string {
@@ -171,9 +172,16 @@ func generate(ctx context.Context, config Config) error {
 			}
 		}
 
+		// Extract friendly name
+		friendlyName := ""
+		if fn, ok := entity.Attributes["friendly_name"].(string); ok {
+			friendlyName = fn
+		}
+
 		domainMap[domain].Entities = append(domainMap[domain].Entities, Entity{
-			FieldName: toFieldName(entity.EntityID),
-			EntityID:  entity.EntityID,
+			FieldName:    toFieldName(entity.EntityID),
+			EntityID:     entity.EntityID,
+			FriendlyName: friendlyName,
 		})
 	}
 
@@ -184,8 +192,7 @@ func generate(ctx context.Context, config Config) error {
 	}
 
 	// Create entities directory if it doesn't exist
-	err = os.MkdirAll("entities", 0755)
-	if err != nil {
+	if err := os.MkdirAll("entities", 0755); err != nil {
 		return fmt.Errorf("failed to create entities directory: %w", err)
 	}
 
@@ -196,7 +203,7 @@ package entities
 {{ range .Domains }}
 type {{ .Name }}Domain struct {
 	{{- range .Entities }}
-	{{ .FieldName }} string
+	{{ .FieldName }} string{{ if .FriendlyName }} // {{ .FriendlyName }}{{ end }}
 	{{- end }}
 }
 
