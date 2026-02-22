@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type AlarmControlPanel struct {
@@ -8,114 +14,143 @@ type AlarmControlPanel struct {
 
 /* Public API */
 
-// Send the alarm the command for arm away.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmAway(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_arm_away",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for arm away. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (acp AlarmControlPanel) ArmAway(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_arm_away",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-// Send the alarm the command for arm away.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmWithCustomBypass(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_arm_custom_bypass",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for arm away. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (acp AlarmControlPanel) ArmWithCustomBypass(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_arm_custom_bypass",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-// Send the alarm the command for arm home.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmHome(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_arm_home",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for arm home. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (acp AlarmControlPanel) ArmHome(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_arm_home",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-// Send the alarm the command for arm night.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmNight(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_arm_night",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for arm night. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (acp AlarmControlPanel) ArmNight(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_arm_night",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-// Send the alarm the command for arm vacation.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) ArmVacation(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_arm_vacation",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for arm vacation. Takes an entityID and
+// an optional service_data, which must be serializable to a JSON
+// object.
+func (acp AlarmControlPanel) ArmVacation(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_arm_vacation",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-// Send the alarm the command for disarm.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) Disarm(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_disarm",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for disarm. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (acp AlarmControlPanel) Disarm(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_disarm",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-// Send the alarm the command for trigger.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (acp AlarmControlPanel) Trigger(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "alarm_control_panel",
-		Service: "alarm_trigger",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Send the alarm the command for trigger. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (acp AlarmControlPanel) Trigger(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "alarm_control_panel",
+		Service:     "alarm_trigger",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return acp.api.Call(req)
+	var result any
+	if err := acp.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

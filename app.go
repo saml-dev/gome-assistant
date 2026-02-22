@@ -15,7 +15,8 @@ import (
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/message"
+	"saml.dev/gome-assistant/websocket"
 )
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
@@ -261,7 +262,14 @@ func (app *App) registerEventListener(evl EventListener) {
 			eventType := eventType
 			app.conn.SubscribeToEventType(
 				eventType,
-				func(msg websocket.ChanMsg) {
+				func(msg message.Message) {
+					// Subscribing, itself, causes the server to send
+					// a "result" message. We don't want to forward
+					// that message to the listeners.
+					if msg.Type != eventType {
+						return
+					}
+
 					go app.callEventListeners(eventType, msg)
 				},
 			)
@@ -328,7 +336,7 @@ func (app *App) Start() {
 
 	// subscribe to state_changed events
 	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
-		func(msg websocket.ChanMsg) {
+		func(msg message.Message) {
 			go app.callEntityListeners(msg.Raw)
 		},
 	)
@@ -345,13 +353,18 @@ func (app *App) Start() {
 				}
 
 				etl.runOnStartupCompleted = true
-				go etl.callback(app.service, app.state, EntityData{
-					TriggerEntityID: eid,
-					FromState:       entityState.State,
-					FromAttributes:  entityState.Attributes,
-					ToState:         entityState.State,
-					ToAttributes:    entityState.Attributes,
-					LastChanged:     entityState.LastChanged,
+				stateChangedState := message.StateChangedState{
+					EntityID:    eid,
+					LastChanged: entityState.LastChanged,
+					State:       entityState.State,
+					Attributes:  entityState.Attributes,
+					LastUpdated: entityState.LastChanged,
+				}
+
+				go etl.callback(app.service, app.state, message.StateChangedData{
+					EntityID: eid,
+					NewState: stateChangedState,
+					OldState: stateChangedState,
 				})
 			}
 		}

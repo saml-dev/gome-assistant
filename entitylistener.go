@@ -8,6 +8,7 @@ import (
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal"
+	"saml.dev/gome-assistant/message"
 )
 
 type EntityListener struct {
@@ -34,39 +35,7 @@ type EntityListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EntityListenerCallback func(*Service, State, EntityData)
-
-type EntityData struct {
-	TriggerEntityID string
-	FromState       string
-	FromAttributes  map[string]any
-	ToState         string
-	ToAttributes    map[string]any
-	LastChanged     time.Time
-}
-
-type stateChangedMsg struct {
-	ID    int    `json:"id"`
-	Type  string `json:"type"`
-	Event struct {
-		Data      stateData `json:"data"`
-		EventType string    `json:"event_type"`
-		Origin    string    `json:"origin"`
-	} `json:"event"`
-}
-
-type stateData struct {
-	EntityID string   `json:"entity_id"`
-	NewState msgState `json:"new_state"`
-	OldState msgState `json:"old_state"`
-}
-
-type msgState struct {
-	EntityID    string         `json:"entity_id"`
-	LastChanged time.Time      `json:"last_changed"`
-	State       string         `json:"state"`
-	Attributes  map[string]any `json:"attributes"`
-}
+type EntityListenerCallback func(*Service, State, message.StateChangedData)
 
 /* Methods */
 
@@ -193,7 +162,7 @@ func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
 
-func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateData) {
+func (l *EntityListener) maybeCall(app *App, data message.StateChangedData) {
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -226,24 +195,23 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateDa
 	if l.delay != 0 {
 		l := l
 		l.delayTimer = time.AfterFunc(l.delay, func() {
-			go l.callback(app.service, app.state, entityData)
+			go l.callback(app.service, app.state, data)
 			l.lastRan = carbon.Now()
 		})
 		return
 	}
 
 	// run now if no delay set
-	go l.callback(app.service, app.state, entityData)
+	go l.callback(app.service, app.state, data)
 	l.lastRan = carbon.Now()
 }
 
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
-	msg := stateChangedMsg{}
+	msg := message.StateChangedEventMessage{}
 	_ = json.Unmarshal(msgBytes, &msg)
 	data := msg.Event.Data
-	eid := data.EntityID
-	listeners, ok := app.entityListeners[eid]
+	listeners, ok := app.entityListeners[data.EntityID]
 	if !ok {
 		// no listeners registered for this id
 		return
@@ -253,20 +221,11 @@ func (app *App) callEntityListeners(msgBytes []byte) {
 	// event listener. I noticed this with iOS app location,
 	// every time I refresh the app it triggers a device_tracker
 	// entity listener.
-	if msg.Event.Data.NewState.State == msg.Event.Data.OldState.State {
+	if data.NewState.State == data.OldState.State {
 		return
 	}
 
-	entityData := EntityData{
-		TriggerEntityID: eid,
-		FromState:       data.OldState.State,
-		FromAttributes:  data.OldState.Attributes,
-		ToState:         data.NewState.State,
-		ToAttributes:    data.NewState.Attributes,
-		LastChanged:     data.OldState.LastChanged,
-	}
-
 	for _, l := range listeners {
-		l.maybeCall(app, entityData, data)
+		l.maybeCall(app, data)
 	}
 }

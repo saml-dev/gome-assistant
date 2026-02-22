@@ -1,8 +1,11 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"time"
+
+	"saml.dev/gome-assistant/message"
 )
 
 /* Structs */
@@ -13,22 +16,36 @@ type InputDatetime struct {
 
 /* Public API */
 
-func (ib InputDatetime) Set(entityID string, value time.Time) error {
-	req := BaseServiceRequest{
+func (ib InputDatetime) Set(
+	ctx context.Context, entityID string, value time.Time,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_datetime",
 		Service: "set_datetime",
 		ServiceData: map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputDatetime) Reload() error {
-	req := BaseServiceRequest{
+func (ib InputDatetime) Reload(ctx context.Context) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_datetime",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

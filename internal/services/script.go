@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type Script struct {
@@ -9,41 +15,70 @@ type Script struct {
 /* Public API */
 
 // Reload a script that was created in the HA UI.
-func (s Script) Reload(entityID string) error {
-	req := BaseServiceRequest{
+func (s Script) Reload(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "reload",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Toggle a script that was created in the HA UI.
-func (s Script) Toggle(entityID string) error {
-	req := BaseServiceRequest{
+func (s Script) Toggle(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // TurnOff a script that was created in the HA UI.
-func (s Script) TurnOff() error {
-	req := BaseServiceRequest{
+func (s Script) TurnOff(ctx context.Context) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "turn_off",
-		Target:  Entity(""),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // TurnOn a script that was created in the HA UI.
-func (s Script) TurnOn(entityID string) error {
-	req := BaseServiceRequest{
+func (s Script) TurnOn(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "script",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

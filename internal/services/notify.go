@@ -1,25 +1,29 @@
 package services
 
 import (
-	"saml.dev/gome-assistant/types"
+	"context"
+
+	"saml.dev/gome-assistant/message"
 )
 
 type Notify struct {
 	api API
 }
 
-// Notify sends a notification. Takes a types.NotifyRequest.
-func (ha *Notify) Notify(reqData types.NotifyRequest) error {
-	req := BaseServiceRequest{
-		Domain:  "notify",
-		Service: reqData.ServiceName,
+// Notify sends a notification.
+func (ha *Notify) Notify(
+	ctx context.Context, serviceName string, reqData message.NotifyData,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "notify",
+		Service:     serviceName,
+		ServiceData: reqData,
 	}
-	serviceData := map[string]any{}
-	serviceData["message"] = reqData.Message
-	serviceData["title"] = reqData.Title
-	if reqData.Data != nil {
-		serviceData["data"] = reqData.Data
+
+	var result any
+	if err := ha.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	req.ServiceData = serviceData
-	return ha.api.Call(req)
+
+	return result, nil
 }

@@ -14,6 +14,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	ga "saml.dev/gome-assistant"
+	"saml.dev/gome-assistant/message"
 )
 
 type (
@@ -106,11 +107,12 @@ func (s *MySuite) TearDownSuite() {
 
 // Basic test of light toggle service and entity listener
 func (s *MySuite) TestLightService() {
+	ctx := context.TODO()
 	entityID := s.config.Entities.LightEntityID
 
 	if entityID != "" {
 		initState := getEntityState(s, entityID)
-		s.app.GetService().Light.Toggle(entityID)
+		s.app.GetService().Light.Toggle(ctx, entityID)
 
 		assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
 			newState := getEntityState(s, entityID)
@@ -130,8 +132,13 @@ func (s *MySuite) TestSchedule() {
 }
 
 // Capture event after light entity state has changed
-func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e ga.EntityData) {
-	slog.Info("Entity callback called.", "entity id", e.TriggerEntityID, "from state", e.FromState, "to state", e.ToState)
+func (s *MySuite) entityCallback(se *ga.Service, st ga.State, e message.StateChangedData) {
+	slog.Info(
+		"Entity callback called",
+		"entity id", e.EntityID,
+		"from state", e.OldState.State,
+		"to state", e.NewState.State,
+	)
 	s.suiteCtx.entityCallbackInvoked.Store(true)
 }
 

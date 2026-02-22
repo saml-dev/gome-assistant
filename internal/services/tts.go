@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type TTS struct {
@@ -9,42 +15,58 @@ type TTS struct {
 /* Public API */
 
 // Remove all text-to-speech cache files and RAM cache.
-func (tts TTS) ClearCache() error {
-	req := BaseServiceRequest{
+func (tts TTS) ClearCache(ctx context.Context) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "tts",
 		Service: "clear_cache",
-		Target:  Entity(""),
 	}
-	return tts.api.Call(req)
+
+	var result any
+	if err := tts.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 // Say something using text-to-speech on a media player with cloud.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (tts TTS) CloudSay(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "tts",
-		Service: "cloud_say",
-		Target:  Entity(entityID),
+// Takes an entityID and an optional service_data, which must be
+// serializable to a JSON object.
+func (tts TTS) CloudSay(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "tts",
+		Service:     "cloud_say",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+
+	var result any
+	if err := tts.api.Call(ctx, req, &result); err != nil {
+		return nil, err
 	}
-	return tts.api.Call(req)
+
+	return result, nil
 }
 
-// Say something using text-to-speech on a media player with google_translate.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (tts TTS) GoogleTranslateSay(entityID string, serviceData ...map[string]any) error {
-	req := BaseServiceRequest{
-		Domain:  "tts",
-		Service: "google_translate_say",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+// Say something using text-to-speech on a media player with
+// google_translate. Takes an entityID and an optional service_data,
+// which must be serializable to a JSON object.
+func (tts TTS) GoogleTranslateSay(
+	ctx context.Context, entityID string, serviceData ...any,
+) (any, error) {
+	req := message.CallServiceData{
+		Domain:      "tts",
+		Service:     "google_translate_say",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      message.Entity(entityID),
 	}
 
-	return tts.api.Call(req)
+	var result any
+	if err := tts.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

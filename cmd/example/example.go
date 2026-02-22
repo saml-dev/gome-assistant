@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"saml.dev/gome-assistant/cmd/example/entities" // Optional import generated entities
+	"saml.dev/gome-assistant/message"
 
 	ga "saml.dev/gome-assistant"
 )
@@ -38,18 +39,24 @@ func main() {
 	pantryDoor := ga.
 		NewEntityListener().
 		EntityIDs(entities.BinarySensor.PantryDoor). // Use generated entity constant
-		Call(pantryLights).
+		Call(func(service *ga.Service, state ga.State, sensor message.StateChangedData) {
+			pantryLights(ctx, service, state, sensor)
+		}).
 		Build()
 
 	_11pmSched := ga.
 		NewDailySchedule().
-		Call(lightsOut).
+		Call(func(service *ga.Service, state ga.State) {
+			lightsOut(ctx, service, state)
+		}).
 		At("23:00").
 		Build()
 
 	_30minsBeforeSunrise := ga.
 		NewDailySchedule().
-		Call(sunriseSched).
+		Call(func(service *ga.Service, state ga.State) {
+			sunriseSched(ctx, service, state)
+		}).
 		Sunrise("-30m").
 		Build()
 
@@ -66,43 +73,60 @@ func main() {
 	app.Start()
 }
 
-func pantryLights(service *ga.Service, state ga.State, sensor ga.EntityData) {
+func pantryLights(
+	ctx context.Context, service *ga.Service, state ga.State, sensor message.StateChangedData,
+) {
 	l := "light.pantry"
 	// l := entities.Light.Pantry // Or use generated entity constant
-	if sensor.ToState == "on" {
-		service.HomeAssistant.TurnOn(l)
+	if sensor.NewState.State == "on" {
+		if _, err := service.HomeAssistant.TurnOn(ctx, l); err != nil {
+			slog.Warn("couldn't turn on pantry light")
+		}
 	} else {
-		service.HomeAssistant.TurnOff(l)
+		if _, err := service.HomeAssistant.TurnOff(ctx, l); err != nil {
+			slog.Warn("couldn't turn off pantry light")
+		}
 	}
 }
 
-func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
+func onEvent(service *ga.Service, state ga.State, msg message.Message) {
 	// Since the structure of the event changes depending
 	// on the event type, you can Unmarshal the raw json
 	// into a Go type. If a type for your event doesn't
 	// exist, you can write it yourself! PR's welcome to
 	// the eventTypes.go file :)
-	ev := ga.EventZWaveJSValueNotification{}
-	json.Unmarshal(data.RawEventJSON, &ev)
+	ev := message.ZWaveJSValueNotificationEventMessage{}
+	json.Unmarshal(msg.Raw, &ev)
 	slog.Info("On event invoked", "event", ev)
 }
 
-func lightsOut(service *ga.Service, state ga.State) {
+func lightsOut(ctx context.Context, service *ga.Service, state ga.State) {
 	// always turn off outside lights
-	service.Light.TurnOff(entities.Light.OutsideLights)
+	if _, err := service.Light.TurnOff(ctx, entities.Light.OutsideLights); err != nil {
+		slog.Warn("couldn't turn off living room light, doing nothing")
+		return
+	}
 	s, err := state.Get(entities.BinarySensor.LivingRoomMotion)
 	if err != nil {
-		slog.Warn("couldnt get living room motion state, doing nothing")
+		slog.Warn("couldn't get living room motion state, doing nothing")
 		return
 	}
 
 	// if no motion detected in living room for 30mins
-	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
-		service.Light.TurnOff(entities.Light.MainLights)
+	if s.State == "off" && time.Since(s.LastChanged.Time()).Minutes() > 30 {
+		if _, err := service.Light.TurnOff(ctx, entities.Light.MainLights); err != nil {
+			slog.Warn("couldn't turn off living light")
+			return
+		}
 	}
 }
 
-func sunriseSched(service *ga.Service, state ga.State) {
-	service.Light.TurnOn(entities.Light.LivingRoomLamps)
-	service.Light.TurnOff(entities.Light.ChristmasLights)
+func sunriseSched(ctx context.Context, service *ga.Service, state ga.State) {
+	if _, err := service.Light.TurnOn(ctx, entities.Light.LivingRoomLamps); err != nil {
+		slog.Warn("couldn't turn on living light")
+	}
+
+	if _, err := service.Light.TurnOff(ctx, entities.Light.ChristmasLights); err != nil {
+		slog.Warn("couldn't turn off Christmas lights")
+	}
 }

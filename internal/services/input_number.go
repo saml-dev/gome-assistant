@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type InputNumber struct {
@@ -8,38 +14,68 @@ type InputNumber struct {
 
 /* Public API */
 
-func (ib InputNumber) Set(entityID string, value float32) error {
-	req := BaseServiceRequest{
+func (ib InputNumber) Set(
+	ctx context.Context, entityID string, value float32,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:      "input_number",
 		Service:     "set_value",
 		ServiceData: map[string]any{"value": value},
-		Target:      Entity(entityID),
+		Target:      message.Entity(entityID),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputNumber) Increment(entityID string) error {
-	req := BaseServiceRequest{
+func (ib InputNumber) Increment(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_number",
 		Service: "increment",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputNumber) Decrement(entityID string) error {
-	req := BaseServiceRequest{
+func (ib InputNumber) Decrement(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_number",
 		Service: "decrement",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputNumber) Reload() error {
-	req := BaseServiceRequest{
+func (ib InputNumber) Reload(ctx context.Context) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_number",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

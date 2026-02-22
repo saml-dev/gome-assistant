@@ -17,11 +17,6 @@ import (
 
 var ErrInvalidToken = errors.New("invalid authentication token")
 
-type AuthMessage struct {
-	MsgType     string `json:"type"`
-	AccessToken string `json:"access_token"`
-}
-
 type Conn struct {
 	conn          *websocket.Conn
 	writeLock     sync.Mutex
@@ -77,14 +72,14 @@ func NewConn(
 	}
 
 	// Send auth message
-	err = conn.sendAuthMessage(ctx, authToken)
+	err = conn.sendAuthMessage(authToken)
 	if err != nil {
 		slog.Error("Unknown error creating websocket client\n")
 		return nil, err
 	}
 
 	// Verify auth message was successful
-	err = conn.verifyAuthResponse(ctx)
+	err = conn.verifyAuthResponse()
 	if err != nil {
 		slog.Error("Auth token is invalid. Please double check it or create a new token in your Home Assistant profile\n")
 		return nil, err
@@ -97,23 +92,28 @@ func (conn *Conn) Close() error {
 	return conn.conn.Close()
 }
 
-func (conn *Conn) sendAuthMessage(ctx context.Context, token string) error {
-	err := conn.conn.WriteJSON(AuthMessage{MsgType: "auth", AccessToken: token})
+func (conn *Conn) sendAuthMessage(token string) error {
+	type authMessage struct {
+		Type        string `json:"type"`
+		AccessToken string `json:"access_token"`
+	}
+
+	err := conn.conn.WriteJSON(authMessage{Type: "auth", AccessToken: token})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-type authResponse struct {
-	MsgType string `json:"type"`
-	Message string `json:"message"`
-}
-
-func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
+func (conn *Conn) verifyAuthResponse() error {
 	msg, err := conn.readMessage()
 	if err != nil {
 		return err
+	}
+
+	type authResponse struct {
+		Type    string `json:"type"`
+		Message string `json:"message"`
 	}
 
 	var authResp authResponse
@@ -121,7 +121,7 @@ func (conn *Conn) verifyAuthResponse(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if authResp.MsgType != "auth_ok" {
+	if authResp.Type != "auth_ok" {
 		return ErrInvalidToken
 	}
 

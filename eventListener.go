@@ -7,7 +7,7 @@ import (
 	"github.com/golang-module/carbon"
 
 	"saml.dev/gome-assistant/internal"
-	"saml.dev/gome-assistant/internal/websocket"
+	"saml.dev/gome-assistant/message"
 )
 
 type EventListener struct {
@@ -25,12 +25,7 @@ type EventListener struct {
 	disabledEntities []internal.EnabledDisabledInfo
 }
 
-type EventListenerCallback func(*Service, State, EventData)
-
-type EventData struct {
-	Type         string
-	RawEventJSON []byte
-}
+type EventListenerCallback func(*Service, State, message.Message)
 
 /* Methods */
 
@@ -132,7 +127,7 @@ func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
 
-func (l *EventListener) maybeCall(app *App, eventData EventData) {
+func (l *EventListener) maybeCall(app *App, eventMsg message.Message) {
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -153,24 +148,19 @@ func (l *EventListener) maybeCall(app *App, eventData EventData) {
 		return
 	}
 
-	go l.callback(app.service, app.state, eventData)
+	go l.callback(app.service, app.state, eventMsg)
 	l.lastRan = carbon.Now()
 }
 
 /* Functions */
-func (app *App) callEventListeners(eventType string, msg websocket.ChanMsg) {
+func (app *App) callEventListeners(eventType string, msg message.Message) {
 	listeners, ok := app.eventListeners[eventType]
 	if !ok {
 		// no listeners registered for this event type
 		return
 	}
 
-	eventData := EventData{
-		Type:         eventType,
-		RawEventJSON: msg.Raw,
-	}
-
 	for _, l := range listeners {
-		l.maybeCall(app, eventData)
+		l.maybeCall(app, msg)
 	}
 }

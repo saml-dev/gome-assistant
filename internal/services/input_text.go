@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type InputText struct {
@@ -8,22 +14,36 @@ type InputText struct {
 
 /* Public API */
 
-func (ib InputText) Set(entityID string, value string) error {
-	req := BaseServiceRequest{
+func (ib InputText) Set(
+	ctx context.Context, entityID string, value string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_text",
 		Service: "set_value",
 		ServiceData: map[string]any{
 			"value": value,
 		},
-		Target: Entity(entityID),
+		Target: message.Entity(entityID),
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (ib InputText) Reload() error {
-	req := BaseServiceRequest{
+func (ib InputText) Reload(ctx context.Context) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "input_text",
 		Service: "reload",
 	}
-	return ib.api.Call(req)
+
+	var result any
+	if err := ib.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

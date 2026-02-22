@@ -1,5 +1,11 @@
 package services
 
+import (
+	"context"
+
+	"saml.dev/gome-assistant/message"
+)
+
 /* Structs */
 
 type Switch struct {
@@ -8,29 +14,53 @@ type Switch struct {
 
 /* Public API */
 
-func (s Switch) TurnOn(entityID string) error {
-	req := BaseServiceRequest{
+func (s Switch) TurnOn(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "switch",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (s Switch) Toggle(entityID string) error {
-	req := BaseServiceRequest{
+func (s Switch) Toggle(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "switch",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (s Switch) TurnOff(entityID string) error {
-	req := BaseServiceRequest{
+func (s Switch) TurnOff(
+	ctx context.Context, entityID string,
+) (any, error) {
+	req := message.CallServiceData{
 		Domain:  "switch",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  message.Entity(entityID),
 	}
-	return s.api.Call(req)
+
+	var result any
+	if err := s.api.Call(ctx, req, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
