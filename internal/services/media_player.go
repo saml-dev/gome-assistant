@@ -19,18 +19,17 @@ func (mp MediaPlayer) ClearPlaylist(entityID string) error {
 	return mp.api.CallAndForget(req)
 }
 
-// Group players together. Only works on platforms with support for player groups.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) Join(entityID string, serviceData ...map[string]any) error {
+// Group players together. Only works on platforms with support for
+// player groups. Takes an entityID and an optional service_data,
+// which must be serializable to a JSON object.
+func (mp MediaPlayer) Join(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "join",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "join",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -90,17 +89,16 @@ func (mp MediaPlayer) Previous(entityID string) error {
 }
 
 // Send the media player the command to seek in current playing media.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) Seek(entityID string, serviceData ...map[string]any) error {
+// Takes an entityID and an optional service_data, which must be
+// serializable to a JSON object.
+func (mp MediaPlayer) Seek(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "media_seek",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "media_seek",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -115,77 +113,71 @@ func (mp MediaPlayer) Stop(entityID string) error {
 	return mp.api.CallAndForget(req)
 }
 
-// Send the media player the command for playing media.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) PlayMedia(entityID string, serviceData ...map[string]any) error {
+// Send the media player the command for playing media. Takes an
+// entityID and an optional service_data, which must be serializable
+// to a JSON object.
+func (mp MediaPlayer) PlayMedia(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "play_media",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "play_media",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
-// Set repeat mode. Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) RepeatSet(entityID string, serviceData ...map[string]any) error {
+// Set repeat mode. Takes an entityID and an optional service_data,
+// which must be serializable to a JSON object.
+func (mp MediaPlayer) RepeatSet(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "repeat_set",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "repeat_set",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
-// Send the media player the command to change sound mode.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData ...map[string]any) error {
+// Send the media player the command to change sound mode. Takes an
+// entityID and an optional service_data, which must be serializable
+// to a JSON object.
+func (mp MediaPlayer) SelectSoundMode(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "select_sound_mode",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "select_sound_mode",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
-// Send the media player the command to change input source.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) SelectSource(entityID string, serviceData ...map[string]any) error {
+// Send the media player the command to change input source. Takes an
+// entityID and an optional service_data, which must be serializable
+// to a JSON object.
+func (mp MediaPlayer) SelectSource(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "select_source",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "select_source",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
-// Set shuffling state.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) Shuffle(entityID string, serviceData ...map[string]any) error {
+// Set shuffling state. Takes an entityID and an optional
+// service_data, which must be serializable to a JSON object.
+func (mp MediaPlayer) Shuffle(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "shuffle_set",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "shuffle_set",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
@@ -245,33 +237,29 @@ func (mp MediaPlayer) VolumeDown(entityID string) error {
 	return mp.api.CallAndForget(req)
 }
 
-// Mute a media player's volume.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) VolumeMute(entityID string, serviceData ...map[string]any) error {
+// Mute a media player's volume. Takes an entityID and an optional
+// service_data, which must be serializable to a JSON object.
+func (mp MediaPlayer) VolumeMute(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "volume_mute",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "volume_mute",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
-// Set a media player's volume level.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (mp MediaPlayer) VolumeSet(entityID string, serviceData ...map[string]any) error {
+// Set a media player's volume level. Takes an entityID and an
+// optional service_data, which must be serializable to a JSON object.
+func (mp MediaPlayer) VolumeSet(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "media_player",
-		Service: "volume_set",
-		Target:  Entity(entityID),
+		Domain:      "media_player",
+		Service:     "volume_set",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return mp.api.CallAndForget(req)
 }
 
