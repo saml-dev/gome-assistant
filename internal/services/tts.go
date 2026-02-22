@@ -19,31 +19,28 @@ func (tts TTS) ClearCache() error {
 }
 
 // Say something using text-to-speech on a media player with cloud.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (tts TTS) CloudSay(entityID string, serviceData ...map[string]any) error {
+// Takes an entityID and an optional service_data, which must be
+// serializable to a JSON object.
+func (tts TTS) CloudSay(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "tts",
-		Service: "cloud_say",
-		Target:  Entity(entityID),
+		Domain:      "tts",
+		Service:     "cloud_say",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return tts.api.CallAndForget(req)
 }
 
-// Say something using text-to-speech on a media player with google_translate.
-// Takes an entityID and an optional
-// map that is translated into service_data.
-func (tts TTS) GoogleTranslateSay(entityID string, serviceData ...map[string]any) error {
+// Say something using text-to-speech on a media player with
+// google_translate. Takes an entityID and an optional service_data,
+// which must be serializable to a JSON object.
+func (tts TTS) GoogleTranslateSay(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "tts",
-		Service: "google_translate_say",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "tts",
+		Service:     "google_translate_say",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
 
 	return tts.api.CallAndForget(req)

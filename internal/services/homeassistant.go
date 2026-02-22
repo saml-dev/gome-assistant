@@ -5,30 +5,26 @@ type HomeAssistant struct {
 }
 
 // TurnOn a Home Assistant entity. Takes an entityID and an optional
-// map that is translated into service_data.
-func (ha *HomeAssistant) TurnOn(entityID string, serviceData ...map[string]any) error {
+// service_data, which must be serializable to a JSON object.
+func (ha *HomeAssistant) TurnOn(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "homeassistant",
-		Service: "turn_on",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "homeassistant",
+		Service:     "turn_on",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
 
 	return ha.api.CallAndForget(req)
 }
 
 // Toggle a Home Assistant entity. Takes an entityID and an optional
-// map that is translated into service_data.
-func (ha *HomeAssistant) Toggle(entityID string, serviceData ...map[string]any) error {
+// service_data, which must be serializable to a JSON object.
+func (ha *HomeAssistant) Toggle(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "homeassistant",
-		Service: "toggle",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "homeassistant",
+		Service:     "toggle",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
 
 	return ha.api.CallAndForget(req)

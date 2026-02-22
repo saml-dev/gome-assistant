@@ -8,30 +8,29 @@ type Scene struct {
 
 /* Public API */
 
-// Apply a scene. Takes map that is translated into service_data.
-func (s Scene) Apply(serviceData ...map[string]any) error {
+// Apply a scene. Takes an optional service_data, which must be
+// serializable to a JSON object.
+func (s Scene) Apply(serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "apply",
-		Target:  Entity(""),
+		Domain:      "scene",
+		Service:     "apply",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(""),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return s.api.CallAndForget(req)
 }
 
 // Create a scene entity. Takes an entityID and an optional
-// map that is translated into service_data.
-func (s Scene) Create(entityID string, serviceData ...map[string]any) error {
+// service_data, which must be serializable to a JSON object.
+func (s Scene) Create(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "create",
-		Target:  Entity(entityID),
+		Domain:      "scene",
+		Service:     "create",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return s.api.CallAndForget(req)
 }
 
@@ -46,15 +45,14 @@ func (s Scene) Reload() error {
 }
 
 // TurnOn a scene entity. Takes an entityID and an optional
-// map that is translated into service_data.
-func (s Scene) TurnOn(entityID string, serviceData ...map[string]any) error {
+// service_data, which must be serializable to a JSON object.
+func (s Scene) TurnOn(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "scene",
-		Service: "turn_on",
-		Target:  Entity(entityID),
+		Domain:      "scene",
+		Service:     "turn_on",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return s.api.CallAndForget(req)
 }

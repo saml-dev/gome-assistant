@@ -48,31 +48,29 @@ func (c Cover) OpenTilt(entityID string) error {
 	return c.api.CallAndForget(req)
 }
 
-// Move to specific position all or specified cover. Takes an entityID and an optional
-// map that is translated into service_data.
-func (c Cover) SetPosition(entityID string, serviceData ...map[string]any) error {
+// Move to specific position all or specified cover. Takes an entityID
+// and an optional service_data, which must be serializable to a JSON
+// object.
+func (c Cover) SetPosition(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "cover",
-		Service: "set_cover_position",
-		Target:  Entity(entityID),
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Domain:      "cover",
+		Service:     "set_cover_position",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
 
 	return c.api.CallAndForget(req)
 }
 
-// Move to specific position all or specified cover tilt. Takes an entityID and an optional
-// map that is translated into service_data.
-func (c Cover) SetTiltPosition(entityID string, serviceData ...map[string]any) error {
+// Move to specific position all or specified cover tilt. Takes an
+// entityID and an optional service_data, which must be serializable
+// to a JSON object.
+func (c Cover) SetTiltPosition(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Target:  Entity(entityID),
-		Domain:  "cover",
-		Service: "set_cover_tilt_position",
-	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
+		Target:      Entity(entityID),
+		Domain:      "cover",
+		ServiceData: optionalServiceData(serviceData...),
+		Service:     "set_cover_tilt_position",
 	}
 
 	return c.api.CallAndForget(req)

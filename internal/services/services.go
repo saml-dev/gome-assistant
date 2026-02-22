@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"log/slog"
 
 	"saml.dev/gome-assistant/websocket"
 )
@@ -64,10 +65,10 @@ type CallServiceMessage struct {
 // call. `ServiceData` can contain arbitrary data needed for a
 // particular call.
 type BaseServiceRequest struct {
-	Domain      string         `json:"domain"`
-	Service     string         `json:"service"`
-	ServiceData map[string]any `json:"service_data,omitempty"`
-	Target      Target         `json:"target,omitempty"`
+	Domain      string `json:"domain"`
+	Service     string `json:"service"`
+	ServiceData any    `json:"service_data,omitempty"`
+	Target      Target `json:"target,omitempty"`
 }
 
 type Target struct {
@@ -77,5 +78,19 @@ type Target struct {
 func Entity(entityID string) Target {
 	return Target{
 		EntityID: entityID,
+	}
+}
+
+func optionalServiceData(serviceData ...any) any {
+	switch len(serviceData) {
+	case 0:
+		return nil
+	case 1:
+		return serviceData[0]
+	default:
+		slog.Warn(
+			"multiple arguments passed as service data; only the first used",
+		)
+		return serviceData[0]
 	}
 }

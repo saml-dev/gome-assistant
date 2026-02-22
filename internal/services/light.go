@@ -9,30 +9,28 @@ type Light struct {
 /* Public API */
 
 // TurnOn a light entity. Takes an entityID and an optional
-// map that is translated into service_data.
-func (l Light) TurnOn(entityID string, serviceData ...map[string]any) error {
+// service_data, which must be serializable to a JSON object.
+func (l Light) TurnOn(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "light",
-		Service: "turn_on",
-		Target:  Entity(entityID),
+		Domain:      "light",
+		Service:     "turn_on",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return l.api.CallAndForget(req)
 }
 
 // Toggle a light entity. Takes an entityID and an optional
-// map that is translated into service_data.
-func (l Light) Toggle(entityID string, serviceData ...map[string]any) error {
+// service_data, which must be serializable to a JSON object.
+func (l Light) Toggle(entityID string, serviceData ...any) error {
 	req := BaseServiceRequest{
-		Domain:  "light",
-		Service: "toggle",
-		Target:  Entity(entityID),
+		Domain:      "light",
+		Service:     "toggle",
+		ServiceData: optionalServiceData(serviceData...),
+		Target:      Entity(entityID),
 	}
-	if len(serviceData) != 0 {
-		req.ServiceData = serviceData[0]
-	}
+
 	return l.api.CallAndForget(req)
 }
 
