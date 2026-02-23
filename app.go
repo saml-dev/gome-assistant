@@ -265,7 +265,7 @@ func (app *App) registerEventListener(evl EventListener) {
 					// Subscribing, itself, causes the server to send
 					// a "result" message. We don't want to forward
 					// that message to the listeners.
-					if msg.Type != eventType {
+					if msg.Type != "event" {
 						return
 					}
 
