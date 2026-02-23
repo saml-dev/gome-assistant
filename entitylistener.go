@@ -31,6 +31,8 @@ type EntityListener struct {
 	runOnStartup          bool
 	runOnStartupCompleted bool
 
+	ignoreAttributeChanges bool
+
 	enabledEntities  []internal.EnabledDisabledInfo
 	disabledEntities []internal.EnabledDisabledInfo
 }
@@ -155,6 +157,14 @@ func (b elBuilder3) RunOnStartup() elBuilder3 {
 	return b
 }
 
+// IgnoreAttributeChanges causes this listener to skip firing when the entity's
+// state string is unchanged (i.e. only attributes changed). By default,
+// attribute-only changes will trigger the listener.
+func (b elBuilder3) IgnoreAttributeChanges() elBuilder3 {
+	b.entityListener.ignoreAttributeChanges = true
+	return b
+}
+
 /*
 Enable this listener only when the current state of {entityID} matches {state}.
 If there is a network error while retrieving state, the listener runs if {runOnNetworkError} is true.
@@ -195,6 +205,9 @@ func (b elBuilder3) Build() EntityListener {
 
 func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateData) {
 	// Check conditions
+	if l.ignoreAttributeChanges && data.NewState.State == data.OldState.State {
+		return
+	}
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
 	}
@@ -246,14 +259,6 @@ func (app *App) callEntityListeners(msgBytes []byte) {
 	listeners, ok := app.entityListeners[eid]
 	if !ok {
 		// no listeners registered for this id
-		return
-	}
-
-	// if new state is same as old state, don't call
-	// event listener. I noticed this with iOS app location,
-	// every time I refresh the app it triggers a device_tracker
-	// entity listener.
-	if msg.Event.Data.NewState.State == msg.Event.Data.OldState.State {
 		return
 	}
 
