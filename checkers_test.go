@@ -33,6 +33,16 @@ func (s MockState) Get(eid string) (EntityState, error) {
 	}
 	return s.GetReturn, nil
 }
+func (s MockState) GetStates(eids []string) ([]string, error) {
+	if s.GetError {
+		return nil, errors.New("some error")
+	}
+	states := make([]string, len(eids))
+	for i := range eids {
+		states[i] = s.GetReturn.State
+	}
+	return states, nil
+}
 func (s MockState) ListEntities() ([]EntityState, error) {
 	return []EntityState{}, nil
 }

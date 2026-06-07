@@ -4,10 +4,13 @@
 package http
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type HttpClient struct {
@@ -40,6 +43,34 @@ func (c *HttpClient) GetState(entityID string) ([]byte, error) {
 	return resp, nil
 }
 
+func (c *HttpClient) GetStates(entityIDs []string) ([]byte, error) {
+	template, err := statesTemplate(entityIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := post(c.url+"/template", c.token, map[string]string{
+		"template": template,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func statesTemplate(entityIDs []string) (string, error) {
+	stateCalls := make([]string, 0, len(entityIDs))
+	for _, entityID := range entityIDs {
+		quotedEntityID, err := json.Marshal(entityID)
+		if err != nil {
+			return "", err
+		}
+		stateCalls = append(stateCalls, "states("+string(quotedEntityID)+")")
+	}
+
+	return "{{ [" + strings.Join(stateCalls, ", ") + "] | to_json }}", nil
+}
+
 func (c *HttpClient) States() ([]byte, error) {
 	resp, err := get(c.url+"/states", c.token)
 	if err != nil {
@@ -55,6 +86,34 @@ func get(url, token string) ([]byte, error) {
 	}
 
 	req.Header.Add("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, errors.New("Error on response.\n[ERROR] -" + err.Error())
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.New("Error while reading the response bytes:" + err.Error())
+	}
+
+	return body, nil
+}
+
+func post(url, token string, data any) ([]byte, error) {
+	postBody, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(postBody))
+	if err != nil {
+		return nil, errors.New("Error creating HTTP request: " + err.Error())
+	}
+
+	req.Header.Add("Authorization", "Bearer "+token)
+	req.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

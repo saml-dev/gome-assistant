@@ -18,6 +18,7 @@ type State interface {
 	BeforeSunset(...DurationString) bool
 	ListEntities() ([]EntityState, error)
 	Get(entityID string) (EntityState, error)
+	GetStates(entityIDs []string) ([]string, error)
 	Equals(entityID, state string) (bool, error)
 }
 
@@ -77,6 +78,23 @@ func (s *StateImpl) Get(entityID string) (EntityState, error) {
 	es := EntityState{}
 	err = json.Unmarshal(resp, &es)
 	return es, err
+}
+
+// GetStates returns the states for each entity ID in the same order as
+// entityIDs. All values are strings; callers must convert returned values to
+// numbers or other types when applicable.
+func (s *StateImpl) GetStates(entityIDs []string) ([]string, error) {
+	if len(entityIDs) == 0 {
+		return []string{}, nil
+	}
+
+	resp, err := s.httpClient.GetStates(entityIDs)
+	if err != nil {
+		return nil, err
+	}
+	states := []string{}
+	err = json.Unmarshal(resp, &states)
+	return states, err
 }
 
 // ListEntities returns a list of all entities in Home Assistant.
