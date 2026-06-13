@@ -12,7 +12,7 @@ type ZWaveJS struct {
 
 // ZWaveJS bulk_set_partial_config_parameters service.
 func (zw ZWaveJS) BulkSetPartialConfigParam(
-	ctx context.Context, entityIDs []string, parameter int, value any,
+	ctx context.Context, target Target, parameter int, value any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "zwave_js",
@@ -21,7 +21,7 @@ func (zw ZWaveJS) BulkSetPartialConfigParam(
 			"parameter": parameter,
 			"value":     value,
 		},
-		Target: Entities(entityIDs),
+		Target: target,
 	}
 
 	var result any

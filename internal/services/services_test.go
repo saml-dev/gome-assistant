@@ -12,7 +12,7 @@ func TestTargetSerializesMultipleEntityIDs(t *testing.T) {
 	req := BaseServiceRequest{
 		Domain:  "homeassistant",
 		Service: "turn_off",
-		Target:  Entities([]string{"light.kitchen", "fan.office"}),
+		Target:  Entities("light.kitchen", "fan.office"),
 	}
 
 	body, err := json.Marshal(req)
@@ -28,12 +28,29 @@ func TestTargetSerializesMultipleEntityIDs(t *testing.T) {
 }
 
 func TestTargetSerializesSingleEntityIDList(t *testing.T) {
-	target := Entities([]string{"light.kitchen"})
+	target := Entities("light.kitchen")
 
 	body, err := json.Marshal(target)
 
 	require.NoError(t, err)
 	assert.JSONEq(t, `{
 		"entity_id": ["light.kitchen"]
+	}`, string(body))
+}
+
+func TestTargetSerializesManualTarget(t *testing.T) {
+	target := Target{
+		EntityIDs: []string{"light.kitchen"},
+		AreaIDs:   []string{"kitchen"},
+		DeviceIDs: []string{"abc123"},
+	}
+
+	body, err := json.Marshal(target)
+
+	require.NoError(t, err)
+	assert.JSONEq(t, `{
+		"entity_id": ["light.kitchen"],
+		"area_id": ["kitchen"],
+		"device_id": ["abc123"]
 	}`, string(body))
 }

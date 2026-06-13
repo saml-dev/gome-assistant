@@ -13,13 +13,13 @@ type AlarmControlPanel struct {
 // Send the alarm the command for arm away. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (acp AlarmControlPanel) ArmAway(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_away",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -33,13 +33,13 @@ func (acp AlarmControlPanel) ArmAway(
 // Send the alarm the command for arm away. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (acp AlarmControlPanel) ArmWithCustomBypass(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_custom_bypass",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -53,13 +53,13 @@ func (acp AlarmControlPanel) ArmWithCustomBypass(
 // Send the alarm the command for arm home. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (acp AlarmControlPanel) ArmHome(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_home",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -73,13 +73,13 @@ func (acp AlarmControlPanel) ArmHome(
 // Send the alarm the command for arm night. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (acp AlarmControlPanel) ArmNight(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_night",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -94,13 +94,13 @@ func (acp AlarmControlPanel) ArmNight(
 // an optional service_data, which must be serializable to a JSON
 // object.
 func (acp AlarmControlPanel) ArmVacation(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_arm_vacation",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -114,13 +114,13 @@ func (acp AlarmControlPanel) ArmVacation(
 // Send the alarm the command for disarm. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (acp AlarmControlPanel) Disarm(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_disarm",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -134,13 +134,13 @@ func (acp AlarmControlPanel) Disarm(
 // Send the alarm the command for trigger. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (acp AlarmControlPanel) Trigger(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "alarm_control_panel",
 		Service:     "alarm_trigger",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any

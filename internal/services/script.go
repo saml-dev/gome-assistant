@@ -12,12 +12,12 @@ type Script struct {
 
 // Reload a script that was created in the HA UI.
 func (s Script) Reload(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "reload",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -30,12 +30,12 @@ func (s Script) Reload(
 
 // Toggle a script that was created in the HA UI.
 func (s Script) Toggle(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "toggle",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -63,12 +63,12 @@ func (s Script) TurnOff(ctx context.Context) (any, error) {
 
 // TurnOn a script that was created in the HA UI.
 func (s Script) TurnOn(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "script",
 		Service: "turn_on",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any

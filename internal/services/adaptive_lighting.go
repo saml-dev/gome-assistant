@@ -12,16 +12,16 @@ type AdaptiveLighting struct {
 
 // Set manual control for an adaptive lighting entity.
 func (al AdaptiveLighting) SetManualControl(
-	ctx context.Context, entityIDs []string, enabled bool,
+	ctx context.Context, target Target, enabled bool,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "adaptive_lighting",
 		Service: "set_manual_control",
 		ServiceData: map[string]any{
-			"entity_id":      entityIDs,
+			"entity_id":      target.EntityIDs,
 			"manual_control": enabled,
 		},
-		Target: Entities(entityIDs),
+		Target: target,
 	}
 
 	var result any

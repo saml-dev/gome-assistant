@@ -9,13 +9,13 @@ type HomeAssistant struct {
 // TurnOn a Home Assistant entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (ha *HomeAssistant) TurnOn(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "homeassistant",
 		Service:     "turn_on",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -29,13 +29,13 @@ func (ha *HomeAssistant) TurnOn(
 // Toggle a Home Assistant entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (ha *HomeAssistant) Toggle(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "homeassistant",
 		Service:     "toggle",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -47,12 +47,12 @@ func (ha *HomeAssistant) Toggle(
 }
 
 func (ha *HomeAssistant) TurnOff(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "homeassistant",
 		Service: "turn_off",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any

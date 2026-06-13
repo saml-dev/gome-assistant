@@ -112,12 +112,13 @@ app.RegisterIntervals(...)
 app.Start()
 ```
 
-A full reference is available on [pkg.go.dev](https://pkg.go.dev/saml.dev/gome-assistant), but all you need to know to get started are the four types of automations in gome-assistant.
+A full reference is available on [pkg.go.dev](https://pkg.go.dev/saml.dev/gome-assistant), but all you need to know to get started are the core concepts below.
 
 - [Daily Schedules](#daily-schedule)
 - [Entity Listeners](#entity-listener)
 - [Event Listeners](#event-listener)
 - [Intervals](#interval)
+- [Calling Services](#calling-services)
 
 ### Daily Schedule
 
@@ -231,6 +232,47 @@ func myCallback(service *ga.Service, state ga.State, data ga.EventData) {
 ```
 
 > 💡 Check `eventTypes.go` for pre-defined event types, or create your own struct type for custom events and contribute them back to gome-assistant with a PR.
+
+### Calling Services
+
+Automation callbacks receive a `*ga.Service`, which is used to call Home Assistant services.
+
+Service methods that act on Home Assistant targets take a `ga.Target`. The most common way to create one is with `ga.Entities(...)`:
+
+```go
+func lightsOut(service *ga.Service) {
+	_, err := service.HomeAssistant.TurnOff(context.Background(), ga.Entities(
+		"light.kitchen",
+		"fan.office",
+		"switch.desk",
+	))
+	if err != nil {
+		// handle error
+	}
+}
+```
+
+Use generated entity constants when available:
+
+```go
+_, err := service.Light.TurnOn(ctx, ga.Entities(
+	entities.Light.LivingRoom,
+	entities.Light.Kitchen,
+))
+```
+
+For more control, construct a `ga.Target` directly or use another helper:
+
+```go
+_, err := service.Light.TurnOff(ctx, ga.Target{
+	EntityIDs: []string{"light.kitchen"},
+	AreaIDs:   []string{"kitchen"},
+	DeviceIDs: []string{"abc123"},
+})
+
+_, err = service.Light.TurnOff(ctx, ga.Areas("kitchen"))
+_, err = service.Light.TurnOff(ctx, ga.Devices("abc123"))
+```
 
 ### Interval
 

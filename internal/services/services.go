@@ -73,11 +73,25 @@ type BaseServiceRequest struct {
 
 type Target struct {
 	EntityIDs []string `json:"entity_id,omitempty"`
+	AreaIDs   []string `json:"area_id,omitempty"`
+	DeviceIDs []string `json:"device_id,omitempty"`
 }
 
-func Entities(entityIDs []string) Target {
+func Entities(entityIDs ...string) Target {
 	return Target{
 		EntityIDs: entityIDs,
+	}
+}
+
+func Areas(areaIDs ...string) Target {
+	return Target{
+		AreaIDs: areaIDs,
+	}
+}
+
+func Devices(deviceIDs ...string) Target {
+	return Target{
+		DeviceIDs: deviceIDs,
 	}
 }
 

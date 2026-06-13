@@ -32,13 +32,13 @@ func (s Scene) Apply(
 // Create a scene entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (s Scene) Create(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "scene",
 		Service:     "create",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -67,13 +67,13 @@ func (s Scene) Reload(ctx context.Context) (any, error) {
 // TurnOn a scene entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (s Scene) TurnOn(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "scene",
 		Service:     "turn_on",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any

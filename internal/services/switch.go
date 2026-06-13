@@ -11,12 +11,12 @@ type Switch struct {
 /* Public API */
 
 func (s Switch) TurnOn(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_on",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -28,12 +28,12 @@ func (s Switch) TurnOn(
 }
 
 func (s Switch) Toggle(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "toggle",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -45,12 +45,12 @@ func (s Switch) Toggle(
 }
 
 func (s Switch) TurnOff(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "switch",
 		Service: "turn_off",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any

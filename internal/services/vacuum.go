@@ -13,12 +13,12 @@ type Vacuum struct {
 // Tell the vacuum cleaner to do a spot clean-up.
 // Takes entity IDs.
 func (v Vacuum) CleanSpot(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "clean_spot",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 	var result any
 	if err := v.api.Call(ctx, req, &result); err != nil {
@@ -31,12 +31,12 @@ func (v Vacuum) CleanSpot(
 // Locate the vacuum cleaner robot.
 // Takes entity IDs.
 func (v Vacuum) Locate(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "locate",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -50,12 +50,12 @@ func (v Vacuum) Locate(
 // Pause the cleaning task.
 // Takes entity IDs.
 func (v Vacuum) Pause(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "pause",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -69,12 +69,12 @@ func (v Vacuum) Pause(
 // Tell the vacuum cleaner to return to its dock.
 // Takes entity IDs.
 func (v Vacuum) ReturnToBase(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "return_to_base",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -88,13 +88,13 @@ func (v Vacuum) ReturnToBase(
 // Send a raw command to the vacuum cleaner. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (v Vacuum) SendCommand(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "vacuum",
 		Service:     "send_command",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -108,13 +108,13 @@ func (v Vacuum) SendCommand(
 // Set the fan speed of the vacuum cleaner. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (v Vacuum) SetFanSpeed(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "vacuum",
 		Service:     "set_fan_speed",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -128,12 +128,12 @@ func (v Vacuum) SetFanSpeed(
 // Start or resume the cleaning task.
 // Takes entity IDs.
 func (v Vacuum) Start(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "start",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -147,12 +147,12 @@ func (v Vacuum) Start(
 // Start, pause, or resume the cleaning task.
 // Takes entity IDs.
 func (v Vacuum) StartPause(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "start_pause",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -166,12 +166,12 @@ func (v Vacuum) StartPause(
 // Stop the current cleaning task.
 // Takes entity IDs.
 func (v Vacuum) Stop(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "stop",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 	var result any
 	if err := v.api.Call(ctx, req, &result); err != nil {
@@ -184,12 +184,12 @@ func (v Vacuum) Stop(
 // Stop the current cleaning task and return to home.
 // Takes entity IDs.
 func (v Vacuum) TurnOff(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "turn_off",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -203,12 +203,12 @@ func (v Vacuum) TurnOff(
 // Start a new cleaning task.
 // Takes entity IDs.
 func (v Vacuum) TurnOn(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "vacuum",
 		Service: "turn_on",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 	var result any
 	if err := v.api.Call(ctx, req, &result); err != nil {

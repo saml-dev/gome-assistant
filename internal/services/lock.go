@@ -13,13 +13,13 @@ type Lock struct {
 // Lock a lock entity. Takes entity IDs and an optional service_data,
 // which must be serializable to a JSON object.
 func (l Lock) Lock(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "lock",
 		Service:     "lock",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -33,13 +33,13 @@ func (l Lock) Lock(
 // Unlock a lock entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (l Lock) Unlock(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "lock",
 		Service:     "unlock",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any

@@ -78,11 +78,11 @@ func pantryLights(
 	l := "light.pantry"
 	// l := entities.Light.Pantry // Or use generated entity constant
 	if sensor.ToState == "on" {
-		if _, err := service.HomeAssistant.TurnOn(ctx, []string{l}); err != nil {
+		if _, err := service.HomeAssistant.TurnOn(ctx, ga.Entities(l)); err != nil {
 			slog.Warn("couldn't turn on pantry light")
 		}
 	} else {
-		if _, err := service.HomeAssistant.TurnOff(ctx, []string{l}); err != nil {
+		if _, err := service.HomeAssistant.TurnOff(ctx, ga.Entities(l)); err != nil {
 			slog.Warn("couldn't turn off pantry light")
 		}
 	}
@@ -101,7 +101,7 @@ func onEvent(service *ga.Service, state ga.State, data ga.EventData) {
 
 func lightsOut(ctx context.Context, service *ga.Service, state ga.State) {
 	// always turn off outside lights
-	if _, err := service.Light.TurnOff(ctx, []string{entities.Light.OutsideLights}); err != nil {
+	if _, err := service.Light.TurnOff(ctx, ga.Entities(entities.Light.OutsideLights)); err != nil {
 		slog.Warn("couldn't turn off living room light, doing nothing")
 		return
 	}
@@ -113,7 +113,7 @@ func lightsOut(ctx context.Context, service *ga.Service, state ga.State) {
 
 	// if no motion detected in living room for 30mins
 	if s.State == "off" && time.Since(s.LastChanged).Minutes() > 30 {
-		if _, err := service.Light.TurnOff(ctx, []string{entities.Light.MainLights}); err != nil {
+		if _, err := service.Light.TurnOff(ctx, ga.Entities(entities.Light.MainLights)); err != nil {
 			slog.Warn("couldn't turn off living light")
 			return
 		}
@@ -121,11 +121,11 @@ func lightsOut(ctx context.Context, service *ga.Service, state ga.State) {
 }
 
 func sunriseSched(ctx context.Context, service *ga.Service, state ga.State) {
-	if _, err := service.Light.TurnOn(ctx, []string{entities.Light.LivingRoomLamps}); err != nil {
+	if _, err := service.Light.TurnOn(ctx, ga.Entities(entities.Light.LivingRoomLamps)); err != nil {
 		slog.Warn("couldn't turn on living light")
 	}
 
-	if _, err := service.Light.TurnOff(ctx, []string{entities.Light.ChristmasLights}); err != nil {
+	if _, err := service.Light.TurnOff(ctx, ga.Entities(entities.Light.ChristmasLights)); err != nil {
 		slog.Warn("couldn't turn off Christmas lights")
 	}
 }

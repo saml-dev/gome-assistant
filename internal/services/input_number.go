@@ -11,13 +11,13 @@ type InputNumber struct {
 /* Public API */
 
 func (ib InputNumber) Set(
-	ctx context.Context, entityIDs []string, value float32,
+	ctx context.Context, target Target, value float32,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "input_number",
 		Service:     "set_value",
 		ServiceData: map[string]any{"value": value},
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -29,12 +29,12 @@ func (ib InputNumber) Set(
 }
 
 func (ib InputNumber) Increment(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_number",
 		Service: "increment",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -46,12 +46,12 @@ func (ib InputNumber) Increment(
 }
 
 func (ib InputNumber) Decrement(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_number",
 		Service: "decrement",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any

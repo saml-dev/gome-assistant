@@ -29,13 +29,13 @@ func (tts TTS) ClearCache(ctx context.Context) (any, error) {
 // Takes entity IDs and an optional service_data, which must be
 // serializable to a JSON object.
 func (tts TTS) CloudSay(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "tts",
 		Service:     "cloud_say",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -50,13 +50,13 @@ func (tts TTS) CloudSay(
 // google_translate. Takes entity IDs and an optional service_data,
 // which must be serializable to a JSON object.
 func (tts TTS) GoogleTranslateSay(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "tts",
 		Service:     "google_translate_say",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any

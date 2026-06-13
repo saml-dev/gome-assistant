@@ -13,12 +13,12 @@ type MediaPlayer struct {
 // Send the media player the command to clear players playlist.
 // Takes entity IDs.
 func (mp MediaPlayer) ClearPlaylist(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "clear_playlist",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -33,13 +33,13 @@ func (mp MediaPlayer) ClearPlaylist(
 // player groups. Takes entity IDs and an optional service_data,
 // which must be serializable to a JSON object.
 func (mp MediaPlayer) Join(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "join",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -53,12 +53,12 @@ func (mp MediaPlayer) Join(
 // Send the media player the command for next track.
 // Takes entity IDs.
 func (mp MediaPlayer) Next(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_next_track",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -72,12 +72,12 @@ func (mp MediaPlayer) Next(
 // Send the media player the command for pause.
 // Takes entity IDs.
 func (mp MediaPlayer) Pause(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_pause",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -91,12 +91,12 @@ func (mp MediaPlayer) Pause(
 // Send the media player the command for play.
 // Takes entity IDs.
 func (mp MediaPlayer) Play(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_play",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -110,12 +110,12 @@ func (mp MediaPlayer) Play(
 // Toggle media player play/pause state.
 // Takes entity IDs.
 func (mp MediaPlayer) PlayPause(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_play_pause",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -129,12 +129,12 @@ func (mp MediaPlayer) PlayPause(
 // Send the media player the command for previous track.
 // Takes entity IDs.
 func (mp MediaPlayer) Previous(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_previous_track",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -149,13 +149,13 @@ func (mp MediaPlayer) Previous(
 // Takes entity IDs and an optional service_data, which must be
 // serializable to a JSON object.
 func (mp MediaPlayer) Seek(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "media_seek",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -169,12 +169,12 @@ func (mp MediaPlayer) Seek(
 // Send the media player the stop command.
 // Takes entity IDs.
 func (mp MediaPlayer) Stop(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "media_stop",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -189,13 +189,13 @@ func (mp MediaPlayer) Stop(
 // entity IDs and an optional service_data, which must be serializable
 // to a JSON object.
 func (mp MediaPlayer) PlayMedia(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "play_media",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -209,13 +209,13 @@ func (mp MediaPlayer) PlayMedia(
 // Set repeat mode. Takes entity IDs and an optional service_data,
 // which must be serializable to a JSON object.
 func (mp MediaPlayer) RepeatSet(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "repeat_set",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -230,13 +230,13 @@ func (mp MediaPlayer) RepeatSet(
 // entity IDs and an optional service_data, which must be serializable
 // to a JSON object.
 func (mp MediaPlayer) SelectSoundMode(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "select_sound_mode",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -251,13 +251,13 @@ func (mp MediaPlayer) SelectSoundMode(
 // entity IDs and an optional service_data, which must be serializable
 // to a JSON object.
 func (mp MediaPlayer) SelectSource(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "select_source",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -271,13 +271,13 @@ func (mp MediaPlayer) SelectSource(
 // Set shuffling state. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (mp MediaPlayer) Shuffle(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "shuffle_set",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -291,12 +291,12 @@ func (mp MediaPlayer) Shuffle(
 // Toggles a media player power state.
 // Takes entity IDs.
 func (mp MediaPlayer) Toggle(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "toggle",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -310,12 +310,12 @@ func (mp MediaPlayer) Toggle(
 // Turn a media player power off.
 // Takes entity IDs.
 func (mp MediaPlayer) TurnOff(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "turn_off",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -329,12 +329,12 @@ func (mp MediaPlayer) TurnOff(
 // Turn a media player power on.
 // Takes entity IDs.
 func (mp MediaPlayer) TurnOn(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "turn_on",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -349,12 +349,12 @@ func (mp MediaPlayer) TurnOn(
 // platforms with support for player groups.
 // Takes entity IDs.
 func (mp MediaPlayer) Unjoin(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "unjoin",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -368,12 +368,12 @@ func (mp MediaPlayer) Unjoin(
 // Turn a media player volume down.
 // Takes entity IDs.
 func (mp MediaPlayer) VolumeDown(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_down",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
@@ -387,13 +387,13 @@ func (mp MediaPlayer) VolumeDown(
 // Mute a media player's volume. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (mp MediaPlayer) VolumeMute(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "volume_mute",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -407,13 +407,13 @@ func (mp MediaPlayer) VolumeMute(
 // Set a media player's volume level. Takes entity IDs and an
 // optional service_data, which must be serializable to a JSON object.
 func (mp MediaPlayer) VolumeSet(
-	ctx context.Context, entityIDs []string, serviceData ...any,
+	ctx context.Context, target Target, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "media_player",
 		Service:     "volume_set",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entities(entityIDs),
+		Target:      target,
 	}
 
 	var result any
@@ -427,12 +427,12 @@ func (mp MediaPlayer) VolumeSet(
 // Turn a media player volume up.
 // Takes entity IDs.
 func (mp MediaPlayer) VolumeUp(
-	ctx context.Context, entityIDs []string,
+	ctx context.Context, target Target,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "media_player",
 		Service: "volume_up",
-		Target:  Entities(entityIDs),
+		Target:  target,
 	}
 
 	var result any
