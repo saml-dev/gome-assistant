@@ -10,16 +10,16 @@ type Lock struct {
 
 /* Public API */
 
-// Lock a lock entity. Takes an entityID and an optional service_data,
+// Lock a lock entity. Takes entity IDs and an optional service_data,
 // which must be serializable to a JSON object.
 func (l Lock) Lock(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "lock",
 		Service:     "lock",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any
@@ -30,16 +30,16 @@ func (l Lock) Lock(
 	return result, nil
 }
 
-// Unlock a lock entity. Takes an entityID and an optional
+// Unlock a lock entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (l Lock) Unlock(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "lock",
 		Service:     "unlock",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any

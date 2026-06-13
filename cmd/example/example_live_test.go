@@ -111,7 +111,7 @@ func (s *MySuite) TestLightService() {
 
 	if entityID != "" {
 		initState := getEntityState(s, entityID)
-		s.app.GetService().Light.Toggle(ctx, entityID)
+		s.app.GetService().Light.Toggle(ctx, []string{entityID})
 
 		assert.EventuallyWithT(s.T(), func(c *assert.CollectT) {
 			newState := getEntityState(s, entityID)

@@ -15,7 +15,7 @@ type InputDatetime struct {
 /* Public API */
 
 func (ib InputDatetime) Set(
-	ctx context.Context, entityID string, value time.Time,
+	ctx context.Context, entityIDs []string, value time.Time,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_datetime",
@@ -23,7 +23,7 @@ func (ib InputDatetime) Set(
 		ServiceData: map[string]any{
 			"timestamp": fmt.Sprint(value.Unix()),
 		},
-		Target: Entity(entityID),
+		Target: Entities(entityIDs),
 	}
 
 	var result any

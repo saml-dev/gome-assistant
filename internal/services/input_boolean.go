@@ -11,12 +11,12 @@ type InputBoolean struct {
 /* Public API */
 
 func (ib InputBoolean) TurnOn(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_boolean",
 		Service: "turn_on",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -28,12 +28,12 @@ func (ib InputBoolean) TurnOn(
 }
 
 func (ib InputBoolean) Toggle(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_boolean",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -45,12 +45,12 @@ func (ib InputBoolean) Toggle(
 }
 
 func (ib InputBoolean) TurnOff(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_boolean",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any

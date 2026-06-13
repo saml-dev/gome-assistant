@@ -15,7 +15,6 @@ func (tts TTS) ClearCache(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "tts",
 		Service: "clear_cache",
-		Target:  Entity(""),
 	}
 
 	var result any
@@ -27,16 +26,16 @@ func (tts TTS) ClearCache(ctx context.Context) (any, error) {
 }
 
 // Say something using text-to-speech on a media player with cloud.
-// Takes an entityID and an optional service_data, which must be
+// Takes entity IDs and an optional service_data, which must be
 // serializable to a JSON object.
 func (tts TTS) CloudSay(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "tts",
 		Service:     "cloud_say",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any
@@ -48,16 +47,16 @@ func (tts TTS) CloudSay(
 }
 
 // Say something using text-to-speech on a media player with
-// google_translate. Takes an entityID and an optional service_data,
+// google_translate. Takes entity IDs and an optional service_data,
 // which must be serializable to a JSON object.
 func (tts TTS) GoogleTranslateSay(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "tts",
 		Service:     "google_translate_say",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any

@@ -11,7 +11,7 @@ type InputText struct {
 /* Public API */
 
 func (ib InputText) Set(
-	ctx context.Context, entityID string, value string,
+	ctx context.Context, entityIDs []string, value string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "input_text",
@@ -19,7 +19,7 @@ func (ib InputText) Set(
 		ServiceData: map[string]any{
 			"value": value,
 		},
-		Target: Entity(entityID),
+		Target: Entities(entityIDs),
 	}
 
 	var result any

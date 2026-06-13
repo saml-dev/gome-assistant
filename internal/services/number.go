@@ -7,13 +7,13 @@ type Number struct {
 }
 
 func (ib Number) SetValue(
-	ctx context.Context, entityID string, value float32,
+	ctx context.Context, entityIDs []string, value float32,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "number",
 		Service:     "set_value",
 		ServiceData: map[string]any{"value": value},
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any
@@ -25,9 +25,9 @@ func (ib Number) SetValue(
 }
 
 func (ib Number) MustSetValue(
-	ctx context.Context, entityID string, value float32,
+	ctx context.Context, entityIDs []string, value float32,
 ) {
-	if _, err := ib.SetValue(ctx, entityID, value); err != nil {
+	if _, err := ib.SetValue(ctx, entityIDs, value); err != nil {
 		panic(err)
 	}
 }

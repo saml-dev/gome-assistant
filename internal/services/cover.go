@@ -10,14 +10,14 @@ type Cover struct {
 
 /* Public API */
 
-// Close all or specified cover. Takes an entityID.
+// Close all or specified cover. Takes entity IDs.
 func (c Cover) Close(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "close_cover",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -28,14 +28,14 @@ func (c Cover) Close(
 	return result, nil
 }
 
-// Close all or specified cover tilt. Takes an entityID.
+// Close all or specified cover tilt. Takes entity IDs.
 func (c Cover) CloseTilt(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "close_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -46,14 +46,14 @@ func (c Cover) CloseTilt(
 	return result, nil
 }
 
-// Open all or specified cover. Takes an entityID.
+// Open all or specified cover. Takes entity IDs.
 func (c Cover) Open(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "open_cover",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -64,14 +64,14 @@ func (c Cover) Open(
 	return result, nil
 }
 
-// Open all or specified cover tilt. Takes an entityID.
+// Open all or specified cover tilt. Takes entity IDs.
 func (c Cover) OpenTilt(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "open_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -82,17 +82,17 @@ func (c Cover) OpenTilt(
 	return result, nil
 }
 
-// Move to specific position all or specified cover. Takes an entityID
+// Move to specific position all or specified cover. Takes entity IDs
 // and an optional service_data, which must be serializable to a JSON
 // object.
 func (c Cover) SetPosition(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "cover",
 		Service:     "set_cover_position",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any
@@ -104,13 +104,13 @@ func (c Cover) SetPosition(
 }
 
 // Move to specific position all or specified cover tilt. Takes an
-// entityID and an optional service_data, which must be serializable
+// entity IDs and an optional service_data, which must be serializable
 // to a JSON object.
 func (c Cover) SetTiltPosition(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 		Domain:      "cover",
 		ServiceData: optionalServiceData(serviceData...),
 		Service:     "set_cover_tilt_position",
@@ -124,14 +124,14 @@ func (c Cover) SetTiltPosition(
 	return result, nil
 }
 
-// Stop a cover entity. Takes an entityID.
+// Stop a cover entity. Takes entity IDs.
 func (c Cover) Stop(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "stop_cover",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -142,14 +142,14 @@ func (c Cover) Stop(
 	return result, nil
 }
 
-// Stop a cover entity tilt. Takes an entityID.
+// Stop a cover entity tilt. Takes entity IDs.
 func (c Cover) StopTilt(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "stop_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -160,14 +160,14 @@ func (c Cover) StopTilt(
 	return result, nil
 }
 
-// Toggle a cover open/closed. Takes an entityID.
+// Toggle a cover open/closed. Takes entity IDs.
 func (c Cover) Toggle(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "toggle",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -178,14 +178,14 @@ func (c Cover) Toggle(
 	return result, nil
 }
 
-// Toggle a cover tilt open/closed. Takes an entityID.
+// Toggle a cover tilt open/closed. Takes entity IDs.
 func (c Cover) ToggleTilt(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "cover",
 		Service: "toggle_cover_tilt",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any

@@ -10,16 +10,16 @@ type Light struct {
 
 /* Public API */
 
-// TurnOn a light entity. Takes an entityID and an optional
+// TurnOn a light entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (l Light) TurnOn(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "light",
 		Service:     "turn_on",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any
@@ -30,16 +30,16 @@ func (l Light) TurnOn(
 	return result, nil
 }
 
-// Toggle a light entity. Takes an entityID and an optional
+// Toggle a light entity. Takes entity IDs and an optional
 // service_data, which must be serializable to a JSON object.
 func (l Light) Toggle(
-	ctx context.Context, entityID string, serviceData ...any,
+	ctx context.Context, entityIDs []string, serviceData ...any,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:      "light",
 		Service:     "toggle",
 		ServiceData: optionalServiceData(serviceData...),
-		Target:      Entity(entityID),
+		Target:      Entities(entityIDs),
 	}
 
 	var result any
@@ -51,12 +51,12 @@ func (l Light) Toggle(
 }
 
 func (l Light) TurnOff(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "light",
 		Service: "turn_off",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any

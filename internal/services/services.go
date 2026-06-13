@@ -72,12 +72,12 @@ type BaseServiceRequest struct {
 }
 
 type Target struct {
-	EntityID string `json:"entity_id,omitempty"`
+	EntityIDs []string `json:"entity_id,omitempty"`
 }
 
-func Entity(entityID string) Target {
+func Entities(entityIDs []string) Target {
 	return Target{
-		EntityID: entityID,
+		EntityIDs: entityIDs,
 	}
 }
 

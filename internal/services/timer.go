@@ -12,7 +12,7 @@ type Timer struct {
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerstart
 func (t Timer) Start(
-	ctx context.Context, entityID string, duration string,
+	ctx context.Context, entityIDs []string, duration string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
@@ -20,7 +20,7 @@ func (t Timer) Start(
 		ServiceData: map[string]any{
 			"duration": duration,
 		},
-		Target: Entity(entityID),
+		Target: Entities(entityIDs),
 	}
 
 	var result any
@@ -33,7 +33,7 @@ func (t Timer) Start(
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerstart
 func (t Timer) Change(
-	ctx context.Context, entityID string, duration string,
+	ctx context.Context, entityIDs []string, duration string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
@@ -41,7 +41,7 @@ func (t Timer) Change(
 		ServiceData: map[string]any{
 			"duration": duration,
 		},
-		Target: Entity(entityID),
+		Target: Entities(entityIDs),
 	}
 
 	var result any
@@ -54,12 +54,12 @@ func (t Timer) Change(
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerpause
 func (t Timer) Pause(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "pause",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -75,7 +75,6 @@ func (t Timer) Cancel(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "cancel",
-		Target:  Entity(""),
 	}
 	var result any
 	if err := t.api.Call(ctx, req, &result); err != nil {
@@ -87,12 +86,12 @@ func (t Timer) Cancel(ctx context.Context) (any, error) {
 
 // See https://www.home-assistant.io/integrations/timer/#action-timerfinish
 func (t Timer) Finish(
-	ctx context.Context, entityID string,
+	ctx context.Context, entityIDs []string,
 ) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "finish",
-		Target:  Entity(entityID),
+		Target:  Entities(entityIDs),
 	}
 
 	var result any
@@ -108,7 +107,6 @@ func (t Timer) Reload(ctx context.Context) (any, error) {
 	req := BaseServiceRequest{
 		Domain:  "timer",
 		Service: "reload",
-		Target:  Entity(""),
 	}
 
 	var result any
