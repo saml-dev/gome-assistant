@@ -5,6 +5,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -36,7 +37,13 @@ func NewHttpClient(url *url.URL, token string) *HttpClient {
 }
 
 func (c *HttpClient) GetState(entityID string) ([]byte, error) {
-	resp, err := get(c.url+"/states/"+entityID, c.token)
+	return c.GetStateWithContext(context.Background(), entityID)
+}
+
+// GetStateWithContext retrieves an entity state and stops the request when
+// ctx is canceled.
+func (c *HttpClient) GetStateWithContext(ctx context.Context, entityID string) ([]byte, error) {
+	resp, err := get(ctx, c.url+"/states/"+entityID, c.token)
 	if err != nil {
 		return nil, err
 	}
@@ -72,15 +79,15 @@ func statesTemplate(entityIDs []string) (string, error) {
 }
 
 func (c *HttpClient) States() ([]byte, error) {
-	resp, err := get(c.url+"/states", c.token)
+	resp, err := get(context.Background(), c.url+"/states", c.token)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
-func get(url, token string) ([]byte, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func get(ctx context.Context, url, token string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, errors.New("Error creating HTTP request: " + err.Error())
 	}

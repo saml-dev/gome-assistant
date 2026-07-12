@@ -3,7 +3,6 @@ module saml.dev/gome-assistant
 go 1.21.0
 
 require (
-	github.com/golang-cz/devslog v0.0.8
 	github.com/golang-module/carbon v1.7.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/nathan-osman/go-sunrise v1.1.0

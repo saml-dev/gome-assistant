@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
-	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -20,6 +20,18 @@ import (
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
 
+// ErrAppClosed is returned when Start is called after Cleanup, or when Cleanup
+// was called before the application had a chance to start.
+var ErrAppClosed = errors.New("app is closed")
+
+// ErrAppNotRunning is returned when an operation requires an active session
+// but Start has not acquired a connection (or has already released it).
+var ErrAppNotRunning = errors.New("app is not running")
+
+// ErrConnectionClosed is returned when a connection terminates without
+// recording a more specific terminal error.
+var ErrConnectionClosed = errors.New("websocket connection is closed")
+
 // scheduledAction represents an action that can schedule and run
 // itself, perhaps repeatedly.
 type scheduledAction interface {
@@ -27,8 +39,15 @@ type scheduledAction interface {
 }
 
 type App struct {
-	ctx       context.Context
-	ctxCancel context.CancelFunc
+	closed  atomic.Bool
+	workers sync.WaitGroup
+
+	ctx context.Context
+	run atomic.Pointer[runCancellation]
+
+	baseURL          *url.URL
+	authToken        string
+	homeZoneEntityID string
 
 	// Wraps the ws connection with added mutex locking
 	conn *websocket.Conn
@@ -43,6 +62,23 @@ type App struct {
 	entityListeners    map[string][]*EntityListener
 	entitySubscription websocket.Subscription
 	eventListeners     map[string][]*EventListener
+}
+
+// runCancellation is published before Start begins startup work so Cleanup can
+// always cancel a Start call that has passed its initial closed check.
+type runCancellation struct {
+	cancel context.CancelFunc
+}
+
+// activeConn returns the connection owned by the current Start call.
+func (app *App) activeConn() (*websocket.Conn, error) {
+	if app.closed.Load() {
+		return nil, ErrAppClosed
+	}
+	if app.conn == nil {
+		return nil, ErrAppNotRunning
+	}
+	return app.conn, nil
 }
 
 // DurationString represents a duration, such as "2s" or "24h".
@@ -61,17 +97,6 @@ type NewAppRequest struct {
 	// Required
 	URL string
 
-	// Optional
-	// Deprecated: use URL instead
-	// IpAddress of your Home Assistant instance i.e. "localhost"
-	// or "192.168.86.59" etc.
-	IpAddress string
-
-	// Optional
-	// Deprecated: use URL instead
-	// Port number Home Assistant is running on. Defaults to 8123.
-	Port string
-
 	// Required
 	// Auth token generated in Home Assistant. Used
 	// to connect to the Websocket API.
@@ -82,44 +107,12 @@ type NewAppRequest struct {
 	// Used to pull latitude/longitude from Home Assistant
 	// to calculate sunset/sunrise times.
 	HomeZoneEntityID string
-
-	// Optional
-	// Whether to use secure connections for http and websockets.
-	// Setting this to `true` will use `https://` instead of `https://`
-	// and `wss://` instead of `ws://`.
-	Secure bool
 }
 
-// validateHomeZone verifies that the home zone entity exists and has latitude/longitude
-func validateHomeZone(state State, entityID string) error {
-	entity, err := state.Get(entityID)
-	if err != nil {
-		return fmt.Errorf("home zone entity '%s' not found: %w", entityID, err)
-	}
-
-	// Ensure it's a zone entity
-	if !strings.HasPrefix(entityID, "zone.") {
-		return fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", entityID)
-	}
-
-	// Verify it has latitude and longitude
-	if entity.Attributes == nil {
-		return fmt.Errorf("home zone entity '%s' has no attributes", entityID)
-	}
-	if entity.Attributes["latitude"] == nil {
-		return fmt.Errorf("home zone entity '%s' missing latitude attribute", entityID)
-	}
-	if entity.Attributes["longitude"] == nil {
-		return fmt.Errorf("home zone entity '%s' missing longitude attribute", entityID)
-	}
-
-	return nil
-}
-
-// NewApp establishes the websocket connection and returns an object
+// NewApp validates its configuration and returns an inert application that
 // you can use to register schedules and listeners.
 func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
-	if (request.URL == "" && request.IpAddress == "") || request.HAAuthToken == "" {
+	if ctx == nil || request.URL == "" || request.HAAuthToken == "" {
 		slog.Error("URL and HAAuthToken are required arguments in NewAppRequest")
 		return nil, ErrInvalidArgs
 	}
@@ -129,107 +122,92 @@ func NewApp(ctx context.Context, request NewAppRequest) (*App, error) {
 		request.HomeZoneEntityID = "zone.home"
 	}
 
-	baseURL := &url.URL{}
-
-	if request.URL != "" {
-		var err error
-		baseURL, err = url.Parse(request.URL)
-		if err != nil {
-			return nil, ErrInvalidArgs
-		}
-	} else {
-		// This is deprecated and will be removed in a future release
-		port := request.Port
-		if port == "" {
-			port = "8123"
-		}
-		baseURL.Scheme = "http"
-		if request.Secure {
-			baseURL.Scheme = "https"
-		}
-		baseURL.Host = request.IpAddress + ":" + port
+	baseURL, err := url.Parse(request.URL)
+	if err != nil {
+		return nil, ErrInvalidArgs
 	}
 
-	connCtx, connCancel := context.WithTimeout(ctx, time.Second*3)
-	defer connCancel()
-
-	conn, err := websocket.NewConn(connCtx, baseURL, request.HAAuthToken)
-	if err != nil {
-		return nil, err
+	if (baseURL.Scheme != "http" && baseURL.Scheme != "https") || baseURL.Host == "" {
+		return nil, ErrInvalidArgs
 	}
 
 	httpClient := http.NewHttpClient(baseURL, request.HAAuthToken)
-
-	state, err := newState(httpClient, request.HomeZoneEntityID)
-	if err != nil {
-		return nil, err
-	}
-
-	ctx, cancel := context.WithCancel(ctx)
+	state := newState(httpClient)
 
 	app := App{
-		conn:            conn,
-		ctx:             ctx,
-		ctxCancel:       cancel,
-		httpClient:      httpClient,
-		state:           state,
-		entityListeners: map[string][]*EntityListener{},
-		eventListeners:  map[string][]*EventListener{},
+		baseURL:          baseURL,
+		authToken:        request.HAAuthToken,
+		homeZoneEntityID: request.HomeZoneEntityID,
+		httpClient:       httpClient,
+		state:            state,
+		entityListeners:  map[string][]*EntityListener{},
+		eventListeners:   map[string][]*EventListener{},
 	}
 
 	app.service = newService(&app)
 
-	// Validate home zone
-	if err := validateHomeZone(state, request.HomeZoneEntityID); err != nil {
-		return nil, err
-	}
-
 	return &app, nil
 }
 
+// Cleanup permanently closes the app and asks the current Start call to stop.
+// Start owns connection cleanup and waits for application-owned goroutines
+// before returning.
 func (app *App) Cleanup() {
-	if app.ctxCancel != nil {
-		app.ctxCancel()
+	if app.closed.Swap(true) {
+		return
+	}
+	if run := app.run.Load(); run != nil {
+		run.cancel()
 	}
 }
 
 func (app *App) RegisterSchedules(schedules ...DailySchedule) {
 	for _, s := range schedules {
-		// realStartTime already set for sunset/sunrise
-		if s.isSunrise || s.isSunset {
-			s.nextRunTime = getNextSunRiseOrSet(app, s.isSunrise, s.sunOffset).Carbon2Time()
-			app.scheduledActions = append(app.scheduledActions, s)
+		// Keep scheduler state internal: registrations take values, and workers
+		// advance this dedicated copy across Start sessions.
+		schedule := new(DailySchedule)
+		*schedule = s
+
+		// Solar schedules depend on the home-zone coordinates loaded by Start.
+		// Keep registration network-free and initialize them after that load.
+		if schedule.isSunrise || schedule.isSunset {
+			app.scheduledActions = append(app.scheduledActions, schedule)
 			app.scheduleCount++
 			continue
 		}
 
 		now := carbon.Now()
-		startTime := carbon.Now().SetTimeMilli(s.hour, s.minute, 0, 0)
+		startTime := carbon.Now().SetTimeMilli(schedule.hour, schedule.minute, 0, 0)
 
 		// advance first scheduled time by frequency until it is in the future
 		if startTime.Lt(now) {
 			startTime = startTime.AddDay()
 		}
 
-		s.nextRunTime = startTime.Carbon2Time()
-		app.scheduledActions = append(app.scheduledActions, s)
+		schedule.nextRunTime = startTime.Carbon2Time()
+		app.scheduledActions = append(app.scheduledActions, schedule)
 		app.scheduleCount++
 	}
 }
 
 func (app *App) RegisterIntervals(intervals ...Interval) {
 	for _, i := range intervals {
-		if i.frequency == 0 {
+		// Keep scheduler state internal: registrations take values, and workers
+		// advance this dedicated copy across Start sessions.
+		interval := new(Interval)
+		*interval = i
+
+		if interval.frequency == 0 {
 			slog.Error("A schedule must use either set frequency via Every()")
 			panic(ErrInvalidArgs)
 		}
 
-		i.nextRunTime = internal.ParseTime(string(i.startTime)).Carbon2Time()
+		interval.nextRunTime = internal.ParseTime(string(interval.startTime)).Carbon2Time()
 		now := time.Now()
-		for i.nextRunTime.Before(now) {
-			i.nextRunTime = i.nextRunTime.Add(i.frequency)
+		for interval.nextRunTime.Before(now) {
+			interval.nextRunTime = interval.nextRunTime.Add(interval.frequency)
 		}
-		app.scheduledActions = append(app.scheduledActions, i)
+		app.scheduledActions = append(app.scheduledActions, interval)
 	}
 }
 
@@ -252,28 +230,7 @@ func (app *App) RegisterEntityListeners(etls ...EntityListener) {
 
 func (app *App) registerEventListener(evl EventListener) {
 	for _, eventType := range evl.eventTypes {
-		elList, ok := app.eventListeners[eventType]
-		if !ok {
-			// We're not listening to that event type yet. Ask HA to
-			// send them to us, and when they arrive, call any event
-			// listeners for that type (including any that are
-			// registered in the future).
-			eventType := eventType
-			app.conn.SubscribeToEventType(
-				eventType,
-				func(msg websocket.Message) {
-					// Subscribing, itself, causes the server to send
-					// a "result" message. We don't want to forward
-					// that message to the listeners.
-					if msg.Type != "event" {
-						return
-					}
-
-					go app.callEventListeners(eventType, msg)
-				},
-			)
-		}
-		app.eventListeners[eventType] = append(elList, &evl)
+		app.eventListeners[eventType] = append(app.eventListeners[eventType], &evl)
 	}
 }
 
@@ -326,48 +283,148 @@ func getNextSunRiseOrSet(app *App, sunrise bool, offset ...DurationString) carbo
 	return sunriseOrSunset
 }
 
-func (app *App) Start() {
+func (app *App) initializeSolarSchedules() {
+	for _, action := range app.scheduledActions {
+		schedule, ok := action.(*DailySchedule)
+		if !ok || (!schedule.isSunrise && !schedule.isSunset) {
+			continue
+		}
+		schedule.nextRunTime = getNextSunRiseOrSet(app, schedule.isSunrise, schedule.sunOffset).Carbon2Time()
+	}
+}
+
+// Start owns one Home Assistant connection and blocks until the context is
+// canceled or the session ends. It does not retry; callers decide whether and
+// when to call Start again. Start calls must not overlap.
+func (app *App) Start(ctx context.Context) error {
+	if ctx == nil {
+		return ErrInvalidArgs
+	}
+
+	if app.closed.Load() {
+		return ErrAppClosed
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	runCtx, cancel := context.WithCancel(ctx)
+	run := &runCancellation{cancel: cancel}
+	app.run.Store(run)
+	if app.closed.Load() {
+		cancel()
+	}
+	app.ctx = runCtx
+
+	defer func() {
+		cancel()
+		if app.conn != nil {
+			_ = app.conn.Close()
+		}
+		app.workers.Wait()
+		app.conn = nil
+		app.run.CompareAndSwap(run, nil)
+	}()
+
 	slog.Info("Starting", "schedules", app.scheduleCount)
 	slog.Info("Starting", "entity listeners", len(app.entityListeners))
 	slog.Info("Starting", "event listeners", len(app.eventListeners))
 
-	go app.runScheduledActions(app.ctx)
+	conn, err := websocket.NewConn(runCtx, app.baseURL, app.authToken)
+	if err != nil {
+		if runErr := runCtx.Err(); runErr != nil {
+			return runErr
+		}
+		return err
+	}
+	app.conn = conn
+
+	if err := app.state.loadHomeZone(runCtx, app.homeZoneEntityID); err != nil {
+		if runErr := runCtx.Err(); runErr != nil {
+			return runErr
+		}
+		return err
+	}
+	app.initializeSolarSchedules()
+	if err := app.subscribeSession(conn); err != nil {
+		if runErr := runCtx.Err(); runErr != nil {
+			return runErr
+		}
+		return err
+	}
+	app.goTracked(func() { app.runScheduledActions(runCtx) })
+	app.runStartupCallbacks(runCtx)
+	return conn.Run(runCtx)
+}
+
+func (app *App) subscribeSession(conn *websocket.Conn) (err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("subscribe during startup: %v", recovered)
+		}
+	}()
 
 	// subscribe to state_changed events
-	app.entitySubscription = app.conn.SubscribeToStateChangedEvents(
+	app.entitySubscription = conn.SubscribeToStateChangedEvents(
 		func(msg websocket.Message) {
-			go app.callEntityListeners(msg.Raw)
+			app.goTracked(func() { app.callEntityListeners(msg.Raw) })
 		},
 	)
+
+	eventTypes := make([]string, 0, len(app.eventListeners))
+	for eventType := range app.eventListeners {
+		eventTypes = append(eventTypes, eventType)
+	}
+	for _, eventType := range eventTypes {
+		eventType := eventType
+		conn.SubscribeToEventType(eventType, func(msg websocket.Message) {
+			if msg.Type != "event" {
+				return
+			}
+			app.goTracked(func() { app.callEventListeners(eventType, msg) })
+		})
+	}
+	return nil
+}
+
+func (app *App) runStartupCallbacks(ctx context.Context) {
+	completed := make(map[*EntityListener]bool)
 
 	// entity listeners runOnStartup
 	for eid, etls := range app.entityListeners {
 		for _, etl := range etls {
 			// ensure each ETL only runs once, even if
 			// it listens to multiple entities
-			if etl.runOnStartup && !etl.runOnStartupCompleted {
-				entityState, err := app.state.Get(eid)
+			if etl.runOnStartup && !completed[etl] {
+				entityState, err := app.state.getWithContext(ctx, eid)
 				if err != nil {
 					slog.Warn("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
+					continue
 				}
 
-				etl.runOnStartupCompleted = true
-				go etl.callback(app.service, app.state, EntityData{
+				completed[etl] = true
+				data := EntityData{
 					TriggerEntityID: eid,
 					FromState:       entityState.State,
 					FromAttributes:  entityState.Attributes,
 					ToState:         entityState.State,
 					ToAttributes:    entityState.Attributes,
 					LastChanged:     entityState.LastChanged,
-				})
+				}
+				app.goTracked(func() { etl.callback(app.service, app.state, data) })
 			}
 		}
 	}
+}
 
-	// Start listen on the connection for incoming messages:
-	if err := app.conn.Run(); err != nil {
-		slog.Error("Error reading from websocket", "err", err)
+func (app *App) goTracked(fn func()) {
+	if app.ctx != nil && app.ctx.Err() != nil {
+		return
 	}
+	app.workers.Add(1)
+	go func() {
+		defer app.workers.Done()
+		fn()
+	}()
 }
 
 // runScheduledActions starts a goroutine to run each `DailySchedule`

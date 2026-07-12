@@ -155,12 +155,13 @@ func (sb scheduleBuilderEnd) Build() DailySchedule {
 
 // run invokes `s.maybeRunCallback()` based on its configured
 // schedule. Terminate when `ctx` is canceled.
-func (s DailySchedule) run(ctx context.Context, app *App) {
+func (s *DailySchedule) run(ctx context.Context, app *App) {
 	// Create a new, but stopped, timer for sleeping on:
 	timer := time.NewTimer(1 * time.Hour)
 	if !timer.Stop() {
 		<-timer.C
 	}
+	defer stopAndDrainTimer(timer)
 
 	for ctx.Err() == nil {
 		if s.nextRunTime.After(time.Now()) {
@@ -170,7 +171,6 @@ func (s DailySchedule) run(ctx context.Context, app *App) {
 			select {
 			case <-timer.C:
 			case <-ctx.Done():
-				timer.Stop()
 				return
 			}
 		}
@@ -193,7 +193,12 @@ func (s DailySchedule) maybeRunCallback(app *App) {
 	if c := checkDisabledEntity(app.state, s.disabledEntities); c.fail {
 		return
 	}
-	go s.callback(app.service, app.state)
+	if app.ctx.Err() != nil {
+		return
+	}
+	app.goTracked(func() {
+		s.callback(app.service, app.state)
+	})
 }
 
 // updateNextRunTime updates `s.nextRunTime` to the next time that `s`

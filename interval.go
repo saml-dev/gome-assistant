@@ -149,12 +149,13 @@ func (sb intervalBuilderEnd) Build() Interval {
 
 // run invokes `i.maybeRunCallback()` based on its configured
 // frequency.
-func (i Interval) run(ctx context.Context, app *App) {
+func (i *Interval) run(ctx context.Context, app *App) {
 	// Create a new, but stopped, timer for sleeping on:
 	timer := time.NewTimer(1 * time.Hour)
 	if !timer.Stop() {
 		<-timer.C
 	}
+	defer stopAndDrainTimer(timer)
 
 	for ctx.Err() == nil {
 		if i.nextRunTime.After(time.Now()) {
@@ -162,7 +163,6 @@ func (i Interval) run(ctx context.Context, app *App) {
 			select {
 			case <-timer.C:
 			case <-ctx.Done():
-				timer.Stop()
 				return
 			}
 		}
@@ -195,5 +195,10 @@ func (i Interval) maybeRunCallback(app *App) {
 	if c := checkDisabledEntity(app.state, i.disabledEntities); c.fail {
 		return
 	}
-	go i.callback(app.service, app.state)
+	if app.ctx.Err() != nil {
+		return
+	}
+	app.goTracked(func() {
+		i.callback(app.service, app.state)
+	})
 }

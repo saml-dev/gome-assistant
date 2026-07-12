@@ -1,6 +1,7 @@
 package gomeassistant
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -36,42 +37,47 @@ type EntityState struct {
 	LastChanged time.Time      `json:"last_changed"`
 }
 
-func newState(c *http.HttpClient, homeZoneEntityID string) (*StateImpl, error) {
-	state := &StateImpl{httpClient: c}
+func newState(c *http.HttpClient) *StateImpl {
+	return &StateImpl{httpClient: c}
+}
 
-	// Ensure the zone exists and has required attributes
-	entity, err := state.Get(homeZoneEntityID)
-	if err != nil {
-		return nil, fmt.Errorf("home zone entity '%s' not found: %w", homeZoneEntityID, err)
-	}
-
-	// Ensure it's a zone entity
+// loadHomeZone loads and validates the home zone coordinates for sunrise and
+// sunset calculations. Call this during application startup, not construction.
+func (s *StateImpl) loadHomeZone(ctx context.Context, homeZoneEntityID string) error {
 	if !strings.HasPrefix(homeZoneEntityID, "zone.") {
-		return nil, fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", homeZoneEntityID)
+		return fmt.Errorf("entity '%s' is not a zone entity (must start with zone.)", homeZoneEntityID)
 	}
 
-	// Verify and extract latitude and longitude
+	entity, err := s.getWithContext(ctx, homeZoneEntityID)
+	if err != nil {
+		return fmt.Errorf("home zone entity '%s' not found: %w", homeZoneEntityID, err)
+	}
+
 	if entity.Attributes == nil {
-		return nil, fmt.Errorf("home zone entity '%s' has no attributes", homeZoneEntityID)
+		return fmt.Errorf("home zone entity '%s' has no attributes", homeZoneEntityID)
 	}
 
-	if lat, ok := entity.Attributes["latitude"].(float64); ok {
-		state.latitude = lat
-	} else {
-		return nil, fmt.Errorf("home zone entity '%s' missing valid latitude attribute", homeZoneEntityID)
+	lat, ok := entity.Attributes["latitude"].(float64)
+	if !ok {
+		return fmt.Errorf("home zone entity '%s' missing valid latitude attribute", homeZoneEntityID)
 	}
 
-	if long, ok := entity.Attributes["longitude"].(float64); ok {
-		state.longitude = long
-	} else {
-		return nil, fmt.Errorf("home zone entity '%s' missing valid longitude attribute", homeZoneEntityID)
+	longitude, ok := entity.Attributes["longitude"].(float64)
+	if !ok {
+		return fmt.Errorf("home zone entity '%s' missing valid longitude attribute", homeZoneEntityID)
 	}
 
-	return state, nil
+	s.latitude = lat
+	s.longitude = longitude
+	return nil
 }
 
 func (s *StateImpl) Get(entityID string) (EntityState, error) {
-	resp, err := s.httpClient.GetState(entityID)
+	return s.getWithContext(context.Background(), entityID)
+}
+
+func (s *StateImpl) getWithContext(ctx context.Context, entityID string) (EntityState, error) {
+	resp, err := s.httpClient.GetStateWithContext(ctx, entityID)
 	if err != nil {
 		return EntityState{}, err
 	}

@@ -132,7 +132,15 @@ func (b eventListenerBuilder3) Build() EventListener {
 	return b.eventListener
 }
 
+func (app *App) callbackAdmissionOpen() bool {
+	return app.ctx == nil || app.ctx.Err() == nil
+}
+
 func (l *EventListener) maybeCall(app *App, eventData EventData) {
+	if !app.callbackAdmissionOpen() {
+		return
+	}
+
 	// Check conditions
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
 		return
@@ -153,7 +161,12 @@ func (l *EventListener) maybeCall(app *App, eventData EventData) {
 		return
 	}
 
-	go l.callback(app.service, app.state, eventData)
+	if app.ctx.Err() != nil {
+		return
+	}
+	app.goTracked(func() {
+		l.callback(app.service, app.state, eventData)
+	})
 	l.lastRan = carbon.Now()
 }
 

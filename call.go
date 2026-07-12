@@ -10,6 +10,11 @@ import (
 
 // CallAndForget implements [services.API.CallAndForget].
 func (app *App) CallAndForget(req services.BaseServiceRequest) error {
+	conn, err := app.activeConn()
+	if err != nil {
+		return err
+	}
+
 	reqMsg := services.CallServiceMessage{
 		BaseMessage: websocket.BaseMessage{
 			Type: "call_service",
@@ -17,7 +22,7 @@ func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 		BaseServiceRequest: req,
 	}
 
-	return app.conn.Send(
+	return conn.Send(
 		func(lc websocket.LockedConn) error {
 			reqMsg.ID = lc.NextMessageID()
 			return lc.SendMessage(reqMsg)
@@ -29,6 +34,25 @@ func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 func (app *App) Call(
 	ctx context.Context, req services.BaseServiceRequest, result any,
 ) error {
+	if ctx == nil {
+		return ErrInvalidArgs
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	conn, err := app.activeConn()
+	if err != nil {
+		return err
+	}
+	select {
+	case <-conn.Done():
+		if err := conn.Err(); err != nil {
+			return err
+		}
+		return ErrConnectionClosed
+	default:
+	}
+
 	// Call works as follows:
 	//  1. Generate a message ID.
 	//  2. Subscribe to that ID.
@@ -60,31 +84,59 @@ func (app *App) Call(
 
 	var subscription websocket.Subscription
 
-	unsubscribe := func() {
-		_ = app.conn.Send(func(lc websocket.LockedConn) error {
-			lc.Unsubscribe(subscription)
-			return nil
+	handleResponse := func(msg websocket.Message) {
+		once.Do(func() {
+			responseErr = msg.GetResult(result)
+			_ = conn.Send(func(lc websocket.LockedConn) error {
+				lc.Unsubscribe(subscription)
+				return nil
+			})
+			close(done)
 		})
 	}
 
-	handleResponse := func(msg websocket.Message) {
-		once.Do(
-			func() {
-				responseErr = msg.GetResult(result)
-				unsubscribe()
-				close(done)
-			},
-		)
-	}
-
-	err := app.conn.Send(
+	err = conn.Send(
 		func(lc websocket.LockedConn) error {
+			if err := ctx.Err(); err != nil {
+				return err
+			}
+			select {
+			case <-conn.Done():
+				if err := conn.Err(); err != nil {
+					return err
+				}
+				return ErrConnectionClosed
+			default:
+			}
 			subscription = lc.Subscribe(handleResponse)
 			reqMsg.ID = subscription.MessageID()
-			return lc.SendMessage(reqMsg)
+			if err := ctx.Err(); err != nil {
+				lc.Unsubscribe(subscription)
+				return err
+			}
+			select {
+			case <-conn.Done():
+				lc.Unsubscribe(subscription)
+				if err := conn.Err(); err != nil {
+					return err
+				}
+				return ErrConnectionClosed
+			default:
+			}
+			if err := lc.SendMessage(reqMsg); err != nil {
+				lc.Unsubscribe(subscription)
+				return err
+			}
+			return nil
 		},
 	)
 	if err != nil {
+		// The send callback may have subscribed before failing. This is safe
+		// even when it already unsubscribed, and covers all send failures.
+		_ = conn.Send(func(lc websocket.LockedConn) error {
+			lc.Unsubscribe(subscription)
+			return nil
+		})
 		return err
 	}
 
@@ -93,15 +145,26 @@ func (app *App) Call(
 		// `handleResponse` has processed a response and set
 		// `responseErr`.
 	case <-ctx.Done():
-		// The context has expired. Unsubscribe and return
-		// `ctx.Err()`, but only if `handleResponse` hasn't just
-		// racily processed a response.
-		once.Do(
-			func() {
-				unsubscribe()
-				responseErr = ctx.Err()
-			},
-		)
+		once.Do(func() {
+			responseErr = ctx.Err()
+			_ = conn.Send(func(lc websocket.LockedConn) error {
+				lc.Unsubscribe(subscription)
+				return nil
+			})
+			close(done)
+		})
+	case <-conn.Done():
+		once.Do(func() {
+			responseErr = conn.Err()
+			if responseErr == nil {
+				responseErr = ErrConnectionClosed
+			}
+			_ = conn.Send(func(lc websocket.LockedConn) error {
+				lc.Unsubscribe(subscription)
+				return nil
+			})
+			close(done)
+		})
 	}
 
 	return responseErr

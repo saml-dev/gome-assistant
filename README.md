@@ -89,17 +89,34 @@ The general flow is
 
 1. Create your app
 2. Register automations
-3. Start app
+3. Run the app
 
 ```go
-import ga "saml.dev/gome-assistant"
+import (
+	"context"
+	"errors"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
 
-// replace with IP and port of your Home Assistant installation
-app, err := ga.NewApp(ga.NewAppRequest{
+	ga "saml.dev/gome-assistant"
+)
+
+ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+defer stop()
+
+// replace with the URL of your Home Assistant installation
+app, err := ga.NewApp(ctx, ga.NewAppRequest{
 	URL:              "http://192.168.1.123:8123",
 	HAAuthToken:      os.Getenv("HA_AUTH_TOKEN"),
 	HomeZoneEntityID: "zone.home",
 })
+if err != nil {
+	slog.Error("failed to create app", "error", err)
+	return
+}
+defer app.Cleanup()
 
 // create automations here (see next sections)
 
@@ -109,8 +126,22 @@ app.RegisterEntityListeners(...)
 app.RegisterEventListeners(...)
 app.RegisterIntervals(...)
 
-app.Start()
+if err := app.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
+	slog.Error("app stopped unexpectedly", "error", err)
+}
 ```
+
+`NewApp` validates configuration and constructs the app without making network
+connections. Register schedules and listeners before calling `Start`. `Start`
+owns connecting, authentication, subscriptions, and workers for one session;
+it blocks until the context is canceled or the connection ends. Cancellation
+(including SIGTERM) and `Cleanup` ask the session to stop, and `Start` closes the
+connection and drains workers before returning. `Start` does not retry failed or
+dropped connections, so applications can choose their own retry policy by
+calling `Start` again. Sequential `Start` calls are supported; they must not
+overlap. Cancel the context to end a session that may be started again later.
+`Cleanup` permanently closes the app; later calls to `Start` return
+`ErrAppClosed`.
 
 A full reference is available on [pkg.go.dev](https://pkg.go.dev/saml.dev/gome-assistant), but all you need to know to get started are the core concepts below.
 
@@ -132,7 +163,7 @@ Schedules can also be run at sunrise or sunset, with an optional [offset](https:
 
 ```go
 // 30 mins before sunrise
-sunrise := ga.NewDailySchedule().Call(myFunc).Sunrise(app, "-30m").Build()
+sunrise := ga.NewDailySchedule().Call(myFunc).Sunrise("-30m").Build()
 // at sunset
 sunset := ga.NewDailySchedule().Call(myFunc).Sunset().Build()
 ```
@@ -149,10 +180,10 @@ Daily schedules have other functions to change the behavior.
 The function passed to `.Call()` must take
 
 - `*ga.Service` used to call home assistant services
-- `*ga.State` used to retrieve state from home assistant
+- `ga.State` used to retrieve state from home assistant
 
 ```go
-func myFunc(se *ga.Service, st *ga.State) {
+func myFunc(se *ga.Service, st ga.State) {
   // ...
 }
 ```
@@ -178,18 +209,18 @@ Entity listeners have other functions to change the behavior.
 | OnlyBetween("03:00", "14:00")           | Only run your function between two specified times of day.                                                        |
 | ExceptionDates(time.Time, ...time.Time) | A one time exception on the given date. Time is ignored, applies to whole day. Functions like a "blocklist".      |
 | ExceptionRange(time.Time, time.Time)    | A one time exception between the two date/times. Both date and time are considered. Functions like a "blocklist". |
-| RunOnStartup()                          | Run your callback during `App.Start()`.                                                                           |
+| RunOnStartup()                          | Run your callback once when each `App.Start()` session starts.                                                    |
 
 #### Entity Listener Callback function
 
 The function passed to `.Call()` must take
 
 - `*ga.Service` used to call home assistant services
-- `*ga.State` used to retrieve state from home assistant
+- `ga.State` used to retrieve state from home assistant
 - `ga.EntityData` which is the entity that triggered the listener
 
 ```go
-func myFunc(se *ga.Service, st *ga.State, e ga.EntityData) {
+func myFunc(se *ga.Service, st ga.State, e ga.EntityData) {
   // ...
 }
 ```
@@ -299,10 +330,10 @@ Intervals have other functions to change the behavior.
 The function passed to `.Call()` must take
 
 - `*ga.Service` used to call home assistant services
-- `*ga.State` used to retrieve state from home assistant
+- `ga.State` used to retrieve state from home assistant
 
 ```go
-func myFunc(se *ga.Service, st *ga.State) {
+func myFunc(se *ga.Service, st ga.State) {
   // ...
 }
 ```

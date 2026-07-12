@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -69,7 +70,9 @@ func main() {
 	app.RegisterSchedules(_11pmSched, _30minsBeforeSunrise)
 	app.RegisterEventListeners(zwaveEventListener)
 
-	app.Start()
+	if err := app.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
+		slog.Error("app stopped unexpectedly", "error", err)
+	}
 }
 
 func pantryLights(

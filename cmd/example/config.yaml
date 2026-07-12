@@ -1,7 +1,0 @@
-hass:
-  address: 192.168.0.204
-  port: 8123
-  zone: zone.home
-
-entities:
-  light_entity_id: light.office_desk_lamp

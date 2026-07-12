@@ -1,8 +1,10 @@
 package gomeassistant
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -23,18 +25,27 @@ type EntityListener struct {
 	betweenEnd   string
 
 	delay      time.Duration
-	delayTimer *time.Timer
+	delayState *entityDelayState
 
 	exceptionDates  []time.Time
 	exceptionRanges []timeRange
 
-	runOnStartup          bool
-	runOnStartupCompleted bool
+	runOnStartup bool
 
 	ignoreAttributeChanges bool
 
 	enabledEntities  []internal.EnabledDisabledInfo
 	disabledEntities []internal.EnabledDisabledInfo
+}
+
+type entityDelayWait struct {
+	timer  *time.Timer
+	cancel context.CancelFunc
+}
+
+type entityDelayState struct {
+	sync.Mutex
+	delayWait *entityDelayWait
 }
 
 type EntityListenerCallback func(*Service, State, EntityData)
@@ -74,7 +85,8 @@ type msgState struct {
 
 func NewEntityListener() elBuilder1 {
 	return elBuilder1{EntityListener{
-		lastRan: carbon.Now().StartOfCentury(),
+		lastRan:    carbon.Now().StartOfCentury(),
+		delayState: &entityDelayState{},
 	}}
 }
 
@@ -152,6 +164,9 @@ func (b elBuilder3) ExceptionRange(start, end time.Time) elBuilder3 {
 	return b
 }
 
+// RunOnStartup invokes the listener once after each successful Start session
+// starts. A listener registered for multiple entities still runs only once per
+// session.
 func (b elBuilder3) RunOnStartup() elBuilder3 {
 	b.entityListener.runOnStartup = true
 	return b
@@ -204,6 +219,10 @@ func (b elBuilder3) Build() EntityListener {
 }
 
 func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateData) {
+	if !app.callbackAdmissionOpen() {
+		return
+	}
+
 	// Check conditions
 	if l.ignoreAttributeChanges && data.NewState.State == data.OldState.State {
 		return
@@ -215,9 +234,7 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateDa
 		return
 	}
 	if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
-		if l.delayTimer != nil {
-			l.delayTimer.Stop()
-		}
+		l.cancelDelay()
 		return
 	}
 	if c := checkThrottle(l.throttle, l.lastRan); c.fail {
@@ -237,17 +254,80 @@ func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateDa
 	}
 
 	if l.delay != 0 {
-		l := l
-		l.delayTimer = time.AfterFunc(l.delay, func() {
-			go l.callback(app.service, app.state, entityData)
-			l.lastRan = carbon.Now()
-		})
+		l.scheduleDelay(app, entityData)
 		return
 	}
 
 	// run now if no delay set
-	go l.callback(app.service, app.state, entityData)
+	if app.ctx.Err() != nil {
+		return
+	}
+	app.goTracked(func() {
+		l.callback(app.service, app.state, entityData)
+	})
 	l.lastRan = carbon.Now()
+}
+
+func (l *EntityListener) cancelDelay() {
+	l.delayState.Lock()
+	defer l.delayState.Unlock()
+	if l.delayState.delayWait != nil {
+		l.delayState.delayWait.cancel()
+		l.delayState.delayWait = nil
+	}
+}
+
+func (l *EntityListener) scheduleDelay(app *App, entityData EntityData) {
+	delayCtx, cancel := context.WithCancel(app.ctx)
+	wait := &entityDelayWait{timer: time.NewTimer(l.delay), cancel: cancel}
+
+	l.delayState.Lock()
+	if l.delayState.delayWait != nil {
+		l.delayState.delayWait.cancel()
+	}
+	l.delayState.delayWait = wait
+	l.delayState.Unlock()
+
+	app.goTracked(func() {
+		defer func() {
+			wait.cancel()
+			stopAndDrainTimer(wait.timer)
+			l.delayState.Lock()
+			if l.delayState.delayWait == wait {
+				l.delayState.delayWait = nil
+			}
+			l.delayState.Unlock()
+		}()
+
+		select {
+		case <-wait.timer.C:
+		case <-delayCtx.Done():
+			return
+		}
+		if app.ctx.Err() != nil || delayCtx.Err() != nil {
+			return
+		}
+
+		l.delayState.Lock()
+		defer l.delayState.Unlock()
+		if l.delayState.delayWait != wait || app.ctx.Err() != nil || delayCtx.Err() != nil {
+			return
+		}
+		app.goTracked(func() {
+			l.callback(app.service, app.state, entityData)
+		})
+		l.lastRan = carbon.Now()
+	})
+}
+
+func stopAndDrainTimer(timer *time.Timer) {
+	if timer.Stop() {
+		return
+	}
+	select {
+	case <-timer.C:
+	default:
+	}
 }
 
 /* Functions */
