@@ -67,7 +67,15 @@ entities.Climate.Bedroom
 entities.MediaPlayer.TVRoom
 ```
 
-The constants are based on the entity ID itself, not the name of the entity in Home Assistant.
+The generated identifiers and values are based on entity IDs. However, entity IDs produced by some integrations are not always easy to read or recognize. When available, the generator includes each entity's Home Assistant `friendly_name` as an inline comment:
+
+```go
+type NumberDomain struct {
+	XiaomiCn718205484Oh4wVolumeP21 string // Cute Screen Speaker Volume
+}
+```
+
+Although the generated identifier may not be immediately recognizable, the comment makes the entity's purpose clear at a glance.
 
 ### Write your automations
 
