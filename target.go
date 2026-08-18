@@ -1,7 +1,7 @@
 package gomeassistant
 
 import (
-	"saml.dev/gome-assistant/internal/services"
+	"saml.dev/gome-assistant/services"
 )
 
 type Target = services.Target

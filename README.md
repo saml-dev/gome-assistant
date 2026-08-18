@@ -313,6 +313,21 @@ _, err = service.Light.TurnOff(ctx, ga.Areas("kitchen"))
 _, err = service.Light.TurnOff(ctx, ga.Devices("abc123"))
 ```
 
+For services without a convenience method, use the public `services` package
+to construct a raw request:
+
+```go
+import "saml.dev/gome-assistant/services"
+
+var result any
+err := app.Call(ctx, services.BaseServiceRequest{
+	Domain:      "light",
+	Service:     "turn_on",
+	Target:      services.Entities("light.kitchen"),
+	ServiceData: map[string]any{"brightness_pct": 50},
+}, &result)
+```
+
 ### Interval
 
 Intervals are used to run a function on an interval.
