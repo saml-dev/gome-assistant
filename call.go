@@ -4,18 +4,20 @@ import (
 	"context"
 	"sync"
 
-	"saml.dev/gome-assistant/internal/services"
+	internalservices "saml.dev/gome-assistant/internal/services"
+	"saml.dev/gome-assistant/services"
 	"saml.dev/gome-assistant/websocket"
 )
 
-// CallAndForget implements [services.API.CallAndForget].
+// CallAndForget sends a Home Assistant service request without waiting for its
+// result.
 func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 	conn, err := app.activeConn()
 	if err != nil {
 		return err
 	}
 
-	reqMsg := services.CallServiceMessage{
+	reqMsg := internalservices.CallServiceMessage{
 		BaseMessage: websocket.BaseMessage{
 			Type: "call_service",
 		},
@@ -30,7 +32,8 @@ func (app *App) CallAndForget(req services.BaseServiceRequest) error {
 	)
 }
 
-// Call implements [services.API.Call].
+// Call sends a Home Assistant service request and unmarshals its result into
+// result.
 func (app *App) Call(
 	ctx context.Context, req services.BaseServiceRequest, result any,
 ) error {
@@ -61,7 +64,7 @@ func (app *App) Call(
 	//  5. Unsubscribe from ID.
 	//  6. Unmarshal the "result" part of the response into `result`.
 
-	reqMsg := services.CallServiceMessage{
+	reqMsg := internalservices.CallServiceMessage{
 		BaseMessage: websocket.BaseMessage{
 			Type: "call_service",
 		},
