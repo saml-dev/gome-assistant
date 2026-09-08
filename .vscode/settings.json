@@ -1,0 +1,8 @@
+{
+  "go.alternateTools": {
+    "go": "/Users/samlewis/.local/share/mise/shims/go",
+    "dlv": "/Users/samlewis/.local/share/mise/shims/dlv",
+    "gopls": "/Users/samlewis/.local/share/mise/shims/gopls"
+  },
+  "zig.path": "/Users/samlewis/.local/share/mise/installs/zig/0.15.2/bin/zig"
+}

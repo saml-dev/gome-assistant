@@ -151,6 +151,33 @@ overlap. Cancel the context to end a session that may be started again later.
 `Cleanup` permanently closes the app; later calls to `Start` return
 `ErrAppClosed`.
 
+Metrics collection and its read-only web UI are optional. Configure them before
+the first `Start` call:
+
+```go
+if err := app.EnableMetricsCollection("/var/lib/gomeassistant/metrics.db"); err != nil {
+	return err
+}
+if err := app.EnableWebUI(false); err != nil {
+	return err
+}
+```
+
+The SQLite path must be absolute. Pass `false` to keep the web UI on loopback,
+starting at `127.0.0.1:52189`. Pass `true` to expose it on all IPv4 interfaces,
+starting at `0.0.0.0:52189`, then connect through the server's LAN address. If
+the starting port is busy, the UI increments until it finds a free one and logs
+the actual address. The UI has no built-in authentication or TLS, so only pass
+`true` on a trusted network or when access is protected externally.
+When metrics are enabled, the first `Start` freezes configuration and
+automation registration. Add `.Key("stable-name")` at the final automation
+builder stage when you want an identity that remains stable if callback source
+lines move; otherwise the callback source location is used. Add
+`.DisableMetrics()` at the final builder stage to keep an automation running
+while excluding it completely from metrics collection and the Automations UI.
+For example, a frequent housekeeping interval can opt out with
+`NewInterval().Call(callback).Every("5s").DisableMetrics().Build()`.
+
 A full reference is available on [pkg.go.dev](https://pkg.go.dev/saml.dev/gome-assistant), but all you need to know to get started are the core concepts below.
 
 - [Daily Schedules](#daily-schedule)
@@ -249,6 +276,25 @@ app.RegisterEventListeners(eventListener)
 ```
 
 Event listeners have other functions to change the behavior.
+
+For broad Home Assistant event types, use `TriggerWhen` once between
+`EventTypes` and `Call` to decide whether an individual event triggers the
+listener at all:
+
+```go
+eventListener := ga.NewEventListener().
+    EventTypes("zha_event").
+    TriggerWhen(func(data ga.EventData) bool {
+        return eventBelongsToThisAutomation(data.RawEventJSON)
+    }).
+    Call(myCallbackFunc).
+    Build()
+```
+
+A `false` result excludes the event before evaluation. It does not invoke the
+callback, run the listener's other conditions, consume its throttle window, or
+produce metrics. Other conditions apply after an event has triggered the
+listener and produce a visible skipped evaluation when they reject it.
 
 | Function                                | Info                                                                                                              |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,6 +21,7 @@ type EntityListener struct {
 	toState   string
 	throttle  time.Duration
 	lastRan   carbon.Carbon
+	lastRanMu *sync.Mutex
 
 	betweenStart string
 	betweenEnd   string
@@ -36,11 +38,17 @@ type EntityListener struct {
 
 	enabledEntities  []internal.EnabledDisabledInfo
 	disabledEntities []internal.EnabledDisabledInfo
+
+	key             string
+	automationKey   string
+	source          string
+	metricsDisabled bool
 }
 
 type entityDelayWait struct {
-	timer  *time.Timer
-	cancel context.CancelFunc
+	timer      *time.Timer
+	cancel     context.CancelFunc
+	evaluation *evaluationTrace
 }
 
 type entityDelayState struct {
@@ -49,6 +57,8 @@ type entityDelayState struct {
 }
 
 type EntityListenerCallback func(*Service, State, EntityData)
+
+var fallbackLastRanMutex sync.Mutex
 
 type EntityData struct {
 	TriggerEntityID string
@@ -86,6 +96,7 @@ type msgState struct {
 func NewEntityListener() elBuilder1 {
 	return elBuilder1{EntityListener{
 		lastRan:    carbon.Now().StartOfCentury(),
+		lastRanMu:  &sync.Mutex{},
 		delayState: &entityDelayState{},
 	}}
 }
@@ -214,81 +225,138 @@ func (b elBuilder3) DisabledWhen(entityID, state string, runOnNetworkError bool)
 	return b
 }
 
+// Key sets the stable logical identity used by metrics and the web UI.
+func (b elBuilder3) Key(key string) elBuilder3 {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		panic(ErrInvalidArgs)
+	}
+	b.entityListener.key = key
+	return b
+}
+
+// DisableMetrics excludes this listener from metrics collection and the web
+// UI catalog without disabling its execution.
+func (b elBuilder3) DisableMetrics() elBuilder3 {
+	b.entityListener.metricsDisabled = true
+	return b
+}
+
 func (b elBuilder3) Build() EntityListener {
 	return b.entityListener
 }
 
 func (l *EntityListener) maybeCall(app *App, entityData EntityData, data stateData) {
+	evaluation := app.newEvaluation(l.automationKey, entityTrigger("entity", entityData))
 	if !app.callbackAdmissionOpen() {
+		evaluation.skip("session_stopping", nil, nil)
 		return
 	}
 
 	// Check conditions
 	if l.ignoreAttributeChanges && data.NewState.State == data.OldState.State {
+		evaluation.skip("attribute_only_change", nil, nil)
 		return
 	}
 	if c := checkWithinTimeRange(l.betweenStart, l.betweenEnd); c.fail {
+		evaluation.skip("outside_time_window", nil, nil)
 		return
 	}
 	if c := checkStatesMatch(l.fromState, data.OldState.State); c.fail {
+		evaluation.skip("from_state_mismatch", nil, nil)
 		return
 	}
 	if c := checkStatesMatch(l.toState, data.NewState.State); c.fail {
-		l.cancelDelay()
+		l.cancelDelay("target_state_changed", evaluation)
+		evaluation.skip("to_state_mismatch", nil, nil)
 		return
 	}
-	if c := checkThrottle(l.throttle, l.lastRan); c.fail {
+	if c := checkThrottle(l.throttle, l.lastRun()); c.fail {
+		evaluation.skip("throttled", nil, nil)
 		return
 	}
 	if c := checkExceptionDates(l.exceptionDates); c.fail {
+		evaluation.skip("exception_date", nil, nil)
 		return
 	}
 	if c := checkExceptionRanges(l.exceptionRanges); c.fail {
+		evaluation.skip("exception_range", nil, nil)
 		return
 	}
-	if c := checkEnabledEntity(app.state, l.enabledEntities); c.fail {
+	if c := checkEnabledEntity(evaluation.scopedState(app.state), l.enabledEntities); c.fail {
+		evaluation.skipCondition(c, "enabled_condition_mismatch", "enabled_condition_query_error")
 		return
 	}
-	if c := checkDisabledEntity(app.state, l.disabledEntities); c.fail {
+	if c := checkDisabledEntity(evaluation.scopedState(app.state), l.disabledEntities); c.fail {
+		evaluation.skipCondition(c, "disabled_condition_match", "disabled_condition_query_error")
 		return
 	}
 
 	if l.delay != 0 {
-		l.scheduleDelay(app, entityData)
+		l.scheduleDelay(app, entityData, evaluation)
 		return
 	}
 
 	// run now if no delay set
-	if app.ctx.Err() != nil {
+	if app.sessionStopping() {
+		evaluation.skip("session_stopping", nil, nil)
 		return
 	}
-	app.goTracked(func() {
-		l.callback(app.service, app.state, entityData)
-	})
+	if !evaluation.runEntityCallback(app, l.callback, entityData) {
+		evaluation.skip("session_stopping", nil, nil)
+	}
+	l.markRan()
+}
+
+func (l *EntityListener) lastRun() carbon.Carbon {
+	mutex := l.lastRanMutex()
+	mutex.Lock()
+	defer mutex.Unlock()
+	return l.lastRan
+}
+
+func (l *EntityListener) lastRanMutex() *sync.Mutex {
+	if l.lastRanMu != nil {
+		return l.lastRanMu
+	}
+	return &fallbackLastRanMutex
+}
+
+func (l *EntityListener) markRan() {
+	mutex := l.lastRanMutex()
+	mutex.Lock()
 	l.lastRan = carbon.Now()
+	mutex.Unlock()
 }
 
-func (l *EntityListener) cancelDelay() {
+func (l *EntityListener) cancelDelay(reason string, cause *evaluationTrace) {
 	l.delayState.Lock()
-	defer l.delayState.Unlock()
-	if l.delayState.delayWait != nil {
-		l.delayState.delayWait.cancel()
-		l.delayState.delayWait = nil
+	wait := l.delayState.delayWait
+	l.delayState.delayWait = nil
+	l.delayState.Unlock()
+	if wait != nil {
+		wait.evaluation.cancelWaiting(reason, cause)
+		wait.cancel()
 	}
 }
 
-func (l *EntityListener) scheduleDelay(app *App, entityData EntityData) {
-	delayCtx, cancel := context.WithCancel(app.ctx)
-	wait := &entityDelayWait{timer: time.NewTimer(l.delay), cancel: cancel}
+func (l *EntityListener) scheduleDelay(app *App, entityData EntityData, evaluation *evaluationTrace) {
+	delayCtx, cancel := context.WithCancel(app.sessionContext())
+	wait := &entityDelayWait{timer: time.NewTimer(l.delay), cancel: cancel, evaluation: evaluation}
 
 	l.delayState.Lock()
-	if l.delayState.delayWait != nil {
-		l.delayState.delayWait.cancel()
-	}
+	// Mark the trace waiting before its wait is visible to another trigger.
+	// A replacement then always observes a cancelable active evaluation.
+	evaluation.beginWaiting(l.delay, l.toState)
+	previous := l.delayState.delayWait
 	l.delayState.delayWait = wait
 	l.delayState.Unlock()
+	if previous != nil {
+		previous.evaluation.cancelWaiting("replaced_by_new_trigger", evaluation)
+		previous.cancel()
+	}
 
-	app.goTracked(func() {
+	if !app.goTracked(func() {
 		defer func() {
 			wait.cancel()
 			stopAndDrainTimer(wait.timer)
@@ -302,22 +370,45 @@ func (l *EntityListener) scheduleDelay(app *App, entityData EntityData) {
 		select {
 		case <-wait.timer.C:
 		case <-delayCtx.Done():
+			if app.sessionStopping() {
+				evaluation.cancelWaiting("session_stopping", nil)
+			} else {
+				evaluation.cancelWaiting("stale_wait", nil)
+			}
 			return
 		}
-		if app.ctx.Err() != nil || delayCtx.Err() != nil {
+		if app.sessionStopping() || delayCtx.Err() != nil {
+			evaluation.cancelWaiting("session_stopping", nil)
 			return
 		}
 
 		l.delayState.Lock()
-		defer l.delayState.Unlock()
-		if l.delayState.delayWait != wait || app.ctx.Err() != nil || delayCtx.Err() != nil {
+		if l.delayState.delayWait != wait {
+			l.delayState.Unlock()
+			evaluation.cancelWaiting("stale_wait", nil)
 			return
 		}
-		app.goTracked(func() {
-			l.callback(app.service, app.state, entityData)
-		})
-		l.lastRan = carbon.Now()
-	})
+		l.delayState.delayWait = nil
+		l.delayState.Unlock()
+		if app.sessionStopping() || delayCtx.Err() != nil {
+			evaluation.cancelWaiting("session_stopping", nil)
+			return
+		}
+		evaluation.finishWaiting()
+		if !evaluation.runEntityCallback(app, l.callback, entityData) {
+			evaluation.skip("session_stopping", nil, nil)
+		}
+		l.markRan()
+	}) {
+		l.delayState.Lock()
+		if l.delayState.delayWait == wait {
+			l.delayState.delayWait = nil
+		}
+		l.delayState.Unlock()
+		wait.cancel()
+		stopAndDrainTimer(wait.timer)
+		evaluation.cancelWaiting("session_stopping", nil)
+	}
 }
 
 func stopAndDrainTimer(timer *time.Timer) {
@@ -333,7 +424,12 @@ func stopAndDrainTimer(timer *time.Timer) {
 /* Functions */
 func (app *App) callEntityListeners(msgBytes []byte) {
 	msg := stateChangedMessage{}
-	_ = json.Unmarshal(msgBytes, &msg)
+	if err := json.Unmarshal(msgBytes, &msg); err != nil {
+		return
+	}
+	if msg.Type != "" && msg.Type != "event" {
+		return
+	}
 	data := msg.Event.Data
 	eid := data.EntityID
 	listeners, ok := app.entityListeners[eid]

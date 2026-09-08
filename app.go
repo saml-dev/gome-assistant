@@ -15,10 +15,16 @@ import (
 
 	"saml.dev/gome-assistant/internal"
 	"saml.dev/gome-assistant/internal/http"
+	"saml.dev/gome-assistant/internal/metrics"
 	"saml.dev/gome-assistant/websocket"
 )
 
 var ErrInvalidArgs = errors.New("invalid arguments provided")
+
+// ErrConfigurationFrozen is returned when metrics or web UI configuration is
+// changed after the first call to Start. It is also used as the panic value
+// when an automation is registered after a metrics-enabled app has started.
+var ErrConfigurationFrozen = errors.New("app configuration is frozen")
 
 // ErrAppClosed is returned when Start is called after Cleanup, or when Cleanup
 // was called before the application had a chance to start.
@@ -41,6 +47,25 @@ type scheduledAction interface {
 type App struct {
 	closed  atomic.Bool
 	workers sync.WaitGroup
+
+	workerAdmissionMu     sync.Mutex
+	workerAdmissionClosed bool
+	lifecycleMu           sync.RWMutex
+
+	configurationMu     sync.Mutex
+	configurationFrozen bool
+	registryFrozen      bool
+	metricsDatabasePath string
+	webUIAddress        string
+	catalog             []automationDefinition
+	catalogErr          error
+
+	metricsMu      sync.Mutex
+	metricsRuntime *metricsRuntime
+	metricsOrigin  atomic.Pointer[metricsSession]
+
+	statusMu sync.RWMutex
+	status   runtimeStatus
 
 	ctx context.Context
 	run atomic.Pointer[runCancellation]
@@ -75,6 +100,8 @@ func (app *App) activeConn() (*websocket.Conn, error) {
 	if app.closed.Load() {
 		return nil, ErrAppClosed
 	}
+	app.lifecycleMu.RLock()
+	defer app.lifecycleMu.RUnlock()
 	if app.conn == nil {
 		return nil, ErrAppNotRunning
 	}
@@ -158,10 +185,17 @@ func (app *App) Cleanup() {
 	}
 	if run := app.run.Load(); run != nil {
 		run.cancel()
+		return
 	}
+	app.closeMetricsRuntime(nil)
+	app.markPermanentlyClosed()
 }
 
 func (app *App) RegisterSchedules(schedules ...DailySchedule) {
+	app.configurationMu.Lock()
+	defer app.configurationMu.Unlock()
+	app.requireRegistrationOpen()
+
 	for _, s := range schedules {
 		// Keep scheduler state internal: registrations take values, and workers
 		// advance this dedicated copy across Start sessions.
@@ -191,6 +225,10 @@ func (app *App) RegisterSchedules(schedules ...DailySchedule) {
 }
 
 func (app *App) RegisterIntervals(intervals ...Interval) {
+	app.configurationMu.Lock()
+	defer app.configurationMu.Unlock()
+	app.requireRegistrationOpen()
+
 	for _, i := range intervals {
 		// Keep scheduler state internal: registrations take values, and workers
 		// advance this dedicated copy across Start sessions.
@@ -223,6 +261,10 @@ func (app *App) registerEntityListener(etl EntityListener) {
 }
 
 func (app *App) RegisterEntityListeners(etls ...EntityListener) {
+	app.configurationMu.Lock()
+	defer app.configurationMu.Unlock()
+	app.requireRegistrationOpen()
+
 	for _, etl := range etls {
 		app.registerEntityListener(etl)
 	}
@@ -235,6 +277,10 @@ func (app *App) registerEventListener(evl EventListener) {
 }
 
 func (app *App) RegisterEventListeners(evls ...EventListener) {
+	app.configurationMu.Lock()
+	defer app.configurationMu.Unlock()
+	app.requireRegistrationOpen()
+
 	for _, evl := range evls {
 		app.registerEventListener(evl)
 	}
@@ -290,13 +336,17 @@ func (app *App) initializeSolarSchedules() {
 			continue
 		}
 		schedule.nextRunTime = getNextSunRiseOrSet(app, schedule.isSunrise, schedule.sunOffset).Carbon2Time()
+		app.updateCatalogNextDue(schedule.automationKey, schedule.nextRunTime)
 	}
 }
 
 // Start owns one Home Assistant connection and blocks until the context is
 // canceled or the session ends. It does not retry; callers decide whether and
 // when to call Start again. Start calls must not overlap.
-func (app *App) Start(ctx context.Context) error {
+func (app *App) Start(ctx context.Context) (returnErr error) {
+	if err := app.freezeConfiguration(); err != nil {
+		return err
+	}
 	if ctx == nil {
 		return ErrInvalidArgs
 	}
@@ -313,17 +363,53 @@ func (app *App) Start(ctx context.Context) error {
 	if app.closed.Load() {
 		cancel()
 	}
-	app.ctx = runCtx
+	app.beginWorkerAdmission()
+	app.setSessionContext(runCtx)
+	app.markSessionStarting()
+
+	var metricsSession *metricsSession
+	ready := false
 
 	defer func() {
+		contextWasDone := runCtx.Err() != nil
 		cancel()
-		if app.conn != nil {
-			_ = app.conn.Close()
+		if conn := app.connection(); conn != nil {
+			_ = conn.Close()
 		}
+		app.endWorkerAdmission()
 		app.workers.Wait()
-		app.conn = nil
+		app.finishMetricsSession(metricsSession, ready, contextWasDone, returnErr)
+		app.metricsOrigin.CompareAndSwap(metricsSession, nil)
+		app.setConnection(nil)
+		app.markSessionFinished(returnErr)
+		if app.closed.Load() {
+			// Cleanup may race a later Start before it acquires a session. In
+			// that case finishMetricsSession has no session through which to
+			// close a runtime promoted by an earlier Start.
+			if metricsSession == nil {
+				app.closeMetricsRuntime(nil)
+			}
+			app.markPermanentlyClosed()
+		}
 		app.run.CompareAndSwap(run, nil)
 	}()
+
+	if err := runCtx.Err(); err != nil {
+		return err
+	}
+	metricsSession, returnErr = app.beginMetricsSession()
+	if returnErr != nil {
+		return returnErr
+	}
+	if metricsSession != nil {
+		app.metricsOrigin.Store(metricsSession)
+		metricsSession.record(metrics.EventSessionStarting, metrics.SessionStartingPayload{
+			WebUIEnabled: app.webUIAddress != "",
+		})
+	}
+	if err := runCtx.Err(); err != nil {
+		return err
+	}
 
 	slog.Info("Starting", "schedules", app.scheduleCount)
 	slog.Info("Starting", "entity listeners", len(app.entityListeners))
@@ -336,7 +422,8 @@ func (app *App) Start(ctx context.Context) error {
 		}
 		return err
 	}
-	app.conn = conn
+	app.setConnection(conn)
+	app.markConnected()
 
 	if err := app.state.loadHomeZone(runCtx, app.homeZoneEntityID); err != nil {
 		if runErr := runCtx.Err(); runErr != nil {
@@ -351,9 +438,24 @@ func (app *App) Start(ctx context.Context) error {
 		}
 		return err
 	}
-	app.goTracked(func() { app.runScheduledActions(runCtx) })
+	if !app.goTracked(func() { app.runScheduledActions(runCtx) }) {
+		if err := runCtx.Err(); err != nil {
+			return err
+		}
+		return context.Canceled
+	}
 	app.runStartupCallbacks(runCtx)
-	return conn.Run(runCtx)
+	if err := runCtx.Err(); err != nil {
+		return err
+	}
+	if metricsSession != nil {
+		metricsSession.record(metrics.EventSessionReady, metrics.EmptyPayload{})
+		app.promoteMetricsRuntime(metricsSession.runtime)
+	}
+	ready = true
+	app.markSessionReady()
+	returnErr = conn.Run(runCtx)
+	return returnErr
 }
 
 func (app *App) subscribeSession(conn *websocket.Conn) (err error) {
@@ -395,9 +497,15 @@ func (app *App) runStartupCallbacks(ctx context.Context) {
 			// ensure each ETL only runs once, even if
 			// it listens to multiple entities
 			if etl.runOnStartup && !completed[etl] {
-				entityState, err := app.state.getWithContext(ctx, eid)
+				// v1 requires automation_triggered before the read. Until that read
+				// succeeds, only the attempted ID is known, so the trigger carries
+				// stable zero-valued callback fields (including null attributes).
+				trigger := startupEntityTrigger(eid)
+				evaluation := app.newEvaluation(etl.automationKey, trigger)
+				entityState, err := evaluation.getWithContext(ctx, app.state, eid)
 				if err != nil {
 					slog.Warn("Failed to get entity state \"", eid, "\" during startup, skipping RunOnStartup")
+					evaluation.skip("startup_state_query_error", nil, err)
 					continue
 				}
 
@@ -410,21 +518,27 @@ func (app *App) runStartupCallbacks(ctx context.Context) {
 					ToAttributes:    entityState.Attributes,
 					LastChanged:     entityState.LastChanged,
 				}
-				app.goTracked(func() { etl.callback(app.service, app.state, data) })
+				if !evaluation.runEntityCallback(app, etl.callback, data) {
+					evaluation.skip("session_stopping", nil, nil)
+				}
 			}
 		}
 	}
 }
 
-func (app *App) goTracked(fn func()) {
-	if app.ctx != nil && app.ctx.Err() != nil {
-		return
+func (app *App) goTracked(fn func()) bool {
+	app.workerAdmissionMu.Lock()
+	if app.workerAdmissionClosed || app.sessionStopping() {
+		app.workerAdmissionMu.Unlock()
+		return false
 	}
 	app.workers.Add(1)
+	app.workerAdmissionMu.Unlock()
 	go func() {
 		defer app.workers.Done()
 		fn()
 	}()
+	return true
 }
 
 // runScheduledActions starts a goroutine to run each `DailySchedule`

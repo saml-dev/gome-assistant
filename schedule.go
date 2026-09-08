@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/golang-module/carbon"
@@ -31,6 +32,11 @@ type DailySchedule struct {
 
 	enabledEntities  []internal.EnabledDisabledInfo
 	disabledEntities []internal.EnabledDisabledInfo
+
+	key             string
+	automationKey   string
+	source          string
+	metricsDisabled bool
 }
 
 func (s DailySchedule) Hash() string {
@@ -149,6 +155,23 @@ func (sb scheduleBuilderEnd) DisabledWhen(entityID, state string, runOnNetworkEr
 	return sb
 }
 
+// Key sets the stable logical identity used by metrics and the web UI.
+func (sb scheduleBuilderEnd) Key(key string) scheduleBuilderEnd {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		panic(ErrInvalidArgs)
+	}
+	sb.schedule.key = key
+	return sb
+}
+
+// DisableMetrics excludes this schedule from metrics collection and the web
+// UI catalog without disabling its execution.
+func (sb scheduleBuilderEnd) DisableMetrics() scheduleBuilderEnd {
+	sb.schedule.metricsDisabled = true
+	return sb
+}
+
 func (sb scheduleBuilderEnd) Build() DailySchedule {
 	return sb.schedule
 }
@@ -181,24 +204,30 @@ func (s *DailySchedule) run(ctx context.Context, app *App) {
 }
 
 func (s DailySchedule) maybeRunCallback(app *App) {
+	evaluation := app.newEvaluation(s.automationKey, dailyTrigger())
 	if c := checkExceptionDates(s.exceptionDates); c.fail {
+		evaluation.skip("exception_date", nil, nil)
 		return
 	}
 	if c := checkAllowlistDates(s.allowlistDates); c.fail {
+		evaluation.skip("date_not_allowed", nil, nil)
 		return
 	}
-	if c := checkEnabledEntity(app.state, s.enabledEntities); c.fail {
+	if c := checkEnabledEntity(evaluation.scopedState(app.state), s.enabledEntities); c.fail {
+		evaluation.skipCondition(c, "enabled_condition_mismatch", "enabled_condition_query_error")
 		return
 	}
-	if c := checkDisabledEntity(app.state, s.disabledEntities); c.fail {
+	if c := checkDisabledEntity(evaluation.scopedState(app.state), s.disabledEntities); c.fail {
+		evaluation.skipCondition(c, "disabled_condition_match", "disabled_condition_query_error")
 		return
 	}
-	if app.ctx.Err() != nil {
+	if app.sessionStopping() {
+		evaluation.skip("session_stopping", nil, nil)
 		return
 	}
-	app.goTracked(func() {
-		s.callback(app.service, app.state)
-	})
+	if !evaluation.runCallback(app, func(service *Service, state State) { s.callback(service, state) }) {
+		evaluation.skip("session_stopping", nil, nil)
+	}
 }
 
 // updateNextRunTime updates `s.nextRunTime` to the next time that `s`
@@ -217,4 +246,5 @@ func (s *DailySchedule) updateNextRunTime(app *App) {
 	} else {
 		s.nextRunTime = carbon.Time2Carbon(s.nextRunTime).AddDay().Carbon2Time()
 	}
+	app.updateCatalogNextDue(s.automationKey, s.nextRunTime)
 }

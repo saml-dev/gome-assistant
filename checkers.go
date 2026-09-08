@@ -8,7 +8,9 @@ import (
 )
 
 type conditionCheck struct {
-	fail bool
+	fail      bool
+	condition *internal.EnabledDisabledInfo
+	err       error
 }
 
 func checkWithinTimeRange(startTime, endTime string) conditionCheck {
@@ -102,12 +104,17 @@ func checkEnabledEntity(s State, infos []internal.EnabledDisabledInfo) condition
 			} else {
 				// don't run this automation
 				cc.fail = true
+				condition := edi
+				cc.condition = &condition
+				cc.err = err
 				break
 			}
 		}
 
 		if !matches {
 			cc.fail = true
+			condition := edi
+			cc.condition = &condition
 			break
 		}
 	}
@@ -130,12 +137,17 @@ func checkDisabledEntity(s State, infos []internal.EnabledDisabledInfo) conditio
 			} else {
 				// don't run this automation
 				cc.fail = true
+				condition := edi
+				cc.condition = &condition
+				cc.err = err
 				break
 			}
 		}
 
 		if matches {
 			cc.fail = true
+			condition := edi
+			cc.condition = &condition
 			break
 		}
 	}

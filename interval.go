@@ -3,6 +3,7 @@ package gomeassistant
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"saml.dev/gome-assistant/internal"
@@ -24,6 +25,11 @@ type Interval struct {
 
 	enabledEntities  []internal.EnabledDisabledInfo
 	disabledEntities []internal.EnabledDisabledInfo
+
+	key             string
+	automationKey   string
+	source          string
+	metricsDisabled bool
 }
 
 func (i Interval) Hash() string {
@@ -143,6 +149,23 @@ func (ib intervalBuilderEnd) DisabledWhen(entityID, state string, runOnNetworkEr
 	return ib
 }
 
+// Key sets the stable logical identity used by metrics and the web UI.
+func (ib intervalBuilderEnd) Key(key string) intervalBuilderEnd {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		panic(ErrInvalidArgs)
+	}
+	ib.interval.key = key
+	return ib
+}
+
+// DisableMetrics excludes this interval from metrics collection and the web
+// UI catalog without disabling its execution.
+func (ib intervalBuilderEnd) DisableMetrics() intervalBuilderEnd {
+	ib.interval.metricsDisabled = true
+	return ib
+}
+
 func (sb intervalBuilderEnd) Build() Interval {
 	return sb.interval
 }
@@ -168,37 +191,46 @@ func (i *Interval) run(ctx context.Context, app *App) {
 		}
 
 		i.maybeRunCallback(app)
-		i.updateNextRunTime()
+		i.updateNextRunTime(app)
 	}
 }
 
-func (i *Interval) updateNextRunTime() {
+func (i *Interval) updateNextRunTime(app *App) {
 	i.nextRunTime = i.nextRunTime.Add(i.frequency)
+	app.updateCatalogNextDue(i.automationKey, i.nextRunTime)
 }
 
 func (i Interval) maybeRunCallback(app *App) {
+	evaluation := app.newEvaluation(i.automationKey, intervalTrigger())
 	if c := checkStartEndTime(i.startTime /* isStart = */, true); c.fail {
+		evaluation.skip("before_start_time", nil, nil)
 		return
 	}
 	if c := checkStartEndTime(i.endTime /* isStart = */, false); c.fail {
+		evaluation.skip("after_end_time", nil, nil)
 		return
 	}
 	if c := checkExceptionDates(i.exceptionDates); c.fail {
+		evaluation.skip("exception_date", nil, nil)
 		return
 	}
 	if c := checkExceptionRanges(i.exceptionRanges); c.fail {
+		evaluation.skip("exception_range", nil, nil)
 		return
 	}
-	if c := checkEnabledEntity(app.state, i.enabledEntities); c.fail {
+	if c := checkEnabledEntity(evaluation.scopedState(app.state), i.enabledEntities); c.fail {
+		evaluation.skipCondition(c, "enabled_condition_mismatch", "enabled_condition_query_error")
 		return
 	}
-	if c := checkDisabledEntity(app.state, i.disabledEntities); c.fail {
+	if c := checkDisabledEntity(evaluation.scopedState(app.state), i.disabledEntities); c.fail {
+		evaluation.skipCondition(c, "disabled_condition_match", "disabled_condition_query_error")
 		return
 	}
-	if app.ctx.Err() != nil {
+	if app.sessionStopping() {
+		evaluation.skip("session_stopping", nil, nil)
 		return
 	}
-	app.goTracked(func() {
-		i.callback(app.service, app.state)
-	})
+	if !evaluation.runCallback(app, func(service *Service, state State) { i.callback(service, state) }) {
+		evaluation.skip("session_stopping", nil, nil)
+	}
 }
