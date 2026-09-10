@@ -126,6 +126,54 @@ func TestActivityRowsHaveStableScanColumnsAndGroupedResult(t *testing.T) {
 	}
 }
 
+func TestMetricsUIUsesFlatSquaredVisualLanguage(t *testing.T) {
+	summary := renderActivitySummary(activityModel{})
+	filters := renderActivityFilters(activityQuery{})
+	automation := renderAutomation(automationRow{Automation: Automation{Key: "daily.one", Type: "daily"}}, false)
+
+	for _, want := range []string{
+		`class="summary-actions"`,
+		`data-filter-kind="activity"`,
+		`class="search-control"`,
+		`class="type-chip" data-type="daily"`,
+		`background: Canvas; color: CanvasText;`,
+		`--wash: color-mix(in srgb, LinkText 7%, Canvas);`,
+		`border-radius: 0`,
+		`.type-chip[data-type="daily"]`,
+		`.type-chip[data-type="interval"]`,
+		`.type-chip[data-type="entity"]`,
+		`.type-chip[data-type="event"]`,
+		`.system-event .raw[open]`,
+		`@media (prefers-reduced-motion: reduce)`,
+		`@media (forced-colors: active)`,
+		`reducedMotion ? 'auto' : 'smooth'`,
+	} {
+		if !strings.Contains(summary+filters+automation+styles+clientScript, want) {
+			t.Fatalf("flat metrics UI does not contain %q", want)
+		}
+	}
+	for _, unwanted := range []string{"box-shadow:", "linear-gradient(", "radial-gradient("} {
+		if strings.Contains(styles, unwanted) {
+			t.Fatalf("flat metrics UI unexpectedly contains elevated decoration %q", unwanted)
+		}
+	}
+}
+
+func TestAutomationCatalogScrollRegionIsAccessible(t *testing.T) {
+	rendered := renderAutomationsContent(automationsModel{
+		Rows: []automationRow{{Automation: Automation{Key: "daily.one", Type: "daily"}}},
+	})
+	for _, want := range []string{
+		`class="catalog-table-wrap" role="region" aria-label="Automation catalog" aria-describedby="catalog-scroll-hint" tabindex="0"`,
+		`<p id="catalog-scroll-hint" class="scroll-hint">Scroll horizontally to see every column.</p>`,
+		`<caption class="sr-only">Current automation definitions and recent timing</caption>`,
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("accessible automation catalog does not contain %q: %s", want, rendered)
+		}
+	}
+}
+
 func TestInactiveSessionShowsStateWithoutGrowingUptime(t *testing.T) {
 	_, handler := newTestUI(t, Snapshot{
 		SessionID: "finished", SessionStarted: time.Now().Add(-time.Hour), SessionActive: false, SessionReady: false,

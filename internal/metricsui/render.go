@@ -125,7 +125,7 @@ func renderActivitySummary(model activityModel) string {
 	if snapshot.LatestError != nil {
 		out.WriteString(summaryTerm("Latest error", snapshot.LatestError.Message))
 	}
-	out.WriteString(`</dl><div class="summary-controls" aria-label="Automation counts">`)
+	out.WriteString(`</dl><div class="summary-actions"><div class="summary-controls" aria-label="Automation counts">`)
 	for _, kind := range automationKinds {
 		out.WriteString(`<a href="/automations?type=` + kind.typeName + `">` + escape(kind.label) + ` <strong>` + fmt.Sprintf("%d", countAutomations(model.Catalog, kind.typeName)) + `</strong></a>`)
 	}
@@ -139,13 +139,13 @@ func renderActivitySummary(model activityModel) string {
 	waiting.Scope = "automations"
 	waiting.BeforeID = 0
 	out.WriteString(`<a href="` + escape(running.url("/", false)) + `">Running <strong>` + fmt.Sprintf("%d", snapshot.Running) + `</strong></a>`)
-	out.WriteString(`<a href="` + escape(waiting.url("/", false)) + `">Waiting <strong>` + fmt.Sprintf("%d", snapshot.Waiting) + `</strong></a></div></section>`)
+	out.WriteString(`<a href="` + escape(waiting.url("/", false)) + `">Waiting <strong>` + fmt.Sprintf("%d", snapshot.Waiting) + `</strong></a></div></div></section>`)
 	return out.String()
 }
 
 func renderActivityFilters(query activityQuery) string {
 	var out strings.Builder
-	out.WriteString(`<form class="filters" action="/" method="get" hx-get="/activity/fragment" hx-target="#activity-content" hx-push-url="true"><label>Search <input type="search" name="q" value="` + escape(query.Search) + `" placeholder="key, source, entity, event"></label>`)
+	out.WriteString(`<form class="filters" action="/" method="get" hx-get="/activity/fragment" hx-target="#activity-content" hx-push-url="true" data-filter-kind="activity"><label class="search-control">Search <input type="search" name="q" value="` + escape(query.Search) + `" placeholder="key, source, entity, event"></label>`)
 	if query.AutomationKey != "" {
 		out.WriteString(`<input type="hidden" name="automation" value="` + escape(query.AutomationKey) + `"><span class="filter-note">Automation: ` + escape(query.AutomationKey) + ` <a href="` + escape(clearAutomationURL(query)) + `">clear</a></span>`)
 	}
