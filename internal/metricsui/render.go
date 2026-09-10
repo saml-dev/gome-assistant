@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -38,6 +39,24 @@ func (ui *ui) handleOlder(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	writeHTML(writer, http.StatusOK, renderActivityRows(model))
+}
+
+func (ui *ui) handleActivityTrace(writer http.ResponseWriter, request *http.Request) {
+	evaluationID := trimTo(request.URL.Query().Get("evaluation"), 128)
+	if evaluationID == "" {
+		writeHTML(writer, http.StatusBadRequest, renderEvaluationTraceError("Evaluation ID is required.", ""))
+		return
+	}
+	trace, err := ui.evaluationTrace(request.Context(), evaluationID)
+	if err != nil {
+		writeHTML(writer, http.StatusInternalServerError, renderEvaluationTraceError("Could not load this trace.", evaluationID))
+		return
+	}
+	if len(trace) == 0 {
+		writeHTML(writer, http.StatusNotFound, renderEvaluationTraceError("This trace is no longer available.", ""))
+		return
+	}
+	writeHTML(writer, http.StatusOK, renderEvaluationTrace(trace))
 }
 
 func (ui *ui) handleAutomations(writer http.ResponseWriter, request *http.Request) {
@@ -204,18 +223,26 @@ func renderActivityRows(model activityModel) string {
 func renderEvaluation(row evaluationRow, expanded bool) string {
 	var out strings.Builder
 	open := ""
+	trigger := "toggle once"
 	if expanded {
 		open = " open"
+		trigger = "load once"
 	}
-	out.WriteString(`<details class="evaluation" data-evaluation="` + escape(row.ID) + `"` + open + `><summary><span class="time">` + localTime(row.OccurredAt) + `</span><span class="evaluation-main"><strong>` + escape(row.AutomationKey) + `</strong><small>` + escape(row.Source) + `</small></span><span class="trigger">` + escape(row.Trigger) + `</span><span class="evaluation-meta"><span class="badge ` + escape(row.Outcome) + `">` + escape(row.Outcome) + `</span><span class="duration">` + escape(formatDuration(row.Duration)) + `</span>`)
+	out.WriteString(`<details class="evaluation" data-evaluation="` + escape(row.ID) + `" hx-get="` + escape(evaluationTraceURL(row.ID)) + `" hx-trigger="` + trigger + `" hx-target="find .trace" hx-swap="outerHTML"` + open + `><summary><span class="time">` + localTime(row.OccurredAt) + `</span><span class="evaluation-main"><strong>` + escape(row.AutomationKey) + `</strong><small>` + escape(row.Source) + `</small></span><span class="trigger">` + escape(row.Trigger) + `</span><span class="evaluation-meta"><span class="badge ` + escape(row.Outcome) + `">` + escape(row.Outcome) + `</span><span class="duration">` + escape(formatDuration(row.Duration)) + `</span>`)
 	if row.Warnings > 0 {
 		out.WriteString(`<span class="badge warning-badge">` + fmt.Sprintf("%d", row.Warnings) + ` operation warnings</span>`)
 	}
 	if row.Incomplete {
 		out.WriteString(`<span class="tooltip" tabindex="0" aria-label="No terminal telemetry event was recorded. The UI cannot distinguish a process crash, callback panic, or dropped event." title="No terminal telemetry event was recorded. The UI cannot distinguish a process crash, callback panic, or dropped event.">incomplete?</span>`)
 	}
-	out.WriteString(`</span></summary><ol class="trace">`)
-	for _, item := range row.Trace {
+	out.WriteString(`</span></summary><ol class="trace" aria-live="polite"><li class="trace-loading"><span>Loading trace…</span></li></ol></details>`)
+	return out.String()
+}
+
+func renderEvaluationTrace(trace []traceItem) string {
+	var out strings.Builder
+	out.WriteString(`<ol class="trace" aria-live="polite">`)
+	for _, item := range trace {
 		out.WriteString(`<li>` + timestampWithSeconds(item.Event.OccurredAt) + `<span>` + escape(item.Text) + `</span>`)
 		if item.Error != "" {
 			out.WriteString(`<strong class="trace-error">` + escape(item.Error) + `</strong>`)
@@ -223,8 +250,23 @@ func renderEvaluation(row evaluationRow, expanded bool) string {
 		out.WriteString(traceRawDisclosure(item.Event))
 		out.WriteString(`</li>`)
 	}
-	out.WriteString(`</ol></details>`)
+	out.WriteString(`</ol>`)
 	return out.String()
+}
+
+func renderEvaluationTraceError(message, retryEvaluationID string) string {
+	var out strings.Builder
+	out.WriteString(`<ol class="trace" aria-live="polite"><li class="trace-load-error" role="alert"><strong>` + escape(message) + `</strong>`)
+	if retryEvaluationID != "" {
+		out.WriteString(`<button type="button" hx-get="` + escape(evaluationTraceURL(retryEvaluationID)) + `" hx-target="closest .trace" hx-swap="outerHTML">Retry</button>`)
+	}
+	out.WriteString(`</li></ol>`)
+	return out.String()
+}
+
+func evaluationTraceURL(evaluationID string) string {
+	values := url.Values{"evaluation": []string{evaluationID}}
+	return "/activity/trace?" + values.Encode()
 }
 
 func traceRawDisclosure(event metrics.StoredEvent) string {

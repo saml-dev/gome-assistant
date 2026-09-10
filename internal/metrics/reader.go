@@ -48,14 +48,17 @@ type EventFilter struct {
 }
 
 type EvaluationSummary struct {
-	EvaluationID  string
-	SessionID     string
-	AutomationKey string
-	FirstID       int64
-	LastID        int64
-	FirstOccurred time.Time
-	LastOccurred  time.Time
-	EventCount    int
+	EvaluationID      string
+	SessionID         string
+	AutomationKey     string
+	FirstID           int64
+	LastID            int64
+	FirstOccurred     time.Time
+	LastOccurred      time.Time
+	EventCount        int
+	TriggerPayload    json.RawMessage
+	LatestState       EventType
+	OperationWarnings int
 }
 
 type EvaluationFilter struct {
@@ -154,13 +157,18 @@ func (reader *Reader) Evaluations(ctx context.Context, filter EvaluationFilter) 
 	limit := normalizedLimit(filter.Limit)
 	query := strings.Builder{}
 	query.WriteString(`
-		SELECT evaluation_id,
-		       COALESCE(MAX(session_id), ''),
-		       COALESCE(MAX(automation_key), ''),
-		       MIN(id), MAX(id), MIN(occurred_at), MAX(occurred_at), COUNT(*)
-		FROM events
-		WHERE evaluation_id IS NOT NULL`)
-	arguments := make([]any, 0, 6)
+		WITH anchors AS (
+		    SELECT evaluation_id,
+		           COALESCE(MAX(session_id), '') AS session_id,
+		           COALESCE(MAX(automation_key), '') AS automation_key,
+		           MIN(id) AS first_id,
+		           MAX(id) AS last_id,
+		           MIN(occurred_at) AS first_occurred,
+		           MAX(occurred_at) AS last_occurred,
+		           COUNT(*) AS event_count
+		    FROM events
+		    WHERE evaluation_id IS NOT NULL`)
+	arguments := make([]any, 0, 7)
 	if filter.SessionID != "" {
 		query.WriteString(` AND session_id = ?`)
 		arguments = append(arguments, filter.SessionID)
@@ -183,8 +191,63 @@ func (reader *Reader) Evaluations(ctx context.Context, filter EvaluationFilter) 
 		query.WriteString(` HAVING MAX(id) < ?`)
 		arguments = append(arguments, filter.BeforeID)
 	}
-	query.WriteString(` ORDER BY MAX(id) DESC LIMIT ?`)
-	arguments = append(arguments, limit)
+	query.WriteString(` ORDER BY MAX(id) DESC LIMIT ?
+		)
+		SELECT anchors.evaluation_id,
+		       anchors.session_id,
+		       anchors.automation_key,
+		       anchors.first_id,
+		       anchors.last_id,
+		       anchors.first_occurred,
+		       anchors.last_occurred,
+		       anchors.event_count,
+		       COALESCE((
+		           SELECT CASE WHEN json_valid(trigger.payload_json) THEN
+		               json_remove(
+		                   trigger.payload_json,
+		                   '$.trigger.event.raw_event_json',
+		                   '$.trigger.entity.from_attributes',
+		                   '$.trigger.entity.to_attributes'
+		               )
+		               ELSE '{}'
+		           END
+		           FROM events AS trigger
+		           WHERE trigger.evaluation_id = anchors.evaluation_id
+		             AND trigger.event_type = ?
+		           ORDER BY trigger.occurred_at ASC, trigger.id ASC
+		           LIMIT 1
+		       ), '{}'),
+		       COALESCE((
+		           SELECT state.event_type
+		           FROM events AS state
+		           WHERE state.evaluation_id = anchors.evaluation_id
+		             AND state.event_type IN (?, ?, ?, ?, ?)
+		           ORDER BY state.occurred_at DESC, state.id DESC
+		           LIMIT 1
+		       ), ''),
+		       (
+		           SELECT COUNT(*)
+		           FROM events AS operation
+		           WHERE operation.evaluation_id = anchors.evaluation_id
+		             AND operation.event_type IN (?, ?)
+		             AND CASE WHEN json_valid(operation.payload_json) THEN
+		                 COALESCE(json_extract(operation.payload_json, '$.error.go_type'), '') <> '' OR
+		                 COALESCE(json_extract(operation.payload_json, '$.error.message'), '') <> ''
+		                 ELSE 0
+		             END
+		       )
+		FROM anchors
+		ORDER BY anchors.last_id DESC`)
+	arguments = append(arguments, limit,
+		EventAutomationTriggered,
+		EventAutomationSkipped,
+		EventAutomationWaiting,
+		EventAutomationWaitCanceled,
+		EventAutomationCallbackStarted,
+		EventAutomationCallbackFinished,
+		EventStateReadFinished,
+		EventServiceCallFinished,
+	)
 
 	rows, err := reader.database.QueryContext(ctx, query.String(), arguments...)
 	if err != nil {
@@ -196,6 +259,7 @@ func (reader *Reader) Evaluations(ctx context.Context, filter EvaluationFilter) 
 	for rows.Next() {
 		var summary EvaluationSummary
 		var firstOccurred, lastOccurred int64
+		var triggerPayload, latestState string
 		if err := rows.Scan(
 			&summary.EvaluationID,
 			&summary.SessionID,
@@ -205,11 +269,16 @@ func (reader *Reader) Evaluations(ctx context.Context, filter EvaluationFilter) 
 			&firstOccurred,
 			&lastOccurred,
 			&summary.EventCount,
+			&triggerPayload,
+			&latestState,
+			&summary.OperationWarnings,
 		); err != nil {
 			return nil, fmt.Errorf("scan metrics evaluation: %w", err)
 		}
 		summary.FirstOccurred = time.Unix(0, firstOccurred).UTC()
 		summary.LastOccurred = time.Unix(0, lastOccurred).UTC()
+		summary.TriggerPayload = json.RawMessage(triggerPayload)
+		summary.LatestState = EventType(latestState)
 		summaries = append(summaries, summary)
 	}
 	if err := rows.Err(); err != nil {

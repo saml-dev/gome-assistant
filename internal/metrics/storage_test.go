@@ -495,23 +495,35 @@ func TestReaderFiltersAndEvaluationTrace(t *testing.T) {
 		event.AutomationKey = "kitchen"
 		event.EvaluationID = evaluationID
 		event.OccurredAt = time.Unix(0, int64(3-index))
+		if eventType == EventAutomationTriggered {
+			event.Payload = AutomationTriggeredPayload{Trigger: Trigger{Kind: "event", Event: &EventTrigger{Type: "zha_event", RawEventJSON: `{"large":"trigger-only-marker"}`}}}
+		}
 		if !recorder.Record(event) {
 			t.Fatal("event not admitted")
 		}
+	}
+	warning := testEvent(EventStateReadFinished, "session-a")
+	warning.AutomationKey = "kitchen"
+	warning.EvaluationID = evaluationID
+	warning.OperationID = "operation-a"
+	warning.OccurredAt = time.Unix(0, 4)
+	warning.Payload = StateReadFinishedPayload{Method: "get", Result: json.RawMessage(`null`), Error: &Error{GoType: "network.Error", Message: "unavailable"}}
+	if !recorder.Record(warning) {
+		t.Fatal("warning event not admitted")
 	}
 	if !recorder.Record(testEvent(EventSessionReady, "session-a")) {
 		t.Fatal("system event not admitted")
 	}
 	eventually(t, func() bool {
 		events, err := recorder.Reader().Events(context.Background(), EventFilter{})
-		return err == nil && len(events) == 4
+		return err == nil && len(events) == 5
 	})
 
 	trace, err := recorder.Reader().EvaluationTrace(context.Background(), evaluationID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(trace) != 3 || trace[0].OccurredAt.After(trace[1].OccurredAt) || trace[1].OccurredAt.After(trace[2].OccurredAt) {
+	if len(trace) != 4 || trace[0].OccurredAt.After(trace[1].OccurredAt) || trace[1].OccurredAt.After(trace[2].OccurredAt) || trace[2].OccurredAt.After(trace[3].OccurredAt) {
 		t.Fatalf("trace is not chronological: %#v", trace)
 	}
 	system, err := recorder.Reader().Events(context.Background(), EventFilter{Scope: ScopeSystem})
@@ -519,8 +531,70 @@ func TestReaderFiltersAndEvaluationTrace(t *testing.T) {
 		t.Fatalf("system events = %#v, %v", system, err)
 	}
 	summaries, err := recorder.Reader().Evaluations(context.Background(), EvaluationFilter{Search: "kitchen"})
-	if err != nil || len(summaries) != 1 || summaries[0].EventCount != 3 {
+	if err != nil || len(summaries) != 1 || summaries[0].EventCount != 4 {
 		t.Fatalf("evaluation summaries = %#v, %v", summaries, err)
+	}
+	if summaries[0].LatestState != EventAutomationCallbackStarted || summaries[0].OperationWarnings != 1 {
+		t.Fatalf("evaluation summary state = %s, warnings = %d", summaries[0].LatestState, summaries[0].OperationWarnings)
+	}
+	var trigger AutomationTriggeredPayload
+	if err := json.Unmarshal(summaries[0].TriggerPayload, &trigger); err != nil || trigger.Trigger.Kind != "event" || trigger.Trigger.Event == nil || trigger.Trigger.Event.Type != "zha_event" || trigger.Trigger.Event.RawEventJSON != "" {
+		t.Fatalf("evaluation summary trigger = %#v, %v", trigger, err)
+	}
+	if _, err := recorder.store.writer.Exec(`
+		UPDATE events SET payload_json = '{'
+		WHERE evaluation_id = ? AND event_type IN (?, ?)`,
+		evaluationID, EventAutomationTriggered, EventStateReadFinished); err != nil {
+		t.Fatal(err)
+	}
+	summaries, err = recorder.Reader().Evaluations(context.Background(), EvaluationFilter{AutomationKey: "kitchen"})
+	if err != nil || len(summaries) != 1 {
+		t.Fatalf("evaluation summaries with malformed payload = %#v, %v", summaries, err)
+	}
+	if string(summaries[0].TriggerPayload) != "{}" || summaries[0].OperationWarnings != 0 {
+		t.Fatalf("malformed summary trigger = %s, warnings = %d", summaries[0].TriggerPayload, summaries[0].OperationWarnings)
+	}
+}
+
+func TestEvaluationSummariesStripLargeTriggerData(t *testing.T) {
+	recorder := newTestRecorder(t, filepath.Join(t.TempDir(), "compact-summaries.sqlite"), recorderOptions{})
+	eventTrigger := testEvent(EventAutomationTriggered, "session")
+	eventTrigger.AutomationKey = "event"
+	eventTrigger.EvaluationID = "event-evaluation"
+	eventTrigger.Payload = AutomationTriggeredPayload{Trigger: Trigger{
+		Kind:  "event",
+		Event: &EventTrigger{Type: "zha_event", RawEventJSON: `{"large":"event-marker"}`},
+	}}
+	entityTrigger := testEvent(EventAutomationTriggered, "session")
+	entityTrigger.AutomationKey = "entity"
+	entityTrigger.EvaluationID = "entity-evaluation"
+	entityTrigger.Payload = AutomationTriggeredPayload{Trigger: Trigger{
+		Kind: "entity",
+		Entity: &EntityData{
+			TriggerEntityID: "light.kitchen",
+			FromState:       "off",
+			FromAttributes:  json.RawMessage(`{"large":"from-marker"}`),
+			ToState:         "on",
+			ToAttributes:    json.RawMessage(`{"large":"to-marker"}`),
+		},
+	}}
+	if !recorder.Record(eventTrigger) || !recorder.Record(entityTrigger) {
+		t.Fatal("trigger event not admitted")
+	}
+
+	var summaries []EvaluationSummary
+	eventually(t, func() bool {
+		var err error
+		summaries, err = recorder.Reader().Evaluations(context.Background(), EvaluationFilter{})
+		return err == nil && len(summaries) == 2
+	})
+	for _, summary := range summaries {
+		payload := string(summary.TriggerPayload)
+		for _, marker := range []string{"event-marker", "from-marker", "to-marker"} {
+			if strings.Contains(payload, marker) {
+				t.Fatalf("summary %s retained %q: %s", summary.EvaluationID, marker, payload)
+			}
+		}
 	}
 }
 

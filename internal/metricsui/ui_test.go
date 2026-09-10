@@ -27,7 +27,7 @@ func TestActivityHandlerFragmentsExpansionAndRawJSON(t *testing.T) {
 
 	record(t, recorder, metrics.Event{Type: metrics.EventAutomationTriggered, SessionID: "session-current", AutomationKey: "kitchen.motion", EvaluationID: "eval-1", Payload: metrics.AutomationTriggeredPayload{Trigger: metrics.Trigger{Kind: "entity", Entity: &metrics.EntityData{TriggerEntityID: "binary_sensor.kitchen_motion", FromState: "off", ToState: "on"}}}})
 	record(t, recorder, metrics.Event{Type: metrics.EventAutomationCallbackStarted, SessionID: "session-current", AutomationKey: "kitchen.motion", EvaluationID: "eval-1", Payload: metrics.EmptyPayload{}})
-	record(t, recorder, metrics.Event{Type: metrics.EventStateReadFinished, SessionID: "session-current", AutomationKey: "kitchen.motion", EvaluationID: "eval-1", OperationID: "operation-1", Payload: metrics.StateReadFinishedPayload{Method: "get", Result: []byte("null"), Error: &metrics.Error{GoType: "network.Error", Message: "unavailable"}}})
+	record(t, recorder, metrics.Event{Type: metrics.EventStateReadFinished, SessionID: "session-current", AutomationKey: "kitchen.motion", EvaluationID: "eval-1", OperationID: "operation-1", Payload: metrics.StateReadFinishedPayload{Method: "get", Result: json.RawMessage(`{"trace_only":"large-result-marker"}`), Error: &metrics.Error{GoType: "network.Error", Message: "unavailable"}}})
 	record(t, recorder, metrics.Event{Type: metrics.EventAutomationCallbackFinished, SessionID: "session-current", AutomationKey: "kitchen.motion", EvaluationID: "eval-1", Payload: metrics.AutomationCallbackFinishedPayload{DurationNS: int64(time.Second)}})
 	record(t, recorder, metrics.Event{Type: metrics.EventSessionReady, SessionID: "session-current", Payload: metrics.EmptyPayload{}})
 
@@ -40,11 +40,35 @@ func TestActivityHandlerFragmentsExpansionAndRawJSON(t *testing.T) {
 			t.Fatalf("Activity body does not contain %q:\n%s", want, response.Body.String())
 		}
 	}
+	if strings.Contains(response.Body.String(), "large-result-marker") {
+		t.Fatalf("default Activity response eagerly contains trace payload: %s", response.Body.String())
+	}
 
-	expanded := serve(handler, http.MethodGet, "/?expand=eval-1")
-	for _, want := range []string{"Callback started", "Callback returned: 1000 ms", "State read finished: get", "Raw JSON", "network.Error: unavailable"} {
+	automationsOnly := serve(handler, http.MethodGet, "/?scope=automations")
+	for _, unwanted := range []string{"Callback started", "State read finished: get", "large-result-marker", "network.Error: unavailable", "Raw JSON"} {
+		if strings.Contains(automationsOnly.Body.String(), unwanted) {
+			t.Fatalf("initial Activity response unexpectedly contains lazy trace data %q:\n%s", unwanted, automationsOnly.Body.String())
+		}
+	}
+
+	expanded := serve(handler, http.MethodGet, "/?scope=automations&expand=eval-1")
+	for _, want := range []string{`data-evaluation="eval-1"`, `hx-get="/activity/trace?evaluation=eval-1"`, `hx-trigger="load once"`, ` open`, "Loading trace…"} {
 		if !strings.Contains(expanded.Body.String(), want) {
-			t.Fatalf("expanded Activity body does not contain %q:\n%s", want, expanded.Body.String())
+			t.Fatalf("expanded Activity shell does not contain %q:\n%s", want, expanded.Body.String())
+		}
+	}
+	if strings.Contains(expanded.Body.String(), "large-result-marker") {
+		t.Fatalf("expanded Activity shell eagerly contains trace payload: %s", expanded.Body.String())
+	}
+	record(t, recorder, metrics.Event{Type: metrics.EventServiceCallFinished, SessionID: "session-current", AutomationKey: "kitchen.motion", EvaluationID: "eval-1", OperationID: "operation-late", Payload: metrics.ServiceCallFinishedPayload{Kind: "call", Result: json.RawMessage(`{"late":"committed-after-list"}`)}})
+
+	trace := serve(handler, http.MethodGet, "/activity/trace?evaluation=eval-1")
+	if trace.Code != http.StatusOK {
+		t.Fatalf("trace status = %d; body = %s", trace.Code, trace.Body.String())
+	}
+	for _, want := range []string{"Callback started", "Callback returned: 1000 ms", "State read finished: get", "Raw JSON", "network.Error: unavailable", "large-result-marker", "committed-after-list"} {
+		if !strings.Contains(trace.Body.String(), want) {
+			t.Fatalf("lazy trace does not contain %q:\n%s", want, trace.Body.String())
 		}
 	}
 
@@ -54,6 +78,9 @@ func TestActivityHandlerFragmentsExpansionAndRawJSON(t *testing.T) {
 	}
 	if !strings.Contains(fragment.Body.String(), `id="activity-content"`) || strings.Contains(fragment.Body.String(), "<!doctype") {
 		t.Fatalf("Activity fragment has wrong shape: %s", fragment.Body.String())
+	}
+	if strings.Contains(fragment.Body.String(), "large-result-marker") || strings.Contains(fragment.Body.String(), "committed-after-list") {
+		t.Fatalf("Activity fragment eagerly contains trace payload: %s", fragment.Body.String())
 	}
 }
 
@@ -66,18 +93,12 @@ func TestCallbackTraceRenderingUsesInlineDurationWithoutRawJSON(t *testing.T) {
 		Type:        metrics.EventAutomationCallbackFinished,
 		PayloadJSON: json.RawMessage(`{"duration_ns":1234567890}`),
 	}
-	row := evaluationRow{
-		ID:            "eval-1",
-		AutomationKey: "kitchen.motion",
-		OccurredAt:    time.Now(),
-		Outcome:       "completed",
-		Trace: []traceItem{
-			{Event: started, Text: describeTraceEvent(started)},
-			{Event: finished, Text: describeTraceEvent(finished)},
-		},
+	trace := []traceItem{
+		{Event: started, Text: describeTraceEvent(started)},
+		{Event: finished, Text: describeTraceEvent(finished)},
 	}
 
-	rendered := renderEvaluation(row, true)
+	rendered := renderEvaluationTrace(trace)
 	for _, want := range []string{"Callback started", "Callback returned: 1235 ms"} {
 		if !strings.Contains(rendered, want) {
 			t.Fatalf("callback trace does not contain %q: %s", want, rendered)
@@ -86,6 +107,34 @@ func TestCallbackTraceRenderingUsesInlineDurationWithoutRawJSON(t *testing.T) {
 	for _, unwanted := range []string{"Raw JSON", "duration_ns"} {
 		if strings.Contains(rendered, unwanted) {
 			t.Fatalf("callback trace unexpectedly contains %q: %s", unwanted, rendered)
+		}
+	}
+}
+
+func TestActivityTraceEndpointErrorsAreScopedAndVisible(t *testing.T) {
+	_, handler := newTestUI(t, Snapshot{}, nil)
+	for _, test := range []struct {
+		path   string
+		status int
+		text   string
+	}{
+		{path: "/activity/trace", status: http.StatusBadRequest, text: "Evaluation ID is required."},
+		{path: "/activity/trace?evaluation=missing", status: http.StatusNotFound, text: "This trace is no longer available."},
+	} {
+		response := serve(handler, http.MethodGet, test.path)
+		if response.Code != test.status || !strings.Contains(response.Body.String(), `class="trace-load-error" role="alert"`) || !strings.Contains(response.Body.String(), test.text) {
+			t.Fatalf("GET %s = %d, body %q", test.path, response.Code, response.Body.String())
+		}
+	}
+	for _, want := range []string{"htmx:beforeSwap", `path.indexOf('/activity/trace?') === 0`, "event.detail.shouldSwap = true", "path === '/activity/older'", "event.detail.parameters.delete('expand')"} {
+		if !strings.Contains(clientScript, want) {
+			t.Fatalf("lazy trace client behavior does not contain %q", want)
+		}
+	}
+	retry := renderEvaluationTraceError("Could not load this trace.", "eval & retry")
+	for _, want := range []string{`hx-get="/activity/trace?evaluation=eval+%26+retry"`, `hx-target="closest .trace"`, `>Retry</button>`} {
+		if !strings.Contains(retry, want) {
+			t.Fatalf("trace retry does not contain %q: %s", want, retry)
 		}
 	}
 }
@@ -110,6 +159,8 @@ func TestActivityRowsHaveStableScanColumnsAndGroupedResult(t *testing.T) {
 	for _, want := range []string{
 		`class="feed-header"`,
 		`<span>Time</span><span>Automation</span><span>Trigger</span><span>Result</span>`,
+		`hx-get="/activity/trace?evaluation=eval-1" hx-trigger="toggle once" hx-target="find .trace"`,
+		`<li class="trace-loading"><span>Loading trace…</span></li>`,
 		`<span class="evaluation-meta"><span class="badge completed">completed</span><span class="duration">42ms</span><span class="badge warning-badge">2 operation warnings</span><span class="tooltip"`,
 		`</span></summary>`,
 	} {
@@ -385,24 +436,24 @@ func TestQueryFiltersAreURLBacked(t *testing.T) {
 }
 
 func TestUnterminatedEvaluationIsOnlyRunningForCurrentActiveSession(t *testing.T) {
-	summary := metrics.EvaluationSummary{EvaluationID: "eval", SessionID: "same", AutomationKey: "key", FirstID: 1, LastID: 1, FirstOccurred: time.Now().Add(-time.Second), LastOccurred: time.Now()}
-	trace := []metrics.StoredEvent{{Type: metrics.EventAutomationTriggered, PayloadJSON: []byte(`{"trigger":{"kind":"daily"}}`)}}
+	summary := metrics.EvaluationSummary{EvaluationID: "eval", SessionID: "same", AutomationKey: "key", FirstID: 1, LastID: 1, FirstOccurred: time.Now().Add(-time.Second), LastOccurred: time.Now(), TriggerPayload: json.RawMessage(`{"trigger":{"kind":"daily"}}`)}
 	definitions := map[string]Automation{"key": {Key: "key", Type: "daily"}}
 
-	finished := summarizeEvaluation(summary, trace, definitions, Snapshot{SessionID: "same", SessionActive: false}, time.Now())
+	finished := summarizeEvaluation(summary, definitions, Snapshot{SessionID: "same", SessionActive: false}, time.Now())
 	if finished.Outcome != "incomplete" || !finished.Incomplete {
 		t.Fatalf("unterminated finished-session evaluation = %#v, want incomplete", finished)
 	}
-	active := summarizeEvaluation(summary, trace, definitions, Snapshot{SessionID: "same", SessionActive: true}, time.Now())
+	active := summarizeEvaluation(summary, definitions, Snapshot{SessionID: "same", SessionActive: true}, time.Now())
 	if active.Outcome != "running" || active.Incomplete {
 		t.Fatalf("unterminated active-session evaluation = %#v, want running", active)
 	}
-	older := summarizeEvaluation(summary, trace, definitions, Snapshot{SessionID: "other", SessionActive: true}, time.Now())
+	older := summarizeEvaluation(summary, definitions, Snapshot{SessionID: "other", SessionActive: true}, time.Now())
 	if older.Outcome != "incomplete" {
 		t.Fatalf("unterminated older-session evaluation = %#v, want incomplete", older)
 	}
-	waitingTrace := append(append([]metrics.StoredEvent(nil), trace...), metrics.StoredEvent{Type: metrics.EventAutomationWaiting, PayloadJSON: []byte(`{"target_state":"on"}`)})
-	waiting := summarizeEvaluation(summary, waitingTrace, definitions, Snapshot{SessionID: "same", SessionActive: false}, time.Now())
+	waitingSummary := summary
+	waitingSummary.LatestState = metrics.EventAutomationWaiting
+	waiting := summarizeEvaluation(waitingSummary, definitions, Snapshot{SessionID: "same", SessionActive: false}, time.Now())
 	if waiting.Outcome != "incomplete" {
 		t.Fatalf("unterminated waiting evaluation from a finished session = %#v, want incomplete", waiting)
 	}
@@ -446,7 +497,7 @@ func TestHasOlderRequiresOneHundredAndFirstLogicalRows(t *testing.T) {
 
 func TestReadOnlyRoutesAndPinnedAssets(t *testing.T) {
 	_, handler := newTestUI(t, Snapshot{}, nil)
-	for _, path := range []string{"/", "/activity/fragment", "/activity/older", "/automations", "/automations/fragment", "/events", "/assets/htmx-2.0.10.min.js"} {
+	for _, path := range []string{"/", "/activity/fragment", "/activity/older", "/activity/trace", "/automations", "/automations/fragment", "/events", "/assets/htmx-2.0.10.min.js"} {
 		response := serve(handler, http.MethodPost, path)
 		if response.Code != http.StatusMethodNotAllowed || response.Header().Get("Allow") != http.MethodGet {
 			t.Fatalf("POST %s = %d, Allow %q", path, response.Code, response.Header().Get("Allow"))
@@ -476,7 +527,7 @@ func TestReadOnlyRoutesAndPinnedAssets(t *testing.T) {
 
 func TestNilSourceReturnsServiceUnavailableForDataRoutes(t *testing.T) {
 	handler := New(Options{})
-	for _, path := range []string{"/", "/activity", "/activity/fragment", "/activity/older", "/automations", "/automations/fragment", "/events"} {
+	for _, path := range []string{"/", "/activity", "/activity/fragment", "/activity/older", "/activity/trace", "/automations", "/automations/fragment", "/events"} {
 		response := serve(handler, http.MethodGet, path)
 		if response.Code != http.StatusServiceUnavailable || !strings.Contains(response.Body.String(), errReaderUnavailable.Error()) {
 			t.Fatalf("nil source GET %s = %d, body %q", path, response.Code, response.Body.String())
@@ -486,7 +537,7 @@ func TestNilSourceReturnsServiceUnavailableForDataRoutes(t *testing.T) {
 
 func TestSSEInvalidatesOnlyAfterCommittedRecord(t *testing.T) {
 	recorder, handler := newTestUI(t, Snapshot{}, nil)
-	server := httptest.NewServer(handler)
+	server := httptest.NewServer(WithCompression(handler))
 	defer server.Close()
 
 	requestContext, cancel := context.WithCancel(context.Background())
@@ -495,11 +546,15 @@ func TestSSEInvalidatesOnlyAfterCommittedRecord(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	request.Header.Set("Accept-Encoding", "gzip")
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer response.Body.Close()
+	if response.Header.Get("Content-Encoding") != "" {
+		t.Fatalf("SSE Content-Encoding = %q, want identity", response.Header.Get("Content-Encoding"))
+	}
 	reader := bufio.NewReader(response.Body)
 	if initial := readSSE(t, reader); initial != "event: change\ndata:\n" {
 		t.Fatalf("initial SSE = %q, want payload-free invalidation", initial)

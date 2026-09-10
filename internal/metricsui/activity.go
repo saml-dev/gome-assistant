@@ -41,7 +41,6 @@ type evaluationRow struct {
 	Duration       time.Duration
 	Warnings       int
 	Incomplete     bool
-	Trace          []traceItem
 }
 
 type systemRow struct {
@@ -77,11 +76,7 @@ func (ui *ui) activity(ctx context.Context, query activityQuery) (activityModel,
 			return model, err
 		}
 		for _, summary := range summaries {
-			trace, err := reader.EvaluationTrace(ctx, summary.EvaluationID)
-			if err != nil {
-				return model, err
-			}
-			row := summarizeEvaluation(summary, trace, definitions, model.Snapshot, ui.options.Now())
+			row := summarizeEvaluation(summary, definitions, model.Snapshot, ui.options.Now())
 			if !matchesEvaluation(row, query) {
 				continue
 			}
@@ -117,7 +112,7 @@ func (ui *ui) activity(ctx context.Context, query activityQuery) (activityModel,
 	return model, nil
 }
 
-func summarizeEvaluation(summary metrics.EvaluationSummary, trace []metrics.StoredEvent, definitions map[string]Automation, snapshot Snapshot, now time.Time) evaluationRow {
+func summarizeEvaluation(summary metrics.EvaluationSummary, definitions map[string]Automation, snapshot Snapshot, now time.Time) evaluationRow {
 	definition := definitions[summary.AutomationKey]
 	row := evaluationRow{
 		ID:             summary.EvaluationID,
@@ -132,40 +127,31 @@ func summarizeEvaluation(summary metrics.EvaluationSummary, trace []metrics.Stor
 		OccurredAt:     summary.FirstOccurred,
 		LastOccurredAt: summary.LastOccurred,
 		Duration:       summary.LastOccurred.Sub(summary.FirstOccurred),
-		Trace:          make([]traceItem, 0, len(trace)),
+		Warnings:       summary.OperationWarnings,
 	}
 	if row.Source == "" {
 		row.Source = "Current definition unavailable"
 	}
-	for _, event := range trace {
-		item := traceItem{Event: event, Text: describeTraceEvent(event)}
-		if errorText := payloadError(event.PayloadJSON); errorText != "" && isOperationFinished(event.Type) {
-			row.Warnings++
-			item.Error = errorText
-		}
-		row.Trace = append(row.Trace, item)
-		switch event.Type {
-		case metrics.EventAutomationTriggered:
-			kind := triggerType(event.PayloadJSON)
-			if row.AutomationType == "" {
-				row.AutomationType = kind
-			}
-			// Current schedule definitions contain the useful concrete time/solar
-			// summary; their persisted trigger intentionally contains only its kind.
-			if row.Trigger == "" || (kind != "daily" && kind != "interval") {
-				row.Trigger = describeTrigger(event.PayloadJSON)
-			}
-		case metrics.EventAutomationSkipped:
-			row.Outcome = "skipped"
-		case metrics.EventAutomationWaiting:
-			row.Outcome = "waiting"
-		case metrics.EventAutomationWaitCanceled:
-			row.Outcome = "canceled"
-		case metrics.EventAutomationCallbackStarted:
-			row.Outcome = "running"
-		case metrics.EventAutomationCallbackFinished:
-			row.Outcome = "completed"
-		}
+	kind := triggerType(summary.TriggerPayload)
+	if row.AutomationType == "" {
+		row.AutomationType = kind
+	}
+	// Current schedule definitions contain the useful concrete time/solar
+	// summary; their persisted trigger intentionally contains only its kind.
+	if row.Trigger == "" || (kind != "daily" && kind != "interval") {
+		row.Trigger = describeTrigger(summary.TriggerPayload)
+	}
+	switch summary.LatestState {
+	case metrics.EventAutomationSkipped:
+		row.Outcome = "skipped"
+	case metrics.EventAutomationWaiting:
+		row.Outcome = "waiting"
+	case metrics.EventAutomationWaitCanceled:
+		row.Outcome = "canceled"
+	case metrics.EventAutomationCallbackStarted:
+		row.Outcome = "running"
+	case metrics.EventAutomationCallbackFinished:
+		row.Outcome = "completed"
 	}
 	if row.Trigger == "" {
 		row.Trigger = "trigger details unavailable"
@@ -192,6 +178,22 @@ func summarizeEvaluation(summary metrics.EvaluationSummary, trace []metrics.Stor
 		}
 	}
 	return row
+}
+
+func (ui *ui) evaluationTrace(ctx context.Context, evaluationID string) ([]traceItem, error) {
+	events, err := ui.options.Source.Reader().EvaluationTrace(ctx, evaluationID)
+	if err != nil {
+		return nil, err
+	}
+	trace := make([]traceItem, 0, len(events))
+	for _, event := range events {
+		item := traceItem{Event: event, Text: describeTraceEvent(event)}
+		if errorText := payloadError(event.PayloadJSON); errorText != "" && isOperationFinished(event.Type) {
+			item.Error = errorText
+		}
+		trace = append(trace, item)
+	}
+	return trace, nil
 }
 
 func matchesEvaluation(row evaluationRow, query activityQuery) bool {

@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"io"
 	"log/slog"
@@ -35,11 +36,19 @@ func TestMetricsWebRuntimeServesActivityAndLogsActualAddress(t *testing.T) {
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, port, defaultWebUIPort)
 
-	client := &http.Client{Timeout: time.Second}
-	response, err := client.Get("http://" + runtime.address + "/")
+	client := &http.Client{Timeout: time.Second, Transport: &http.Transport{DisableCompression: true}}
+	request, err := http.NewRequest(http.MethodGet, "http://"+runtime.address+"/", nil)
+	require.NoError(t, err)
+	request.Header.Set("Accept-Encoding", "gzip")
+	response, err := client.Do(request)
 	require.NoError(t, err)
 	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
+	require.Equal(t, "gzip", response.Header.Get("Content-Encoding"))
+	require.Contains(t, response.Header.Values("Vary"), "Accept-Encoding")
+	compressed, err := gzip.NewReader(response.Body)
+	require.NoError(t, err)
+	defer compressed.Close()
+	body, err := io.ReadAll(compressed)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, response.StatusCode)
 	require.Contains(t, string(body), "Activity")

@@ -108,6 +108,8 @@ button:hover, .load-older:hover { color: Canvas; background: LinkText; border-co
 .trace { margin: .15rem 0 .35rem 2.6rem; padding: .15rem .6rem .15rem 1rem; border-left: 2px solid var(--line-strong); list-style: none; }
 .trace li { display: grid; grid-template-columns: minmax(9rem, auto) 1fr auto; gap: .45rem; align-items: start; padding: .25rem 0; font-size: .78rem; }
 .trace li + li { border-top: 1px dotted var(--line); }
+.trace-loading, .trace-load-error { color: var(--muted); }
+.trace-load-error { color: var(--danger); }
 .raw { grid-column: 1 / -1; margin-top: .15rem; }
 .raw summary { width: fit-content; color: var(--muted); cursor: pointer; font-size: .76rem; }
 pre { max-width: 100%; overflow: auto; margin: .35rem 0 0; padding: .5rem; border: 1px solid var(--line); border-radius: 0; background: var(--wash); font-size: .75rem; white-space: pre-wrap; overflow-wrap: anywhere; }
@@ -236,7 +238,15 @@ const clientScript = `(function () {
   document.body.addEventListener('toggle', function (event) { if (event.target.matches('details[data-evaluation], details[data-automation]')) syncExpanded(); }, true);
   document.body.addEventListener('click', function (event) { var button = event.target.closest('[data-show-new]'); if (!button) return; event.preventDefault(); var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; window.scrollTo({top: 0, behavior: reducedMotion ? 'auto' : 'smooth'}); refreshActivity(true); });
   document.body.addEventListener('htmx:configRequest', function (event) {
-    if (event.detail.path === '/activity/fragment') new URL(window.location.href).searchParams.getAll('expand').forEach(function (value) { event.detail.parameters.append('expand', value); });
+    var path = event.detail.path.split('?')[0];
+    if (path === '/activity/fragment' || path === '/activity/older') {
+      event.detail.parameters.delete('expand');
+      new URL(window.location.href).searchParams.getAll('expand').forEach(function (value) { event.detail.parameters.append('expand', value); });
+    }
+  });
+  document.body.addEventListener('htmx:beforeSwap', function (event) {
+    var path = event.detail.requestConfig && event.detail.requestConfig.path;
+    if (path && path.indexOf('/activity/trace?') === 0 && event.detail.xhr.status >= 400) { event.detail.shouldSwap = true; event.detail.isError = false; }
   });
   document.body.addEventListener('htmx:afterSwap', function (event) { localize(event.target); updateBanner(); });
   document.body.addEventListener('htmx:sseMessage', function (event) {

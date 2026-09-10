@@ -56,11 +56,11 @@ func newMetricsRuntime(app *App, databasePath, webAddress string) (*metricsRunti
 	}
 	runtime.listener = listener
 	runtime.address = listener.Addr().String()
-	runtime.server = &stdhttp.Server{Handler: metricsui.New(metricsui.Options{
+	runtime.server = &stdhttp.Server{Handler: metricsui.WithCompression(metricsui.New(metricsui.Options{
 		Source:      recorder,
 		Snapshot:    app.metricsUISnapshot,
 		Automations: app.metricsUIAutomations,
-	})}
+	}))}
 	slog.Info("metrics web UI listening", "address", runtime.address)
 	go func() {
 		err := runtime.server.Serve(listener)

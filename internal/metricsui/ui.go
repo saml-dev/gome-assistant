@@ -106,6 +106,12 @@ func (ui *ui) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 		ui.handleOlder(writer, request)
+	case "/activity/trace":
+		if !ui.sourceAvailable() {
+			ui.writeUnavailable(writer)
+			return
+		}
+		ui.handleActivityTrace(writer, request)
 	case "/automations":
 		if !ui.sourceAvailable() {
 			ui.writeUnavailable(writer)
