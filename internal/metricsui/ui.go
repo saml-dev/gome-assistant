@@ -130,7 +130,7 @@ func (ui *ui) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 		ui.handleEvents(writer, request)
-	case "/assets/htmx-2.0.10.min.js", "/assets/htmx-sse-2.2.4.js":
+	case "/assets/htmx-2.0.10.min.js":
 		ui.handleAsset(writer, request)
 	default:
 		http.NotFound(writer, request)

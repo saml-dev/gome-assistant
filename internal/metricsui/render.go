@@ -100,10 +100,8 @@ func page(title, active, content string) string {
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark"><title>` + escape(title) + ` · gomeassistant metrics</title>
 <style>` + styles + `</style>
-<script defer src="/assets/htmx-2.0.10.min.js"></script>
-<script defer src="/assets/htmx-sse-2.2.4.js"></script></head>
+<script defer src="/assets/htmx-2.0.10.min.js"></script></head>
 <body><header class="topbar"><nav aria-label="Primary"><a href="/"` + activityClass + `>Activity</a><a href="/automations"` + automationClass + `>Automations</a></nav><span class="product">gomeassistant metrics</span></header>
-<div id="metrics-sse" hx-ext="sse" sse-connect="/events" sse-swap="change" aria-hidden="true"></div>
 <main>` + content + `</main><script>` + clientScript + `</script></body></html>`
 }
 
@@ -124,7 +122,7 @@ func renderActivitySummary(model activityModel) string {
 	if snapshot.MetricsHealth.Degraded || lossCount(snapshot.MetricsHealth.PendingLosses) > 0 {
 		out.WriteString(`<aside class="warning" role="status"><strong>Telemetry may be incomplete.</strong> SQLite is degraded or events are awaiting a loss summary; new activity can be missing.</aside>`)
 	}
-	out.WriteString(`<section class="summary" aria-label="Current metrics summary"><div><h1>Activity</h1><p class="muted">Committed automation evaluations and system events.</p></div><dl>`)
+	out.WriteString(`<section class="summary" aria-label="Current metrics summary"><div><h1>Activity</h1><p class="muted">a log of all triggered automations</p></div><dl>`)
 	out.WriteString(summaryTerm("Metrics", healthText(snapshot.MetricsHealth)))
 	connection := snapshot.Connection
 	if connection == "" {

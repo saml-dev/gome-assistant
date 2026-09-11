@@ -403,6 +403,19 @@ func TestTimestampsUseCompactFallbackAndFullLocalizedHoverText(t *testing.T) {
 	}
 }
 
+func TestAutomationCatalogMatchesActivityRowChrome(t *testing.T) {
+	for _, want := range []string{
+		`.catalog { width: 100%; min-width: 850px; border-collapse: collapse; font-size: .84rem; }`,
+		`.catalog tbody tr { cursor: pointer; }`,
+		`event.target.closest('.catalog tbody tr')`,
+		`details.open = !details.open`,
+	} {
+		if !strings.Contains(styles+clientScript, want) {
+			t.Fatalf("automation catalog row chrome does not contain %q", want)
+		}
+	}
+}
+
 func TestAutomationKeyColumnDoesNotWrap(t *testing.T) {
 	rendered := renderAutomationsContent(automationsModel{
 		Rows: []automationRow{{Automation: Automation{Key: "a long automation key", Type: "event"}}},
@@ -495,6 +508,25 @@ func TestHasOlderRequiresOneHundredAndFirstLogicalRows(t *testing.T) {
 	}
 }
 
+func TestClientClosesEventSourceOnNavigation(t *testing.T) {
+	for _, want := range []string{
+		"new EventSource('/events')",
+		"window.addEventListener('pagehide', closeSSE)",
+		"event.persisted) connectSSE()",
+		"sse.close()",
+	} {
+		if !strings.Contains(clientScript, want) {
+			t.Fatalf("SSE lifecycle client behavior does not contain %q", want)
+		}
+	}
+	rendered := page("Activity", "activity", "")
+	for _, unwanted := range []string{"htmx-sse", "sse-connect", "metrics-sse"} {
+		if strings.Contains(rendered, unwanted) {
+			t.Fatalf("page still uses the leaking SSE extension: %q in %s", unwanted, rendered)
+		}
+	}
+}
+
 func TestReadOnlyRoutesAndPinnedAssets(t *testing.T) {
 	_, handler := newTestUI(t, Snapshot{}, nil)
 	for _, path := range []string{"/", "/activity/fragment", "/activity/older", "/activity/trace", "/automations", "/automations/fragment", "/events", "/assets/htmx-2.0.10.min.js"} {
@@ -508,7 +540,6 @@ func TestReadOnlyRoutesAndPinnedAssets(t *testing.T) {
 	}
 	for _, asset := range []struct{ name, want string }{
 		{"assets/htmx-2.0.10.min.js", "71ea67185bfa8c98c39d31717c6fce5d852370fcdfd129db4543774d3145c0de"},
-		{"assets/htmx-sse-2.2.4.js", "3b5992a541619babefc4c169505af474df5c3039da51e59b96ccf9241ecd61d2"},
 	} {
 		data, err := os.ReadFile(asset.name)
 		if err != nil {

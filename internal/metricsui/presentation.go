@@ -35,7 +35,7 @@ const styles = `
 }
 * { box-sizing: border-box; }
 body { margin: 0; line-height: 1.35; background: Canvas; color: CanvasText; }
-[hidden], #metrics-sse { display: none !important; }
+[hidden] { display: none !important; }
 a { color: LinkText; text-underline-offset: .15em; }
 :focus-visible { outline: 2px solid LinkText; outline-offset: 2px; }
 .topbar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .45rem max(1rem, calc((100vw - 1300px) / 2)); border-top: 2px solid LinkText; border-bottom: 1px solid var(--line-strong); background: Canvas; }
@@ -127,21 +127,22 @@ pre { max-width: 100%; overflow: auto; margin: .35rem 0 0; padding: .5rem; borde
 .catalog-table-wrap { overflow-x: auto; border: 1px solid var(--line-strong); }
 .catalog-table-wrap:focus-visible { outline-offset: 2px; }
 .sr-only, .scroll-hint { position: absolute; width: 1px; height: 1px; overflow: hidden; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); white-space: nowrap; }
-.catalog { width: 100%; min-width: 850px; border-collapse: collapse; }
+.catalog { width: 100%; min-width: 850px; border-collapse: collapse; font-size: .84rem; }
 .catalog th, .catalog td { padding: .38rem .45rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-.catalog th { color: var(--muted); background: var(--wash); font-size: .7rem; letter-spacing: .035em; text-transform: uppercase; }
+.catalog th { color: var(--muted); background: var(--wash); font-size: .68rem; letter-spacing: .035em; text-transform: uppercase; }
+.catalog tbody tr { cursor: pointer; }
 .catalog tbody tr:last-child td { border-bottom: 0; }
 .catalog tbody tr:hover { background: var(--wash); }
 .catalog th.automation-key, .catalog td.automation-key { width: 1%; }
 .catalog th.automation-key, .catalog td.automation-key > details > summary { white-space: nowrap; }
-.catalog .automation-time { width: 1%; white-space: nowrap; font-size: .74rem; font-variant-numeric: tabular-nums; text-align: right; }
-.catalog td.automation-time .relative { display: block; font-size: .68rem; }
+.catalog .automation-time { width: 1%; white-space: nowrap; font-size: .76rem; font-variant-numeric: tabular-nums; text-align: right; }
+.catalog td.automation-time .relative { display: block; font-size: .7rem; }
 .catalog details > summary { width: fit-content; cursor: pointer; }
 .type-chip[data-type="daily"] { color: var(--daily); }
 .type-chip[data-type="interval"] { color: var(--interval); }
 .type-chip[data-type="entity"] { color: var(--entity); }
 .type-chip[data-type="event"] { color: var(--event); }
-.automation-details { width: 100%; min-width: 0; margin-top: .4rem; padding: .2rem 0 .2rem .65rem; border-left: 2px solid var(--line-strong); white-space: normal; }
+.automation-details { width: 100%; min-width: 0; margin-top: .4rem; padding: .2rem 0 .2rem .65rem; border-left: 2px solid var(--line-strong); white-space: normal; cursor: auto; }
 .automation-details p { margin: .35rem 0; }
 @media (max-width: 1000px) {
   .summary { grid-template-columns: minmax(12rem, .7fr) minmax(28rem, 2fr); }
@@ -234,9 +235,35 @@ const clientScript = `(function () {
     htmx.ajax('GET', '/activity/fragment' + url.search, {target: '#activity-content', swap: 'outerHTML'});
   }
   function atNewestUninterrupted() { return !new URL(window.location.href).searchParams.has('before') && window.scrollY < 24 && document.querySelectorAll('details[data-evaluation][open]').length === 0; }
+  var sse = null;
+  function closeSSE() { if (!sse) return; sse.close(); sse = null; }
+  function connectSSE() {
+    closeSSE();
+    sse = new EventSource('/events');
+    sse.addEventListener('change', function () {
+      if (!document.getElementById('activity-content')) return;
+      if (atNewestUninterrupted()) refreshActivity(); else { pending++; updateBanner(); }
+    });
+  }
+  connectSSE();
+  window.addEventListener('pagehide', closeSSE);
+  window.addEventListener('pageshow', function (event) { if (event.persisted) connectSSE(); });
   document.addEventListener('DOMContentLoaded', function () { localize(document); updateBanner(); window.setInterval(function () { localize(document); }, 1000); });
   document.body.addEventListener('toggle', function (event) { if (event.target.matches('details[data-evaluation], details[data-automation]')) syncExpanded(); }, true);
-  document.body.addEventListener('click', function (event) { var button = event.target.closest('[data-show-new]'); if (!button) return; event.preventDefault(); var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; window.scrollTo({top: 0, behavior: reducedMotion ? 'auto' : 'smooth'}); refreshActivity(true); });
+  document.body.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-show-new]');
+    if (button) {
+      event.preventDefault();
+      var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({top: 0, behavior: reducedMotion ? 'auto' : 'smooth'});
+      refreshActivity(true);
+      return;
+    }
+    var row = event.target.closest('.catalog tbody tr');
+    if (!row || event.target.closest('a, .automation-details, summary')) return;
+    var details = row.querySelector('details[data-automation]');
+    if (details) details.open = !details.open;
+  });
   document.body.addEventListener('htmx:configRequest', function (event) {
     var path = event.detail.path.split('?')[0];
     if (path === '/activity/fragment' || path === '/activity/older') {
@@ -249,8 +276,4 @@ const clientScript = `(function () {
     if (path && path.indexOf('/activity/trace?') === 0 && event.detail.xhr.status >= 400) { event.detail.shouldSwap = true; event.detail.isError = false; }
   });
   document.body.addEventListener('htmx:afterSwap', function (event) { localize(event.target); updateBanner(); });
-  document.body.addEventListener('htmx:sseMessage', function (event) {
-    if (!event.detail || event.detail.type !== 'change' || !document.getElementById('activity-content')) return;
-    if (atNewestUninterrupted()) refreshActivity(); else { pending++; updateBanner(); }
-  });
 }());`

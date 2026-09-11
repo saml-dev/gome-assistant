@@ -7,21 +7,15 @@ import (
 	"time"
 )
 
-//go:embed assets/htmx-2.0.10.min.js assets/htmx-sse-2.2.4.js
+//go:embed assets/htmx-2.0.10.min.js
 var assets embed.FS
 
 func (ui *ui) handleAsset(writer http.ResponseWriter, request *http.Request) {
-	var name string
-	switch request.URL.Path {
-	case "/assets/htmx-2.0.10.min.js":
-		name = "assets/htmx-2.0.10.min.js"
-	case "/assets/htmx-sse-2.2.4.js":
-		name = "assets/htmx-sse-2.2.4.js"
-	default:
+	if request.URL.Path != "/assets/htmx-2.0.10.min.js" {
 		http.NotFound(writer, request)
 		return
 	}
-
+	name := "assets/htmx-2.0.10.min.js"
 	data, err := assets.ReadFile(name)
 	if err != nil {
 		http.Error(writer, "embedded asset is unavailable", http.StatusInternalServerError)
