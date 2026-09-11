@@ -162,25 +162,31 @@ func renderActivitySummary(model activityModel) string {
 
 func renderActivityFilters(query activityQuery) string {
 	var out strings.Builder
-	out.WriteString(`<form class="filters" action="/" method="get" hx-get="/activity/fragment" hx-target="#activity-content" hx-push-url="true" data-filter-kind="activity"><label class="search-control">Search <input type="search" name="q" value="` + escape(query.Search) + `" placeholder="key, source, entity, event"></label>`)
+	out.WriteString(`<form class="filters" action="/" method="get" hx-get="/activity/fragment" hx-target="#activity-content" hx-swap="outerHTML" hx-push-url="true" hx-sync="this:replace" data-filter-kind="activity"><div class="search-control"><button type="submit">Search</button><label for="activity-search"><span class="sr-only">Search</span><input type="search" id="activity-search" name="q" value="` + escape(query.Search) + `" placeholder="key, source, entity, event" hx-preserve></label></div>`)
 	if query.AutomationKey != "" {
 		out.WriteString(`<input type="hidden" name="automation" value="` + escape(query.AutomationKey) + `"><span class="filter-note">Automation: ` + escape(query.AutomationKey) + ` <a href="` + escape(clearAutomationURL(query)) + `">clear</a></span>`)
 	}
-	out.WriteString(selectControl("scope", "Scope", query.Scope, []option{{"all", "All"}, {"automations", "Automations"}, {"system", "System"}}))
-	out.WriteString(selectControl("outcome", "Outcome", query.Outcome, []option{{"", "Any outcome"}, {"waiting", "Waiting"}, {"running", "Running"}, {"completed", "Completed"}, {"skipped", "Skipped"}, {"canceled", "Canceled"}, {"incomplete", "Incomplete"}}))
-	out.WriteString(selectControl("type", "Automation type", query.AutomationType, []option{{"", "Any type"}, {"daily", "Daily"}, {"interval", "Interval"}, {"entity", "Entity"}, {"event", "Event"}}))
-	out.WriteString(`<button type="submit">Filter</button></form><nav class="scope" aria-label="Activity scope">`)
-	for _, item := range []struct{ value, label string }{{"all", "All"}, {"automations", "Automations"}, {"system", "System"}} {
-		link := query
-		link.Scope = item.value
-		link.BeforeID = 0
-		current := ""
-		if query.Scope == item.value {
-			current = ` aria-current="page"`
-		}
-		out.WriteString(`<a href="` + escape(link.url("/", false)) + `"` + current + `>` + item.label + `</a>`)
+	if query.Scope != "" && query.Scope != "all" {
+		out.WriteString(`<input type="hidden" name="scope" value="` + escape(query.Scope) + `">`)
 	}
-	out.WriteString(`</nav>`)
+	if query.Outcome != "" {
+		out.WriteString(`<input type="hidden" name="outcome" value="` + escape(query.Outcome) + `">`)
+	}
+	if query.AutomationType != "" {
+		out.WriteString(`<input type="hidden" name="type" value="` + escape(query.AutomationType) + `">`)
+	}
+	out.WriteString(`</form>`)
+	activityURL := func(apply func(*activityQuery, string)) func(string) (string, string) {
+		return func(value string) (string, string) {
+			link := query
+			link.BeforeID = 0
+			apply(&link, value)
+			return link.url("/", false), link.url("/activity/fragment", false)
+		}
+	}
+	out.WriteString(segmentNav("Scope", "Activity scope", query.Scope, "#activity-content", []option{{"all", "All"}, {"automations", "Automations"}, {"system", "System"}}, activityURL(func(link *activityQuery, value string) { link.Scope = value })))
+	out.WriteString(segmentNav("Outcome", "Outcome", query.Outcome, "#activity-content", []option{{"", "All"}, {"waiting", "Waiting"}, {"running", "Running"}, {"completed", "Completed"}, {"skipped", "Skipped"}, {"canceled", "Canceled"}, {"incomplete", "Incomplete"}}, activityURL(func(link *activityQuery, value string) { link.Outcome = value })))
+	out.WriteString(segmentNav("Automation type", "Automation type", query.AutomationType, "#activity-content", []option{{"", "All"}, {"daily", "Daily schedule"}, {"interval", "Interval"}, {"entity", "Entity listeners"}, {"event", "Event listeners"}}, activityURL(func(link *activityQuery, value string) { link.AutomationType = value })))
 	return out.String()
 }
 
@@ -355,7 +361,7 @@ func countAutomations(items []Automation, kind string) int {
 }
 
 var automationKinds = []struct{ typeName, label string }{
-	{"daily", "Daily"},
+	{"daily", "Daily schedule"},
 	{"interval", "Intervals"},
 	{"entity", "Entity listeners"},
 	{"event", "Event listeners"},
@@ -363,17 +369,18 @@ var automationKinds = []struct{ typeName, label string }{
 
 type option struct{ value, label string }
 
-func selectControl(name, label, selected string, options []option) string {
+func segmentNav(label, ariaLabel, selected, hxTarget string, items []option, urls func(value string) (href, fragment string)) string {
 	var out strings.Builder
-	out.WriteString(`<label>` + escape(label) + ` <select name="` + escape(name) + `">`)
-	for _, option := range options {
-		isSelected := ""
-		if selected == option.value {
-			isSelected = " selected"
+	out.WriteString(`<div class="segment-filter"><span class="segment-label">` + escape(label) + `</span><nav class="scope" aria-label="` + escape(ariaLabel) + `">`)
+	for _, item := range items {
+		href, fragment := urls(item.value)
+		current := ""
+		if selected == item.value {
+			current = ` aria-current="page"`
 		}
-		out.WriteString(`<option value="` + escape(option.value) + `"` + isSelected + `>` + escape(option.label) + `</option>`)
+		out.WriteString(`<a href="` + escape(href) + `" hx-get="` + escape(fragment) + `" hx-target="` + escape(hxTarget) + `" hx-swap="outerHTML" hx-push-url="true"` + current + `>` + escape(item.label) + `</a>`)
 	}
-	out.WriteString(`</select></label>`)
+	out.WriteString(`</nav></div>`)
 	return out.String()
 }
 

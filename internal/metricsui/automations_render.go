@@ -11,9 +11,11 @@ func renderAutomationsContent(model automationsModel) string {
 	var out strings.Builder
 	out.WriteString(`<div id="automations-content"><section class="catalog-heading"><h1>Automations</h1><p class="muted">Current frozen catalog. Definitions shown here are not historical snapshots.</p></section>`)
 	out.WriteString(renderAutomationCountFilters(model))
-	out.WriteString(`<form class="filters" action="/automations" method="get" hx-get="/automations/fragment" hx-target="#automations-content" hx-swap="outerHTML" hx-push-url="true" data-filter-kind="automations"><label class="search-control">Search <input type="search" name="q" value="` + escape(model.Query.Search) + `" placeholder="key, source, trigger"></label>`)
-	out.WriteString(selectControl("type", "Automation type", model.Query.Type, []option{{"", "All types"}, {"daily", "Daily"}, {"interval", "Interval"}, {"entity", "Entity"}, {"event", "Event"}}))
-	out.WriteString(`<button type="submit">Filter</button></form>`)
+	out.WriteString(`<form class="filters" action="/automations" method="get" hx-get="/automations/fragment" hx-target="#automations-content" hx-swap="outerHTML" hx-push-url="true" hx-sync="this:replace" data-filter-kind="automations"><div class="search-control"><button type="submit">Search</button><label for="automations-search"><span class="sr-only">Search</span><input type="search" id="automations-search" name="q" value="` + escape(model.Query.Search) + `" placeholder="key, source, trigger" hx-preserve></label></div>`)
+	if model.Query.Type != "" {
+		out.WriteString(`<input type="hidden" name="type" value="` + escape(model.Query.Type) + `">`)
+	}
+	out.WriteString(`</form>`)
 	if len(model.Rows) == 0 {
 		out.WriteString(`<p class="empty">No current automations match these filters.</p></div>`)
 		return out.String()
@@ -28,7 +30,7 @@ func renderAutomationsContent(model automationsModel) string {
 
 func renderAutomationCountFilters(model automationsModel) string {
 	var out strings.Builder
-	out.WriteString(`<nav class="summary-controls automation-counts" aria-label="Automation type filters">`)
+	out.WriteString(`<div class="segment-filter"><span class="segment-label">Automation type</span><nav class="scope" aria-label="Automation type filters">`)
 	types := append([]struct{ typeName, label string }{{"", "All automations"}}, automationKinds...)
 	for _, kind := range types {
 		query := model.Query
@@ -43,7 +45,7 @@ func renderAutomationCountFilters(model automationsModel) string {
 		}
 		out.WriteString(`<a href="` + escape(query.url("/automations")) + `" hx-get="` + escape(query.url("/automations/fragment")) + `" hx-target="#automations-content" hx-swap="outerHTML" hx-push-url="true"` + current + `>` + escape(kind.label) + ` <strong>` + fmt.Sprintf("%d", count) + `</strong></a>`)
 	}
-	out.WriteString(`</nav>`)
+	out.WriteString(`</nav></div>`)
 	return out.String()
 }
 

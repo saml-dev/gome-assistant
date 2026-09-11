@@ -261,7 +261,7 @@ func TestAutomationsHandlerAndActivityLink(t *testing.T) {
 		`href="/?automation=porch.light"`, "Last trigger", "Last completion",
 		`datetime="2026-09-07T10:02:00Z"`, `datetime="2026-09-07T10:01:00Z"`,
 		`aria-label="Automation type filters"`, `All automations <strong>2</strong>`,
-		`aria-current="page">Daily <strong>2</strong>`, `Intervals <strong>0</strong>`,
+		`aria-current="page">Daily schedule <strong>2</strong>`, `Intervals <strong>0</strong>`,
 		`<form class="filters" action="/automations" method="get" hx-get="/automations/fragment" hx-target="#automations-content" hx-swap="outerHTML"`,
 	} {
 		if !strings.Contains(response.Body.String(), want) {
@@ -283,6 +283,44 @@ func TestAutomationsHandlerAndActivityLink(t *testing.T) {
 	}
 }
 
+func TestFiltersSearchOnSubmitWithButtonBeforeInput(t *testing.T) {
+	activity := renderActivityFilters(activityQuery{})
+	automations := renderAutomationsContent(automationsModel{})
+	for _, rendered := range []string{activity, automations} {
+		for _, want := range []string{
+			`<div class="search-control"><button type="submit">Search</button><label for=`,
+			`<span class="sr-only">Search</span><input type="search"`,
+			`hx-sync="this:replace"`,
+			`hx-preserve`,
+		} {
+			if !strings.Contains(rendered, want) {
+				t.Fatalf("search filters do not contain %q: %s", want, rendered)
+			}
+		}
+		if strings.Contains(rendered, "input changed") || strings.Contains(rendered, "delay:500ms") || strings.Contains(rendered, `>Filter</button>`) || strings.Contains(rendered, "<select") {
+			t.Fatalf("search filters still render automatic search behavior or legacy controls: %s", rendered)
+		}
+	}
+	if !strings.Contains(styles, `.search-control { display: grid; grid-template-columns: auto minmax(0, 1fr);`) {
+		t.Fatal("Search button is not laid out to the left of the input")
+	}
+	for _, want := range []string{
+		`<span class="segment-label">Scope</span><nav class="scope" aria-label="Activity scope">`,
+		`<span class="segment-label">Outcome</span><nav class="scope" aria-label="Outcome">`,
+		`<span class="segment-label">Automation type</span><nav class="scope" aria-label="Automation type">`,
+		`>Daily schedule</a>`,
+		`>Entity listeners</a>`,
+		`>Event listeners</a>`,
+		`hx-get="/activity/fragment?scope=automations"`,
+		`hx-get="/activity/fragment?outcome=completed"`,
+		`hx-get="/activity/fragment?type=entity"`,
+	} {
+		if !strings.Contains(activity, want) {
+			t.Fatalf("activity segment filters do not contain %q: %s", want, activity)
+		}
+	}
+}
+
 func TestAutomationCountFiltersAreOneClickAndURLBacked(t *testing.T) {
 	model := automationsModel{
 		Query: automationQuery{
@@ -301,12 +339,13 @@ func TestAutomationCountFiltersAreOneClickAndURLBacked(t *testing.T) {
 	rendered := renderAutomationCountFilters(model)
 
 	for _, want := range []string{
+		`<span class="segment-label">Automation type</span><nav class="scope" aria-label="Automation type filters">`,
 		`href="/automations?expand=event.one&amp;q=garage+door"`,
 		`hx-get="/automations/fragment?expand=event.one&amp;q=garage+door"`,
 		`hx-target="#automations-content" hx-swap="outerHTML"`,
 		`href="/automations?expand=event.one&amp;q=garage+door&amp;type=daily"`,
 		`All automations <strong>5</strong>`,
-		`Daily <strong>2</strong>`,
+		`Daily schedule <strong>2</strong>`,
 		`Intervals <strong>1</strong>`,
 		`Entity listeners <strong>1</strong>`,
 		`aria-current="page">Event listeners <strong>1</strong>`,
