@@ -477,7 +477,6 @@ func (app *App) subscribeSession(conn *websocket.Conn) (err error) {
 		eventTypes = append(eventTypes, eventType)
 	}
 	for _, eventType := range eventTypes {
-		eventType := eventType
 		conn.SubscribeToEventType(eventType, func(msg websocket.Message) {
 			if msg.Type != "event" {
 				return

@@ -2,6 +2,7 @@ package gomeassistant
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -71,9 +72,7 @@ func cloneConfiguration(configuration map[string]any) map[string]any {
 
 func mapsClone[T any](source map[string]T) map[string]T {
 	copy := make(map[string]T, len(source))
-	for key, value := range source {
-		copy[key] = value
-	}
+	maps.Copy(copy, source)
 	return copy
 }
 

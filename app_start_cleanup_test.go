@@ -187,7 +187,7 @@ func TestCleanupCancelsImmediatelyStartingApp(t *testing.T) {
 	server, _, _ := newFakeHA(t, http.StatusOK)
 
 	const iterations = 200
-	for i := 0; i < iterations; i++ {
+	for i := range iterations {
 		app := fakeApp(t, server.URL)
 		runDone := make(chan error, 1)
 		go func() { runDone <- app.Start(context.Background()) }()
